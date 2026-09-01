@@ -1,0 +1,41 @@
+{
+  "name": "doriath",
+  "version": "0.1.0",
+  "description": "Doriath: workbench local BBVA CIB que une FENIX (Copilot + GitHub CLI) con KDD Studio (Knowledge-Driven Development).",
+  "type": "module",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "bin": {
+    "doriath": "src/cli.mjs"
+  },
+  "scripts": {
+    "start": "node src/cli.mjs start",
+    "doctor": "node src/cli.mjs doctor",
+    "models": "node src/cli.mjs models",
+    "check": "node scripts/check.mjs",
+    "test": "node --test tests/",
+    "build:dist": "node scripts/build-dist.mjs",
+    "build:exe": "node scripts/build-exe.mjs",
+    "build": "node scripts/build-dist.mjs && node scripts/build-exe.mjs"
+  },
+  "dependencies": {
+    "@github/copilot-sdk": "1.0.11",
+    "docx": "9.7.1",
+    "gray-matter": "4.0.3",
+    "js-yaml": "4.1.0",
+    "jszip": "3.10.1",
+    "mammoth": "1.12.2",
+    "pdf-parse": "1.1.1",
+    "pptxgenjs": "4.0.1",
+    "xlsx": "0.18.5"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "jpeg-js": "^0.4.4",
+    "pngjs": "^7.0.0",
+    "postject": "1.0.0-alpha.6"
+  }
+}
