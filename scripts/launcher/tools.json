@@ -1,0 +1,5 @@
+{
+  "node": { "version": "22.22.2", "url": "https://nodejs.org/dist/v22.22.2/node-v22.22.2-win-x64.zip", "stripPrefix": true },
+  "gh": { "version": "2.96.0", "url": "https://github.com/cli/cli/releases/download/v2.96.0/gh_2.96.0_windows_amd64.zip", "stripPrefix": true, "bin": "bin/gh.exe" },
+  "git": { "version": "2.55.0.3", "url": "https://github.com/git-for-windows/git/releases/download/v2.55.0.windows.3/MinGit-2.55.0.3-64-bit.zip", "stripPrefix": false, "bin": "cmd/git.exe" }
+}

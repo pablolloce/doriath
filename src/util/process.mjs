@@ -98,6 +98,7 @@ export function spawnDetached(command, args = [], { cwd, env } = {}) {
     windowsHide: false,
     shell: false,
   });
+  child.on("error", () => { /* el llamador decide si el fallo importa */ });
   child.unref();
   return child;
 }
