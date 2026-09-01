@@ -1,4 +1,6 @@
 import path from "node:path";
+import { existsSync } from "node:fs";
+import { createRequire } from "node:module";
 import { ensureDir } from "../util/fs.mjs";
 import { paths } from "../paths.mjs";
 import { log } from "../util/log.mjs";
@@ -27,11 +29,37 @@ async function loadSdk() {
   return sdkPromise;
 }
 
+/**
+ * Localiza el runtime Copilot (paquete de plataforma `@github/copilot-<os>-<arch>`). Las versiones
+ * recientes del paquete no exportan `./sdk`, por lo que la resolución automática del SDK falla; se
+ * indica la ruta por `COPILOT_CLI_PATH`. Se prefiere la entrada JS (corre con el Node de Doriath) y,
+ * si no existe, el binario nativo.
+ */
+export function resolveCopilotCliPath() {
+  if (process.env.COPILOT_CLI_PATH && existsSync(process.env.COPILOT_CLI_PATH)) return process.env.COPILOT_CLI_PATH;
+  const require = createRequire(import.meta.url);
+  let base;
+  try {
+    base = path.dirname(require.resolve("@github/copilot/package.json"));
+  } catch {
+    return "";
+  }
+  const variants = process.platform === "linux" ? ["linux", "linuxmusl"] : [process.platform];
+  for (const variant of variants) {
+    const dir = path.join(base, "..", `copilot-${variant}-${process.arch}`);
+    const candidates = [path.join(dir, "index.js"), path.join(dir, process.platform === "win32" ? "copilot.exe" : "copilot")];
+    for (const candidate of candidates) if (existsSync(candidate)) return candidate;
+  }
+  return "";
+}
+
 export function sanitizedCopilotEnvironment(config) {
   const env = { ...process.env };
   for (const key of PROVIDER_SECRET_VARIABLES) delete env[key];
   env.GH_HOST = config.copilot.host;
   delete env.COPILOT_HOME;
+  const cliPath = resolveCopilotCliPath();
+  if (cliPath) env.COPILOT_CLI_PATH = cliPath;
   return env;
 }
 
