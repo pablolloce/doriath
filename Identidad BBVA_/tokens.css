@@ -1,0 +1,598 @@
+/* ===========================================================
+   BBVA × NFQ — Design Tokens para presentaciones HTML
+   =========================================================== */
+
+/* Fuentes oficiales (Source Serif 4 + Lato), open source vía Google Fonts. */
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,700;1,8..60,700&family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
+
+:root {
+  /* ---------- COLORES ---------- */
+  --bbva-electric-blue: #001391;
+  --bbva-serene-blue:   #85C8FF;
+
+  --bbva-white:    #FFFFFF;
+  --bbva-sand:     #F7F8F8;
+  --bbva-gray-2:   #E2E6EA;
+  --bbva-gray-3:   #CAD1D8;
+  --bbva-gray-4:   #ADB8C2;
+  --bbva-gray-5:   #46536D;
+  --bbva-midnight: #070E46;
+  --bbva-deep:     #000519;
+
+  --bbva-canary:   #FFE761;
+  --bbva-lime:     #88E783;
+  --bbva-aqua:     #8BE1E9;
+  --bbva-ice:      #8BE1E9; /* alias de aqua */
+  --bbva-purple:   #9694FF;
+  --bbva-mandarin: #FFB56B;
+
+  /* ---------- COMBINACIONES (fondo, contraste, acento) ---------- */
+  --combo-a-bg: var(--bbva-sand);          --combo-a-fg: var(--bbva-electric-blue); --combo-a-accent: var(--bbva-serene-blue);
+  --combo-b-bg: var(--bbva-serene-blue);   --combo-b-fg: var(--bbva-electric-blue); --combo-b-accent: var(--bbva-sand);
+  --combo-c-bg: var(--bbva-electric-blue); --combo-c-fg: var(--bbva-sand);          --combo-c-accent: var(--bbva-serene-blue);
+  --combo-d-bg: var(--bbva-midnight);      --combo-d-fg: var(--bbva-sand);          --combo-d-accent: var(--bbva-serene-blue);
+
+  /* ---------- TIPOGRAFÍA ---------- */
+  --bbva-font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --bbva-font-body:    "Lato", "Helvetica Neue", Arial, sans-serif;
+
+  --bbva-fs-hero:    clamp(72px, 7vw, 128px);
+  --bbva-fs-h1:      clamp(40px, 4vw, 72px);
+  --bbva-fs-h2:      clamp(28px, 2.5vw, 48px);
+  --bbva-fs-h3:      clamp(20px, 1.8vw, 32px);
+  --bbva-fs-lead:    clamp(18px, 1.3vw, 24px);
+  --bbva-fs-body:    clamp(14px, 1vw, 18px);
+  --bbva-fs-caption: clamp(11px, 0.75vw, 14px);
+  --bbva-fs-label:   clamp(10px, 0.7vw, 12px);
+
+  /* ---------- ESPACIADO (múltiplos de 8) ---------- */
+  --bbva-grid-unit: 8px;
+  --bbva-space-1: 8px;   --bbva-space-2: 16px;  --bbva-space-3: 24px;  --bbva-space-4: 32px;
+  --bbva-space-5: 40px;  --bbva-space-6: 48px;  --bbva-space-7: 56px;  --bbva-space-8: 64px;
+
+  /* ---------- RADIOS (múltiplos de 4) ---------- */
+  --bbva-radius-sm:  8px;
+  --bbva-radius-md: 16px;
+  --bbva-radius-lg: 24px;
+  --bbva-radius-xl: 32px;
+  --bbva-radius-full: 9999px;
+
+  --bbva-margin-outer: 64px;
+  --bbva-gap: 32px;
+}
+
+/* ===========================================================
+   Reset mínimo + base tipográfica
+   =========================================================== */
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--bbva-font-body);
+  font-weight: 400;
+  font-size: var(--bbva-fs-body);
+  line-height: 1.5;
+  color: var(--bbva-electric-blue);
+  background: var(--bbva-sand);
+}
+
+h1, h2, h3 {
+  font-family: var(--bbva-font-display);
+  font-weight: 700;
+  margin: 0;
+}
+
+h1 { font-size: var(--bbva-fs-h1); line-height: 1.0; }
+h2 { font-size: var(--bbva-fs-h2); line-height: 1.05; }
+h3 { font-size: var(--bbva-fs-h3); line-height: 1.15; }
+
+p { margin: 0; }
+
+.bbva-hero {
+  font-family: var(--bbva-font-display);
+  font-weight: 700;
+  font-size: var(--bbva-fs-hero);
+  line-height: 0.95;
+}
+
+/* ===========================================================
+   Combinaciones de marca (aplicar al <section> o al <body>)
+   =========================================================== */
+
+.bbva-combo--sand,
+.bbva-combo-a {
+  background-color: var(--combo-a-bg);
+  color: var(--combo-a-fg);
+  --combo-bg: var(--combo-a-bg);
+  --combo-fg: var(--combo-a-fg);
+  --combo-accent: var(--combo-a-accent);
+}
+
+.bbva-combo--serene,
+.bbva-combo-b {
+  background-color: var(--combo-b-bg);
+  color: var(--combo-b-fg);
+  --combo-bg: var(--combo-b-bg);
+  --combo-fg: var(--combo-b-fg);
+  --combo-accent: var(--combo-b-accent);
+}
+
+.bbva-combo--electric,
+.bbva-combo-c {
+  background-color: var(--combo-c-bg);
+  color: var(--combo-c-fg);
+  --combo-bg: var(--combo-c-bg);
+  --combo-fg: var(--combo-c-fg);
+  --combo-accent: var(--combo-c-accent);
+}
+
+.bbva-combo--midnight,
+.bbva-combo-d {
+  background-color: var(--combo-d-bg);
+  color: var(--combo-d-fg);
+  --combo-bg: var(--combo-d-bg);
+  --combo-fg: var(--combo-d-fg);
+  --combo-accent: var(--combo-d-accent);
+}
+
+/* ===========================================================
+   Slide base — orientativo, puedes redefinir grid interno
+   =========================================================== */
+
+.slide {
+  width: 100%;
+  min-height: 100vh;
+  padding: var(--bbva-margin-outer);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--bbva-gap);
+  position: relative;
+  overflow: hidden;
+}
+
+.slide__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bbva-space-4);
+}
+
+.slide__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bbva-space-4);
+  font-size: var(--bbva-fs-caption);
+  color: color-mix(in srgb, var(--combo-fg) 70%, transparent);
+}
+
+.slide__footer--centered { justify-content: center; }
+
+/* Breadcrumb */
+.breadcrumb {
+  font-family: var(--bbva-font-body);
+  font-weight: 700;
+  font-size: var(--bbva-fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: color-mix(in srgb, var(--combo-fg) 70%, transparent);
+  display: flex;
+  gap: var(--bbva-space-6);
+}
+.breadcrumb__sub { font-weight: 400; }
+
+.ante-title {
+  font-family: var(--bbva-font-body);
+  font-weight: 400;
+  font-size: var(--bbva-fs-lead);
+  margin: 0 0 var(--bbva-space-2) 0;
+}
+
+.pager {
+  font-family: var(--bbva-font-body);
+  font-size: var(--bbva-fs-label);
+}
+
+/* ===========================================================
+   Logos BBVA + NFQ
+   =========================================================== */
+
+.bbva-logo { height: 56px; width: auto; display: block; }
+.bbva-logo--sm { height: 40px; }
+.bbva-logo--lg { height: 80px; }
+
+.nfq-logo { height: 28px; width: auto; display: block; }
+.nfq-logo--sm { height: 20px; }
+.nfq-logo--lg { height: 40px; }
+
+.nfq-credit {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bbva-space-2);
+}
+.nfq-credit__label {
+  font-family: var(--bbva-font-body);
+  font-weight: 400;
+  font-size: var(--bbva-fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.85;
+}
+
+/* ===========================================================
+   Cajas Bentō
+   =========================================================== */
+
+.bento__box {
+  background-color: var(--combo-bg);
+  color: var(--combo-fg);
+  border-radius: var(--bbva-radius-lg);
+  padding: var(--bbva-space-6);
+  overflow: hidden;
+}
+
+.bento__box--visual {
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--combo-fg) 8%, transparent);
+}
+
+.bento__box--visual img,
+.bento__box--visual video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.bento__title {
+  font-family: var(--bbva-font-display);
+  font-weight: 700;
+  font-size: var(--bbva-fs-h1);
+  line-height: 1.0;
+  margin: 0 0 var(--bbva-space-3) 0;
+}
+
+/* ===========================================================
+   Doble Bentō (texto sobre imagen, sin opacity)
+   =========================================================== */
+
+.double-bento {
+  position: relative;
+  isolation: isolate;
+}
+
+.double-bento__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  margin: 0;
+}
+.double-bento__bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.double-bento__overlay {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  justify-self: center;
+  max-width: 70%;
+  background-color: var(--combo-bg);
+  color: var(--combo-fg);
+  border-radius: var(--bbva-radius-lg);
+  padding: var(--bbva-space-6) var(--bbva-space-7);
+  text-align: center;
+}
+
+/* ===========================================================
+   CTA / botón
+   =========================================================== */
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bbva-space-1);
+  padding: var(--bbva-space-2) var(--bbva-space-4);
+  font-family: var(--bbva-font-body);
+  font-weight: 700;
+  font-size: var(--bbva-fs-body);
+  line-height: 1.2;
+  border: 0;
+  border-radius: var(--bbva-radius-full);
+  background-color: var(--combo-accent);
+  color: var(--bbva-electric-blue); /* texto sobre acento → Electric */
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 160ms ease;
+}
+.cta:hover { transform: translateY(-1px); }
+
+.cta--block {
+  display: flex;
+  width: 100%;
+  padding: var(--bbva-space-4);
+  justify-content: center;
+  background-color: var(--bbva-electric-blue);
+  color: var(--bbva-white);
+  font-family: var(--bbva-font-display);
+  font-size: var(--bbva-fs-h3);
+  border-radius: var(--bbva-radius-md);
+}
+
+/* ===========================================================
+   Listas
+   =========================================================== */
+
+.bbva-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--bbva-space-2);
+}
+.bbva-list li {
+  position: relative;
+  padding-left: var(--bbva-space-3);
+}
+.bbva-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--combo-accent);
+  font-weight: 700;
+}
+
+/* ===========================================================
+   UI Stickers
+   =========================================================== */
+
+.bbva-sticker { font-family: var(--bbva-font-body); }
+
+.bbva-sticker--dot {
+  display: inline-flex;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: var(--bbva-fs-caption);
+  color: var(--bbva-electric-blue);
+}
+
+.bbva-sticker--bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bbva-space-1);
+}
+.bbva-sticker--bubble .bbva-sticker__dot {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+.bbva-sticker--bubble .bbva-sticker__dot img { width: 24px; height: 24px; }
+.bbva-sticker--bubble .bbva-sticker__text {
+  background: var(--bbva-white);
+  color: var(--bbva-electric-blue);
+  padding: var(--bbva-space-2) var(--bbva-space-3);
+  border-radius: var(--bbva-radius-md);
+  font-weight: 400;
+  line-height: 1.2;
+  display: grid;
+}
+.bbva-sticker--bubble .bbva-sticker__text strong { font-weight: 700; }
+
+.bbva-sticker--ui-bubble {
+  display: grid;
+  gap: var(--bbva-space-1);
+  padding: var(--bbva-space-3);
+  background: var(--bbva-white);
+  color: var(--bbva-electric-blue);
+  border-radius: var(--bbva-radius-md);
+  font-weight: 400;
+  min-width: 200px;
+  box-shadow: 0 4px 16px rgba(0, 19, 145, .08);
+}
+.bbva-sticker__value {
+  font-family: var(--bbva-font-display);
+  font-weight: 700;
+  font-size: var(--bbva-fs-h3);
+  line-height: 1;
+}
+
+/* ===========================================================
+   Acentos como fondo (texto siempre en Electric Blue)
+   =========================================================== */
+
+.bbva-bg-canary   { background: var(--bbva-canary);   color: var(--bbva-electric-blue); }
+.bbva-bg-lime     { background: var(--bbva-lime);     color: var(--bbva-electric-blue); }
+.bbva-bg-aqua,
+.bbva-bg-ice      { background: var(--bbva-ice);      color: var(--bbva-electric-blue); }
+.bbva-bg-purple   { background: var(--bbva-purple);   color: var(--bbva-electric-blue); }
+.bbva-bg-mandarin { background: var(--bbva-mandarin); color: var(--bbva-electric-blue); }
+
+/* ===========================================================
+   Iconos
+   =========================================================== */
+
+.bbva-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-block;
+  vertical-align: middle;
+}
+.bbva-icon--sm { width: 20px; height: 20px; }
+.bbva-icon--lg { width: 48px; height: 48px; }
+.bbva-icon--xl { width: 64px; height: 64px; }
+
+/* Sobre fondos azules, invertir el SVG (que viene en Electric Blue) a blanco */
+.bbva-combo--electric .bbva-icon,
+.bbva-combo--midnight .bbva-icon {
+  filter: brightness(0) invert(1);
+}
+
+/* ===========================================================
+   Color cards (4 ítems con acentos)
+   =========================================================== */
+
+.color-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--bbva-space-3);
+}
+.color-card {
+  padding: var(--bbva-space-4);
+  border-radius: var(--bbva-radius-md);
+  color: var(--bbva-electric-blue);
+  display: grid;
+  align-content: space-between;
+  min-height: 240px;
+}
+.color-card:nth-child(1) { background: var(--bbva-serene-blue); }
+.color-card:nth-child(2) { background: var(--bbva-lime); }
+.color-card:nth-child(3) { background: var(--bbva-canary); }
+.color-card:nth-child(4) { background: var(--bbva-mandarin); }
+.color-card__icon { width: 32px; height: 32px; align-self: end; }
+
+/* ===========================================================
+   Section index (índice con cajas de colores)
+   =========================================================== */
+
+.section-index {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--bbva-space-2);
+  margin-top: var(--bbva-space-4);
+}
+.section-index__item {
+  padding: var(--bbva-space-3);
+  border-radius: var(--bbva-radius-md);
+  color: var(--bbva-electric-blue);
+  min-height: 240px;
+  display: grid;
+  align-content: start;
+  gap: var(--bbva-space-2);
+}
+.section-index__item:nth-child(6n+1) { background: transparent; border: 1px solid currentColor; color: var(--combo-fg); }
+.section-index__item:nth-child(6n+2) { background: var(--bbva-serene-blue); }
+.section-index__item:nth-child(6n+3) { background: var(--bbva-lime); }
+.section-index__item:nth-child(6n+4) { background: var(--bbva-canary); }
+.section-index__item:nth-child(6n+5) { background: var(--bbva-mandarin); }
+.section-index__item:nth-child(6n+6) { background: var(--bbva-purple); }
+.section-index__label {
+  font-family: var(--bbva-font-body);
+  font-size: var(--bbva-fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+.section-index__title {
+  font-family: var(--bbva-font-display);
+  font-weight: 700;
+  font-size: var(--bbva-fs-h3);
+  line-height: 1.05;
+}
+
+/* ===========================================================
+   Bocadillos (3 consequat)
+   =========================================================== */
+
+.bubbles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--bbva-space-5);
+}
+.bubble-item { display: grid; gap: var(--bbva-space-4); }
+.bubble-item__balloon {
+  background: var(--bbva-electric-blue);
+  color: var(--bbva-white);
+  padding: var(--bbva-space-4);
+  border-radius: var(--bbva-radius-md);
+  font-size: var(--bbva-fs-h3);
+  font-weight: 700;
+  font-family: var(--bbva-font-display);
+  position: relative;
+}
+.bubble-item__balloon::after {
+  content: "";
+  position: absolute;
+  bottom: -12px;
+  left: var(--bbva-space-4);
+  width: 0; height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 12px solid var(--bbva-electric-blue);
+}
+
+/* ===========================================================
+   Caja de conclusión
+   =========================================================== */
+
+.conclusion__box {
+  background: var(--bbva-serene-blue);
+  color: var(--bbva-electric-blue);
+  padding: var(--bbva-space-4) var(--bbva-space-5);
+  border-radius: var(--bbva-radius-md);
+  font-family: var(--bbva-font-display);
+  font-size: var(--bbva-fs-h3);
+  line-height: 1.15;
+  font-weight: 700;
+}
+.conclusion__box em { font-style: italic; }
+
+/* ===========================================================
+   Tabla
+   =========================================================== */
+
+.bbva-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--bbva-font-body);
+  font-size: var(--bbva-fs-body);
+  background: var(--bbva-sand);
+  border-radius: var(--bbva-radius-md);
+  overflow: hidden;
+}
+.bbva-table thead { background: var(--bbva-gray-2); }
+.bbva-table th,
+.bbva-table td {
+  padding: var(--bbva-space-2) var(--bbva-space-3);
+  text-align: left;
+  border-bottom: 1px solid var(--bbva-gray-3);
+}
+.bbva-table th {
+  font-weight: 700;
+  color: var(--bbva-electric-blue);
+  text-transform: uppercase;
+  font-size: var(--bbva-fs-label);
+  letter-spacing: 0.03em;
+}
+.bbva-table tr.is-highlighted { background: color-mix(in srgb, var(--bbva-lime) 30%, transparent); }
+.bbva-table tr.is-total {
+  background: var(--bbva-electric-blue);
+  color: var(--bbva-white);
+  font-weight: 700;
+}
+
+/* ===========================================================
+   Print
+   =========================================================== */
+
+@media print {
+  @page { size: 1920px 1080px; margin: 0; }
+  body { background: white; }
+  .slide {
+    page-break-after: always;
+    min-height: auto;
+    height: 1080px;
+    width: 1920px;
+  }
+}
