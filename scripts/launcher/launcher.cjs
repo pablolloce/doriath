@@ -99,10 +99,16 @@ async function ensurePortableTool(name) {
   return binDir;
 }
 
+const COPILOT_PLATFORM_PACKAGE = `@github/copilot-${process.platform}-${process.arch}`;
+
+function installed(name) {
+  return fs.existsSync(path.join(appDir, "node_modules", ...name.split("/"), "package.json"));
+}
+
 function dependenciesReady() {
   try {
     const manifest = JSON.parse(fs.readFileSync(path.join(appDir, "package.json"), "utf8"));
-    return Object.keys(manifest.dependencies || {}).every((name) => fs.existsSync(path.join(appDir, "node_modules", ...name.split("/"), "package.json")));
+    return Object.keys(manifest.dependencies || {}).every(installed);
   } catch {
     return false;
   }
@@ -116,18 +122,34 @@ function runNpm(npm, npmArgs, env) {
   return { ok: result.status === 0, output };
 }
 
-/** Repara node_modules con el mismo reintento que install.ps1 de FENIX. */
-function repairDependencies(node, env) {
-  if (dependenciesReady()) return;
-  log("Faltan dependencias en app/node_modules; instalando (npm install)…");
+/** npm install con el mismo reintento que install.ps1 de FENIX (Artifactory -> npmjs con CA del sistema). */
+function npmInstallWithFallback(node, env, extraArgs, label) {
   const npm = npmCommand(node);
   const withNode = { ...env, PATH: [path.dirname(node), env.PATH || ""].join(path.delimiter) };
-  const first = runNpm(npm, ["install", "--omit=dev", "--ignore-scripts", "--loglevel", "error", "--no-fund"], withNode);
+  const base = ["install", "--omit=dev", "--ignore-scripts", "--loglevel", "error", "--no-fund", ...extraArgs];
+  const first = runNpm(npm, base, withNode);
   if (first.ok) return;
-  if (!AUTH_FAILURE.test(first.output)) throw new Error("npm install falló. Revisa los mensajes anteriores.");
+  if (!AUTH_FAILURE.test(first.output)) throw new Error(`${label}: npm install falló. Revisa los mensajes anteriores.`);
   log("El registro corporativo rechazó la descarga. Reintentando desde npmjs con los certificados de Windows…");
-  const second = runNpm(npm, ["install", "--omit=dev", "--ignore-scripts", "--registry", "https://registry.npmjs.org/", "--package-lock=false", "--no-audit", "--loglevel", "error", "--no-fund"], { ...withNode, NODE_OPTIONS: [withNode.NODE_OPTIONS, "--use-system-ca"].filter(Boolean).join(" ") });
-  if (!second.ok) throw new Error("npm install falló también contra registry.npmjs.org.");
+  const second = runNpm(npm, [...base, "--registry", "https://registry.npmjs.org/", "--package-lock=false", "--no-audit"], { ...withNode, NODE_OPTIONS: [withNode.NODE_OPTIONS, "--use-system-ca"].filter(Boolean).join(" ") });
+  if (!second.ok) throw new Error(`${label}: npm install falló también contra registry.npmjs.org.`);
+}
+
+/** Repara node_modules: dependencias declaradas y runtime Copilot de esta plataforma. */
+function repairDependencies(node, env) {
+  if (!dependenciesReady()) {
+    log("Faltan dependencias en app/node_modules; instalando (npm install)…");
+    npmInstallWithFallback(node, env, [], "dependencias");
+  }
+  if (!installed(COPILOT_PLATFORM_PACKAGE)) {
+    let version = "";
+    try {
+      version = JSON.parse(fs.readFileSync(path.join(appDir, "node_modules", "@github", "copilot", "package.json"), "utf8")).version;
+    } catch { /* sin versión */ }
+    log(`Falta ${COPILOT_PLATFORM_PACKAGE} (runtime de Copilot); instalándolo explícitamente…`);
+    npmInstallWithFallback(node, env, ["--no-save", "--force", `${COPILOT_PLATFORM_PACKAGE}${version ? `@${version}` : ""}`], "runtime Copilot");
+    if (!installed(COPILOT_PLATFORM_PACKAGE)) throw new Error(`No se pudo instalar ${COPILOT_PLATFORM_PACKAGE}. Copilot no funcionará hasta resolverlo.`);
+  }
 }
 
 function ensureGitHubSession(env, host) {

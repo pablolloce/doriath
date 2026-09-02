@@ -6,7 +6,8 @@
  *   data/ outputs/ knowledge-bases/  carpetas vacías (las crea también el instalador)
  *   doriath-root.json, Doriath.cmd, BUILD.json
  *
- * Opciones: --skip-node (no descarga Node), --skip-modules (copia node_modules actual), --platform linux
+ * Opciones: --fresh (reinstala node_modules desde el registro en vez de copiar el árbol probado),
+ *           --skip-node (no descarga Node), --platform linux (payload Linux para pruebas)
  */
 import { cp, mkdir, rm, writeFile, readFile, copyFile, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -44,26 +45,60 @@ async function stageApp() {
   return app;
 }
 
-async function installModules(app) {
-  if (args.includes("--skip-modules")) {
-    await cp(path.join(root, "node_modules"), path.join(app, "node_modules"), { recursive: true });
-    log("node_modules copiado del checkout (sin adaptar a Windows).");
-    return;
+function copilotPlatformPackage() {
+  return `@github/copilot-${platform}-x64`;
+}
+
+async function readInstalledVersion(dir, name) {
+  try {
+    return JSON.parse(await readFile(path.join(dir, "node_modules", ...name.split("/"), "package.json"), "utf8")).version;
+  } catch {
+    return "";
   }
-  log(`Instalando dependencias de producción para ${platform}-x64…`);
-  // Mismo criterio que scripts/install-deps.mjs (y que install.ps1 de FENIX): primero la configuración
-  // del usuario y, si el Artifactory corporativo rechaza las descargas, registry.npmjs.org confiando en
-  // los certificados del sistema. El .npmrc de proyecto generado por install-deps se reutiliza.
+}
+
+/**
+ * Dependencias del payload. Igual que build-dist.mjs de FENIX, por defecto se copia el árbol
+ * `node_modules` ya probado del checkout (incluye el runtime Copilot de la plataforma del equipo
+ * que construye); `--fresh`, o construir para otra plataforma, reinstala desde el registro con el
+ * mismo reintento que `npm run setup`. En ambos casos se comprueba explícitamente que el paquete
+ * de plataforma de Copilot está presente y, si npm no lo seleccionó, se instala a propósito.
+ */
+async function installModules(app) {
+  const hostMatches = process.platform === platform && process.arch === "x64";
+  const fresh = args.includes("--fresh") || !hostMatches;
+  const npm = process.platform === "win32" ? "npm.cmd" : "npm";
+  const platformEnv = { ...process.env, npm_config_os: platform, npm_config_cpu: "x64", npm_config_ignore_scripts: "true" };
+  if (platform === "linux") platformEnv.npm_config_libc = "glibc";
   const projectNpmrc = path.join(root, ".npmrc");
   if (existsSync(projectNpmrc)) await copyFile(projectNpmrc, path.join(app, ".npmrc"));
-  const result = spawnSync(process.execPath, [path.join(root, "scripts", "install-deps.mjs"), "--production", "--cwd", app], {
-    stdio: "inherit",
-    env: { ...process.env, npm_config_os: platform, npm_config_cpu: "x64", npm_config_libc: platform === "linux" ? "glibc" : "", npm_config_ignore_scripts: "true" },
-  });
-  if (result.status !== 0) throw new Error("npm install falló en el payload.");
-  const copilotDir = path.join(app, "node_modules", "@github", `copilot-${platform}-x64`);
-  if (!existsSync(copilotDir)) throw new Error(`Falta el paquete @github/copilot-${platform}-x64 en el payload.`);
-  log(`Paquete Copilot de plataforma: ${path.basename(copilotDir)}.`);
+
+  if (!fresh) {
+    const source = path.join(root, "node_modules");
+    if (!existsSync(path.join(source, "@github", "copilot-sdk"))) throw new Error("No hay node_modules/ probado en el checkout. Ejecuta npm run setup antes, o usa --fresh.");
+    log("Copiando node_modules del checkout (árbol ya probado, como FENIX)…");
+    await cp(source, path.join(app, "node_modules"), { recursive: true });
+    const prune = spawnSync(npm, ["prune", "--omit=dev", "--ignore-scripts", "--no-audit", "--no-fund", "--loglevel", "error"], { cwd: app, stdio: "inherit", env: platformEnv, shell: process.platform === "win32" });
+    if (prune.status === 0) log("Dependencias de desarrollo retiradas del payload (npm prune --omit=dev).");
+    else log("Aviso: npm prune falló; el payload conserva las dependencias de desarrollo (no afecta al funcionamiento).");
+  } else {
+    log(`Instalando dependencias de producción para ${platform}-x64 desde el registro…`);
+    const result = spawnSync(process.execPath, [path.join(root, "scripts", "install-deps.mjs"), "--production", "--cwd", app], { stdio: "inherit", env: platformEnv });
+    if (result.status !== 0) throw new Error("npm install falló en el payload.");
+  }
+
+  const packageName = copilotPlatformPackage();
+  if (!existsSync(path.join(app, "node_modules", "@github", `copilot-${platform}-x64`))) {
+    const version = await readInstalledVersion(app, "@github/copilot");
+    log(`npm no dejó ${packageName} en el payload; se instala explícitamente${version ? ` (${version})` : ""}…`);
+    const result = spawnSync(process.execPath, [path.join(root, "scripts", "install-deps.mjs"), "--production", "--cwd", app, "--packages", `${packageName}${version ? `@${version}` : ""}`], { stdio: "inherit", env: platformEnv });
+    if (result.status !== 0 || !existsSync(path.join(app, "node_modules", "@github", `copilot-${platform}-x64`))) {
+      const listing = spawnSync(npm, ["ls", "@github/copilot", "--depth=1"], { cwd: app, encoding: "utf8", env: platformEnv, shell: process.platform === "win32" });
+      process.stdout.write(`${listing.stdout || ""}${listing.stderr || ""}`);
+      throw new Error(`Falta ${packageName} en el payload y no se pudo instalar. Revisa la salida de npm anterior.`);
+    }
+  }
+  log(`Paquete Copilot de plataforma: ${packageName} ${await readInstalledVersion(app, packageName)}.`);
   await rm(path.join(app, "package-lock.json"), { force: true });
   await rm(path.join(app, ".npmrc"), { force: true });
 }

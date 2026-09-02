@@ -9,6 +9,8 @@
  *      usuario; se deja un .npmrc de proyecto (ignorado por git) para las siguientes instalaciones.
  *
  * Uso: node scripts/install-deps.mjs [--production] [--force-npmjs] [--registry <url>] [--cwd <dir>]
+ *      [--packages <pkg@ver,...>]  instala esos paquetes explícitamente (--no-save --force), p. ej. el
+ *                                  runtime Copilot de la plataforma si npm no lo seleccionó.
  */
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync } from "node:fs";
@@ -21,6 +23,7 @@ const flag = (name) => { const index = args.indexOf(name); return index >= 0 ? a
 const root = path.resolve(flag("--cwd") || scriptRoot);
 const production = args.includes("--production");
 const registry = flag("--registry") || "https://registry.npmjs.org/";
+const packages = String(flag("--packages") || "").split(",").map((item) => item.trim()).filter(Boolean);
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
 const cacheDir = path.join(scriptRoot, ".cache");
 const caFile = path.join(cacheDir, "system-ca-bundle.pem");
@@ -37,7 +40,7 @@ export function nodeSupportsSystemCa(version = process.versions.node) {
 }
 
 function runNpm(extraArgs = [], extraEnv = {}) {
-  const npmArgs = ["install", "--loglevel", "error", "--no-fund", ...(production ? ["--omit=dev"] : []), ...extraArgs];
+  const npmArgs = ["install", "--loglevel", "error", "--no-fund", ...(production ? ["--omit=dev"] : []), ...(packages.length ? ["--no-save", "--force", ...packages] : []), ...extraArgs];
   log(`npm ${npmArgs.join(" ")}`);
   const result = spawnSync(npm, npmArgs, { cwd: root, stdio: ["inherit", "pipe", "pipe"], env: { ...process.env, ...extraEnv }, shell: process.platform === "win32", encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
   process.stdout.write(result.stdout || "");

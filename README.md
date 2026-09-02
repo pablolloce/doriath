@@ -77,7 +77,7 @@ npm run build:exe    # dist/Doriath/Doriath.exe y dist/Doriath-Setup.exe (Node S
 npm run build        # ambos
 ```
 
-- `build:dist` instala las dependencias de producción para Windows x64 (`npm_config_os=win32`) para que el runtime nativo de Copilot (`@github/copilot-win32-x64`) vaya dentro del payload, y descarga el Node portable indicado en `scripts/launcher/tools.json`.
+- `build:dist` copia por defecto el `node_modules` ya probado del checkout (como FENIX) y retira las dependencias de desarrollo con `npm prune --omit=dev`; con `--fresh`, o al construir desde otra plataforma, reinstala desde el registro con el mismo reintento que `npm run setup`. En ambos casos comprueba que el runtime nativo de Copilot (`@github/copilot-win32-x64`) está en el payload y, si npm no lo seleccionó, lo instala explícitamente. También descarga el Node portable indicado en `scripts/launcher/tools.json`.
 - `build:exe` empaqueta `scripts/launcher/launcher.cjs` y `setup.cjs` con esbuild, genera los blobs SEA e inyecta cada uno con `postject` en una copia de `node.exe`. El instalador lleva `dist/payload.zip` como asset embebido.
 - Los ejecutables no van firmados; firma Authenticode aparte si la política lo exige. Con `--platform linux` se generan binarios Linux para validar la mecánica.
 
