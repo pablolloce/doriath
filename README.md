@@ -1,0 +1,91 @@
+# Doriath
+
+Workbench local para BBVA CIB que une la operativa de **FENIX** (sesión corporativa de GitHub con `gh`, agente **GitHub Copilot** sin BYOK, trabajo sobre repositorios Git) con la metodología de **KDD Studio** (Knowledge-Driven Development: conocimiento como specs versionadas que se activan como contexto del trabajo).
+
+Se ejecuta en el equipo del usuario: un servidor Node en `127.0.0.1` y una pestaña en Chrome. No hay backend remoto ni base de datos: el estado vive en ficheros.
+
+## Módulos
+
+| Módulo | Qué hace |
+|---|---|
+| **Knowledge Base Studio** | Importa documentos (PDF, Word, Excel, PowerPoint, Markdown, texto, código) a una base de conocimiento local y genera specs KDD con el analizador en dos fases de KDD Studio (átomos → plan de curación → bodies). Preview con preguntas abiertas y chat de resolución antes de persistir. Catálogo, edición, grafo e impacto. |
+| **BBVA CIB Assistant** | Chat con contexto de todas las bases de conocimiento (herramientas de consulta, no memoria). Genera entregables con la identidad BBVA × NFQ: Word, Excel, PowerPoint, HTML, Markdown, código. |
+| **Knowledge-Driven Development** | Entrevista en 4 fases (entender, clasificar, validar, generar) que produce la iniciativa WRK-SPEC con sus planes y tareas, detecta los repositorios necesarios (carpetas locales con `.git`), y ejecuta cada tarea con Copilot sobre el repositorio: diff revisable, commit, push y pull request. |
+
+Las bases de conocimiento son carpetas locales con la misma disposición que las fuentes locales de KDD Studio (`specs/<capa>/…`, `docs-tecnicos/`, `.kdd-studio/`), así que son intercambiables.
+
+## Requisitos en el equipo (Windows)
+
+- **GitHub CLI** (`gh`) con sesión en `bbva.ghe.com`. Si falta, el launcher descarga una versión portable y abre el inicio de sesión (`gh auth login --web`).
+- **Git**. Si falta, el launcher descarga MinGit portable.
+- Licencia de **GitHub Copilot** en la cuenta corporativa. Doriath pasa al runtime el token de la sesión de `gh` y, si no vale, usa la sesión propia del runtime (`copilot login --host bbva.ghe.com`).
+- Chrome (opcional): se abre una pestaña nueva en la instancia en ejecución; sin Chrome se usa el navegador predeterminado.
+
+No hace falta Node instalado: el instalador incluye un Node portable.
+
+## Instalación (usuario final)
+
+1. Ejecuta `Doriath-Setup.exe`. Pide la carpeta de instalación (por defecto `%LOCALAPPDATA%\Doriath`) y crea:
+   ```
+   Doriath/
+   ├── Doriath.exe          launcher
+   ├── app/                 aplicación
+   ├── runtime/             Node portable (+ gh y git portables si hicieron falta)
+   ├── data/                configuración, conversaciones, análisis, ejecuciones, logs
+   ├── outputs/             ficheros generados por el asistente
+   └── knowledge-bases/     carpeta sugerida para las bases de conocimiento
+   ```
+2. Se crean accesos directos en el Escritorio y el menú Inicio.
+3. `Doriath.exe` comprueba `gh`/`git`, la sesión de GitHub, arranca el servidor y abre Chrome. Si ya hay una instancia en marcha, solo abre la pestaña.
+
+Datos existentes en `data/`, `outputs/` y `knowledge-bases/` se conservan al reinstalar.
+
+## Desarrollo
+
+```bash
+npm install
+npm start            # arranca en http://127.0.0.1:4410 y abre el navegador
+npm run doctor       # diagnóstico: gh, git, sesión, Copilot y modelos
+npm run models       # catálogo real de modelos de la licencia
+npm run check        # sintaxis de todos los módulos
+npm test             # tests unitarios (node:test)
+```
+
+Variables útiles: `DORIATH_HOME` (carpeta de datos), `DORIATH_PORT`, `DORIATH_GITHUB_HOST`, `DORIATH_VERBOSE=1`.
+
+En desarrollo los datos van a `~/.doriath`; instalado, a `<raíz>/data`. La configuración está en `data/config.json` (host GitHub, modo de autenticación Copilot, carpetas, prefijo de ramas) y también se edita desde **Ajustes**.
+
+## Build del instalador
+
+```bash
+npm run build:dist   # dist/Doriath: app + node_modules (paquete Copilot win32-x64) + Node portable
+npm run build:exe    # dist/Doriath/Doriath.exe y dist/Doriath-Setup.exe (Node SEA + postject)
+npm run build        # ambos
+```
+
+- `build:dist` instala las dependencias de producción para Windows x64 (`npm_config_os=win32`) para que el runtime nativo de Copilot (`@github/copilot-win32-x64`) vaya dentro del payload, y descarga el Node portable indicado en `scripts/launcher/tools.json`.
+- `build:exe` empaqueta `scripts/launcher/launcher.cjs` y `setup.cjs` con esbuild, genera los blobs SEA e inyecta cada uno con `postject` en una copia de `node.exe`. El instalador lleva `dist/payload.zip` como asset embebido.
+- Los ejecutables no van firmados; firma Authenticode aparte si la política lo exige. Con `--platform linux` se generan binarios Linux para validar la mecánica.
+
+## Estructura del código
+
+```
+src/
+├── cli.mjs, main.mjs, server.mjs      arranque, servidor HTTP (node:http), SSE
+├── config.mjs, paths.mjs              configuración y rutas (dev vs instalado)
+├── auth/gh.mjs                        sesión GitHub vía gh (token efímero, login en consola)
+├── ai/                                Copilot SDK (cliente, sesiones, herramientas, permisos), prompts, YAML del modelo
+├── kdd/                               núcleo KDD: layout, frontmatter, ids, secciones, store, grafo, BM25
+├── knowledge/                         bases de conocimiento, documentos, extractores, analizador en dos fases
+├── assistant/                         chats (assistant/work/knowledge/resolution), generadores docx/xlsx/pptx/html, salidas
+├── work/                              repositorios locales, paquetes Work, ejecuciones con git
+└── routes/                            API JSON
+public/                                frontend (HTML/CSS/JS sin bundler) con identidad BBVA × NFQ
+prompts/, kdd-reference/               prompts y preámbulo canónico de KDD Studio
+scripts/                               build, launcher e instalador
+docs/                                  FENIX-core.md, kdd-studio-funcionamiento.md, identidad BBVA, módulos de referencia de FENIX
+```
+
+## Identidad visual
+
+La interfaz y los documentos generados siguen `docs/identidad-bbva`: paleta (Electric Blue, Serene, Sand, Midnight y acentos), tipografías Source Serif 4 y Lato (empaquetadas en `public/fonts`), cajas bentō con radios 16/24, retícula de 8 px, logo BBVA primario y NFQ como autoría. Los logos con transparencia de `public/brand` se derivan de los originales de la guía.

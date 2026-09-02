@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+*.log
+.doriath/
+data/
+outputs/
+knowledge-bases/
+runtime/
+*.tmp
+.DS_Store
+Thumbs.db
