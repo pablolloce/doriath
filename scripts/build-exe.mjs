@@ -72,6 +72,18 @@ async function baseNodeBinary() {
   return process.execPath;
 }
 
+/**
+ * Node con el que se genera el blob SEA. El formato del blob va ligado a la versión de Node, así que
+ * cuando el equipo de build es de la misma plataforma que el destino (build en Windows) se usa el
+ * propio node.exe portable que llevará el ejecutable; solo al cruzar plataformas se recurre al node
+ * del sistema (sin snapshot ni code cache el blob es portable entre plataformas).
+ */
+async function seaNodeBinary(base) {
+  if (process.platform === platform) return base;
+  log(`Blob SEA generado con el Node del sistema (${process.version}); el ejecutable usa ${path.basename(base)}.`);
+  return process.execPath;
+}
+
 async function makeSea({ name, entry, output, assets }) {
   await mkdir(build, { recursive: true });
   const bundled = path.join(build, `${name}.bundle.cjs`);
@@ -80,8 +92,9 @@ async function makeSea({ name, entry, output, assets }) {
   const config = { main: bundled, output: blob, disableExperimentalSEAWarning: true, useSnapshot: false, useCodeCache: false, ...(assets ? { assets } : {}) };
   const configPath = path.join(build, `${name}.sea.json`);
   await writeFile(configPath, JSON.stringify(config, null, 2));
-  run(process.execPath, ["--experimental-sea-config", configPath]);
-  await copyFile(await baseNodeBinary(), output);
+  const base = await baseNodeBinary();
+  run(await seaNodeBinary(base), ["--experimental-sea-config", configPath]);
+  await copyFile(base, output);
   const postject = path.join(root, "node_modules", "postject", "dist", "cli.js");
   run(process.execPath, [postject, output, "NODE_SEA_BLOB", blob, "--sentinel-fuse", "NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2", ...(platform === "darwin" ? ["--macho-segment-name", "NODE_SEA"] : [])]);
   const size = (await stat(output)).size;

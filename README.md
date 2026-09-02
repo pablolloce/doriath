@@ -28,7 +28,7 @@ No hace falta Node instalado: el instalador incluye un Node portable.
 1. Ejecuta `Doriath-Setup.exe`. Pide la carpeta de instalación (por defecto `%LOCALAPPDATA%\Doriath`) y crea:
    ```
    Doriath/
-   ├── Doriath.exe          launcher
+   ├── Doriath.exe          launcher (Doriath.cmd y Doriath-Diagnostico.cmd como alternativas)
    ├── app/                 aplicación
    ├── runtime/             Node portable (+ gh y git portables si hicieron falta)
    ├── data/                configuración, conversaciones, análisis, ejecuciones, logs
@@ -39,6 +39,16 @@ No hace falta Node instalado: el instalador incluye un Node portable.
 3. `Doriath.exe` comprueba `gh`/`git`, la sesión de GitHub, arranca el servidor y abre Chrome. Si ya hay una instancia en marcha, solo abre la pestaña.
 
 Datos existentes en `data/`, `outputs/` y `knowledge-bases/` se conservan al reinstalar.
+
+### Si la ventana de Doriath.exe se cierra sola
+
+`Doriath.exe` es una aplicación de consola: la ventana muestra los registros y, ante cualquier fallo, se queda abierta con "Pulsa una tecla para cerrar" (como FENIX). Si aun así se cierra sin mostrar nada:
+
+1. Ejecuta `Doriath-Diagnostico.cmd` (junto a `Doriath.exe`): lanza el mismo ejecutable con la ventana fija y muestra el código de salida, incluso cuando el binario no llega a arrancar.
+2. Revisa `data\logs\launcher.log`: recoge todo lo que imprime el launcher y el servidor (`data\logs\doriath.log` tiene el registro del servidor). Envíalo si pides ayuda.
+3. Como alternativa, `Doriath.cmd` arranca el servidor directamente con el Node portable, sin pasar por el ejecutable.
+
+`Doriath.exe` es un `node.exe` con el launcher inyectado (Node SEA) y no va firmado: si la política del equipo bloquea ejecutables sin firma, aparece un aviso de Windows o el proceso termina al instante; en ese caso usa `Doriath.cmd` o firma el binario.
 
 ## Desarrollo
 
@@ -78,7 +88,7 @@ npm run build        # ambos
 ```
 
 - `build:dist` copia por defecto el `node_modules` ya probado del checkout (como FENIX) y retira las dependencias de desarrollo con `npm prune --omit=dev`; con `--fresh`, o al construir desde otra plataforma, reinstala desde el registro con el mismo reintento que `npm run setup`. En ambos casos comprueba que el runtime nativo de Copilot (`@github/copilot-win32-x64`) está en el payload y, si npm no lo seleccionó, lo instala explícitamente. También descarga el Node portable indicado en `scripts/launcher/tools.json`.
-- `build:exe` empaqueta `scripts/launcher/launcher.cjs` y `setup.cjs` con esbuild, genera los blobs SEA e inyecta cada uno con `postject` en una copia de `node.exe`. El instalador lleva `dist/payload.zip` como asset embebido.
+- `build:exe` empaqueta `scripts/launcher/launcher.cjs` y `setup.cjs` con esbuild, genera los blobs SEA e inyecta cada uno con `postject` en una copia de `node.exe`. Al construir en Windows el blob se genera con el propio `node.exe` portable (misma versión que ejecutará el launcher); desde otra plataforma se usa el Node del sistema. El instalador lleva `dist/payload.zip` como asset embebido.
 - Los ejecutables no van firmados; firma Authenticode aparte si la política lo exige. Con `--platform linux` se generan binarios Linux para validar la mecánica.
 - **Espacio en disco**: el build necesita unos 3 GB libres (payload ~600 MB, instalador ~750 MB entre zip y exe, más la caché de npm con el runtime de Copilot, ~300 MB). Los scripts lo comprueban antes de empezar y retiran los intermedios al terminar. Si la unidad del repositorio va justa, construye en otra con `DORIATH_DIST=D:\doriath-dist npm run build`. Con el disco lleno, npm descarta en silencio el runtime de Copilot por ser una dependencia opcional.
 

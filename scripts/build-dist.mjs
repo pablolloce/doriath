@@ -4,7 +4,7 @@
  *   app/          código + node_modules de producción (paquete Copilot de Windows x64)
  *   runtime/node/ Node.js portable para Windows
  *   data/ outputs/ knowledge-bases/  carpetas vacías (las crea también el instalador)
- *   doriath-root.json, Doriath.cmd, BUILD.json
+ *   doriath-root.json, Doriath.cmd, Doriath-Diagnostico.cmd, BUILD.json
  *
  * Opciones: --fresh (reinstala node_modules desde el registro en vez de copiar el árbol probado),
  *           --skip-node (no descarga Node), --platform linux (payload Linux para pruebas)
@@ -130,14 +130,29 @@ async function stageScaffold() {
     "@echo off",
     "setlocal",
     "set ROOT=%~dp0",
-    "set DORIATH_LAUNCHER_PID=%RANDOM%",
     "if exist \"%ROOT%runtime\\gh\\bin\" set PATH=%ROOT%runtime\\gh\\bin;%PATH%",
     "if exist \"%ROOT%runtime\\git\\cmd\" set PATH=%ROOT%runtime\\git\\cmd;%PATH%",
     "if exist \"%ROOT%runtime\\node\\node.exe\" (set NODE=%ROOT%runtime\\node\\node.exe) else (set NODE=node)",
     "\"%NODE%\" \"%ROOT%app\\src\\cli.mjs\" start %*",
+    "if errorlevel 1 pause",
     "endlocal",
   ].join("\r\n");
   await writeFile(path.join(target, "Doriath.cmd"), `${cmd}\r\n`);
+  // Ejecuta el launcher con la ventana fija: si Doriath.exe no llega ni a arrancar (por ejemplo, si el
+  // equipo bloquea el binario), el mensaje queda a la vista en vez de cerrarse la consola.
+  const diagnostic = [
+    "@echo off",
+    "setlocal",
+    "title Doriath - diagnostico",
+    "echo Ejecutando Doriath.exe con la ventana fija. El registro completo queda en data\\logs\\launcher.log",
+    "echo.",
+    "\"%~dp0Doriath.exe\" %*",
+    "echo.",
+    "echo Doriath.exe ha terminado con codigo %ERRORLEVEL%.",
+    "pause",
+    "endlocal",
+  ].join("\r\n");
+  await writeFile(path.join(target, "Doriath-Diagnostico.cmd"), `${diagnostic}\r\n`);
   let commit = "";
   try {
     commit = spawnSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).stdout.trim();
