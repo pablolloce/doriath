@@ -206,6 +206,7 @@ function renderGate() {
   overlay.hidden = false;
   overlay.onclick = null;
   overlay.replaceChildren(h("div", { class: "gate", id: "gate" },
+    h("img", { src: "/brand/doriath-mark-white.png", alt: "", class: "gate__mark" }),
     h("div", {}, h("p", { class: "ante-title", text: "Doriath · BBVA CIB" }), h("h1", { text: github.installed ? "Inicia sesión en GitHub" : "Falta GitHub CLI" })),
     h("p", { class: "lead", text: github.installed
       ? `Doriath usa tu sesión corporativa de GitHub (${github.host}) para acceder a los repositorios y a GitHub Copilot. Al pulsar el botón se abrirá una consola y el navegador para completar el inicio de sesión con tu correo de BBVA.`
