@@ -99,6 +99,7 @@ export function spawnDetached(command, args = [], { cwd, env } = {}) {
     shell: false,
   });
   child.on("error", () => { /* el llamador decide si el fallo importa */ });
+  child.on("error", (error) => process.stderr.write(`[doriath] No se pudo lanzar ${command}: ${error.message}\n`));
   child.unref();
   return child;
 }

@@ -16,6 +16,9 @@ export const DEFAULT_CONFIG = Object.freeze({
     timeoutMs: 600000,
   },
   ui: { language: "es", openBrowser: true, browser: "chrome" },
+  // Proxy de salida para gh, git y el runtime Copilot. Vacío = sin proxy. FENIX usa por defecto el
+  // proxy local corporativo de Ivanti (http://127.0.0.1:8999); actívalo aquí si tu red lo exige.
+  network: { proxyUrl: "", noProxy: "127.0.0.1,localhost" },
   paths: { outputs: defaultOutputsRoot, knowledgeBases: defaultKnowledgeBasesRoot },
   work: { commitAuthor: "", branchPrefix: "feature/doriath" },
 });
@@ -37,6 +40,7 @@ export async function loadConfig() {
   const stored = await readJson(paths.configFile, {});
   cached = merge(structuredClone(DEFAULT_CONFIG), stored);
   if (process.env.DORIATH_PORT) cached.server.port = Number(process.env.DORIATH_PORT);
+  if (process.env.DORIATH_PROXY) cached.network.proxyUrl = process.env.DORIATH_PROXY;
   if (process.env.DORIATH_GITHUB_HOST) {
     cached.github.host = process.env.DORIATH_GITHUB_HOST;
     cached.copilot.host = process.env.DORIATH_GITHUB_HOST;
@@ -49,7 +53,7 @@ export function getConfig() {
   return cached;
 }
 
-const EDITABLE_SECTIONS = ["github", "copilot", "ui", "paths", "work", "server"];
+const EDITABLE_SECTIONS = ["github", "copilot", "ui", "paths", "work", "server", "network"];
 
 export async function updateConfig(patch) {
   const current = getConfig();
@@ -62,6 +66,20 @@ export async function updateConfig(patch) {
   const { product, ...persisted } = next;
   await writeJson(paths.configFile, persisted);
   return cached;
+}
+
+/**
+ * Aplica el proxy configurado al entorno del proceso (lo heredan gh, git y el runtime Copilot).
+ * Devuelve true si se ha aplicado.
+ */
+export function applyNetworkEnvironment(config = getConfig()) {
+  const proxy = String(config.network?.proxyUrl || "").trim();
+  if (!proxy) return false;
+  for (const key of ["HTTPS_PROXY", "HTTP_PROXY", "https_proxy", "http_proxy"]) process.env[key] = proxy;
+  const noProxy = String(config.network?.noProxy || "127.0.0.1,localhost");
+  process.env.NO_PROXY = noProxy;
+  process.env.no_proxy = noProxy;
+  return true;
 }
 
 /** Vista sin secretos para la UI. */

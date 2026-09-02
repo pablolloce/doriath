@@ -1,4 +1,4 @@
-import { loadConfig } from "./config.mjs";
+import { loadConfig, applyNetworkEnvironment } from "./config.mjs";
 import { paths } from "./paths.mjs";
 import { ensureDir } from "./util/fs.mjs";
 import { configureLog, log } from "./util/log.mjs";
@@ -20,6 +20,7 @@ export async function startDoriath({ openBrowser } = {}) {
   await ensureDir(config.paths.outputs).catch(() => undefined);
   await ensureDir(config.paths.knowledgeBases).catch(() => undefined);
   configureLog(paths.logsDir);
+  if (applyNetworkEnvironment(config)) log.info("main", `Proxy de salida configurado: ${config.network.proxyUrl}`);
 
   const url = `http://${config.server.host}:${config.server.port}/`;
   const running = await probeRunningInstance(config.server.port, config.server.host);

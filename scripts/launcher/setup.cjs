@@ -37,9 +37,34 @@ function ask(question, fallback) {
   return new Promise((resolve) => rl.question(`${question} [${fallback}]: `, (answer) => { rl.close(); resolve(answer.trim() || fallback); }));
 }
 
+/** Genera un .ico a partir del isotipo (System.Drawing), como create-shortcut.ps1 de FENIX. */
+function createIcon(root) {
+  const png = path.join(root, "app", "public", "brand", "nfq-isotype.png");
+  const ico = path.join(root, "data", "doriath.ico");
+  if (!isWindows || !fs.existsSync(png)) return "";
+  fs.mkdirSync(path.dirname(ico), { recursive: true });
+  const script = [
+    "Add-Type -AssemblyName System.Drawing",
+    `$source = [System.Drawing.Image]::FromFile('${png.replace(/'/g, "''")}')`,
+    "$bitmap = New-Object System.Drawing.Bitmap 256, 256",
+    "$graphics = [System.Drawing.Graphics]::FromImage($bitmap)",
+    "$graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic",
+    "$graphics.DrawImage($source, 0, 0, 256, 256)",
+    "$graphics.Dispose()",
+    "$icon = [System.Drawing.Icon]::FromHandle($bitmap.GetHicon())",
+    `$stream = [System.IO.File]::Open('${ico.replace(/'/g, "''")}', [System.IO.FileMode]::Create)`,
+    "$icon.Save($stream)",
+    "$stream.Dispose()",
+    "$source.Dispose()",
+  ].join("; ");
+  const result = spawnSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], { encoding: "utf8", windowsHide: true });
+  return result.status === 0 && fs.existsSync(ico) ? ico : "";
+}
+
 function createShortcuts(root) {
   if (!isWindows) return;
   const target = path.join(root, "Doriath.exe");
+  const icon = createIcon(root) || target;
   const script = [
     "$shell = New-Object -ComObject WScript.Shell",
     `$desktop = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Doriath.lnk'`,
@@ -49,7 +74,7 @@ function createShortcuts(root) {
     `  $s.TargetPath = '${target.replace(/'/g, "''")}'`,
     `  $s.WorkingDirectory = '${root.replace(/'/g, "''")}'`,
     "  $s.Description = 'Doriath - BBVA CIB Knowledge-Driven Development'",
-    `  $s.IconLocation = '${target.replace(/'/g, "''")},0'`,
+    `  $s.IconLocation = '${icon.replace(/'/g, "''")},0'`,
     "  $s.Save()",
     "}",
   ].join("; ");

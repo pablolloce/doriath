@@ -53,13 +53,17 @@ npm test             # tests unitarios (node:test)
 
 ### Dependencias en la red BBVA
 
-En un equipo corporativo `npm install` resuelve contra el Artifactory interno (`Npm_Virtual2`), que responde `403 Forbidden` (realm `Artifactory Realm`) cuando no hay credenciales válidas para ese registro. `npm run setup` reproduce el criterio del instalador de FENIX:
+En un equipo corporativo `npm install` resuelve contra el Artifactory interno (`Npm_Virtual2`), que responde `401/403 Forbidden` (realm `Artifactory Realm`) cuando no hay credenciales válidas. `npm run setup` aplica el mismo criterio que `scripts/install.ps1` de FENIX:
 
 1. Prueba `npm install` con la configuración del usuario.
-2. Si el registro rechaza las descargas por autenticación, exporta las CA raíz e intermedias del almacén de certificados de Windows a `.cache/system-ca-bundle.pem` y reintenta contra `https://registry.npmjs.org/` con `NODE_EXTRA_CA_CERTS` y un `.npmrc` de proyecto (ignorado por git) que fija el registro, el `cafile` y desactiva la auditoría. El `.npmrc` del usuario no se modifica.
+2. Si el registro rechaza las descargas por autenticación, reintenta con `npm install --registry https://registry.npmjs.org/ --package-lock=false --no-audit` confiando en los certificados del sistema: `NODE_OPTIONS=--use-system-ca` cuando el Node lo admite (22.15 o superior; el Node portable del instalador lo admite) y, en todo caso, las CA del almacén de Windows exportadas a `.cache/system-ca-bundle.pem` vía `NODE_EXTRA_CA_CERTS`. El `.npmrc` del usuario no se modifica; queda un `.npmrc` de proyecto (ignorado por git) para las siguientes instalaciones.
 3. Si npmjs también está bloqueado, hacen falta credenciales del Artifactory (`npm login --registry http://cibartifactory.igrupobbva:8084/artifactory/api/npm/Npm_Virtual2/`) o construir el instalador desde un equipo con salida a Internet e instalar el `.exe` resultante, que ya lleva todas las dependencias.
 
-`npm run build:dist` reutiliza ese mismo `.npmrc` y el paquete de certificados al instalar las dependencias del payload.
+`npm run build:dist` usa el mismo mecanismo al instalar las dependencias del payload, y `Doriath.exe` lo repite si en el equipo destino falta alguna dependencia en `app/node_modules`.
+
+### Proxy de salida
+
+FENIX arranca siempre con el proxy local corporativo de Ivanti (`http://127.0.0.1:8999`). Doriath no lo activa por defecto; si tu red lo exige, ponlo en `data/config.json` (`network.proxyUrl`) o arranca con `--proxy http://127.0.0.1:8999` (o `DORIATH_PROXY`). Se aplica a gh, git, el runtime Copilot y las descargas del launcher.
 
 Variables útiles: `DORIATH_HOME` (carpeta de datos), `DORIATH_PORT`, `DORIATH_GITHUB_HOST`, `DORIATH_VERBOSE=1`.
 

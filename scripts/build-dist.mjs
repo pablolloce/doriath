@@ -51,17 +51,14 @@ async function installModules(app) {
     return;
   }
   log(`Instalando dependencias de producción para ${platform}-x64…`);
-  // Reutiliza el .npmrc de proyecto generado por scripts/install-deps.mjs (registro alternativo y
-  // certificados del sistema) para que el payload se pueda construir dentro de la red corporativa.
+  // Mismo criterio que scripts/install-deps.mjs (y que install.ps1 de FENIX): primero la configuración
+  // del usuario y, si el Artifactory corporativo rechaza las descargas, registry.npmjs.org confiando en
+  // los certificados del sistema. El .npmrc de proyecto generado por install-deps se reutiliza.
   const projectNpmrc = path.join(root, ".npmrc");
   if (existsSync(projectNpmrc)) await copyFile(projectNpmrc, path.join(app, ".npmrc"));
-  const caFile = path.join(root, ".cache", "system-ca-bundle.pem");
-  const certEnv = existsSync(caFile) ? { NODE_EXTRA_CA_CERTS: caFile } : {};
-  const result = spawnSync(process.platform === "win32" ? "npm.cmd" : "npm", ["install", "--omit=dev", "--ignore-scripts", "--no-audit", "--no-fund", "--no-package-lock"], {
-    cwd: app,
+  const result = spawnSync(process.execPath, [path.join(root, "scripts", "install-deps.mjs"), "--production", "--cwd", app], {
     stdio: "inherit",
-    env: { ...process.env, ...certEnv, npm_config_os: platform, npm_config_cpu: "x64", npm_config_libc: platform === "linux" ? "glibc" : "" },
-    shell: process.platform === "win32",
+    env: { ...process.env, npm_config_os: platform, npm_config_cpu: "x64", npm_config_libc: platform === "linux" ? "glibc" : "", npm_config_ignore_scripts: "true" },
   });
   if (result.status !== 0) throw new Error("npm install falló en el payload.");
   const copilotDir = path.join(app, "node_modules", "@github", `copilot-${platform}-x64`);
