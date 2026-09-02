@@ -51,10 +51,16 @@ async function installModules(app) {
     return;
   }
   log(`Instalando dependencias de producción para ${platform}-x64…`);
+  // Reutiliza el .npmrc de proyecto generado por scripts/install-deps.mjs (registro alternativo y
+  // certificados del sistema) para que el payload se pueda construir dentro de la red corporativa.
+  const projectNpmrc = path.join(root, ".npmrc");
+  if (existsSync(projectNpmrc)) await copyFile(projectNpmrc, path.join(app, ".npmrc"));
+  const caFile = path.join(root, ".cache", "system-ca-bundle.pem");
+  const certEnv = existsSync(caFile) ? { NODE_EXTRA_CA_CERTS: caFile } : {};
   const result = spawnSync(process.platform === "win32" ? "npm.cmd" : "npm", ["install", "--omit=dev", "--ignore-scripts", "--no-audit", "--no-fund", "--no-package-lock"], {
     cwd: app,
     stdio: "inherit",
-    env: { ...process.env, npm_config_os: platform, npm_config_cpu: "x64", npm_config_libc: platform === "linux" ? "glibc" : "" },
+    env: { ...process.env, ...certEnv, npm_config_os: platform, npm_config_cpu: "x64", npm_config_libc: platform === "linux" ? "glibc" : "" },
     shell: process.platform === "win32",
   });
   if (result.status !== 0) throw new Error("npm install falló en el payload.");
@@ -62,6 +68,7 @@ async function installModules(app) {
   if (!existsSync(copilotDir)) throw new Error(`Falta el paquete @github/copilot-${platform}-x64 en el payload.`);
   log(`Paquete Copilot de plataforma: ${path.basename(copilotDir)}.`);
   await rm(path.join(app, "package-lock.json"), { force: true });
+  await rm(path.join(app, ".npmrc"), { force: true });
 }
 
 async function stageNode() {

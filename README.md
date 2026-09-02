@@ -43,13 +43,23 @@ Datos existentes en `data/`, `outputs/` y `knowledge-bases/` se conservan al rei
 ## Desarrollo
 
 ```bash
-npm install
+npm run setup        # instala dependencias (con reintento contra npmjs si el Artifactory corporativo devuelve 401/403)
 npm start            # arranca en http://127.0.0.1:4410 y abre el navegador
 npm run doctor       # diagnóstico: gh, git, sesión, Copilot y modelos
 npm run models       # catálogo real de modelos de la licencia
 npm run check        # sintaxis de todos los módulos
 npm test             # tests unitarios (node:test)
 ```
+
+### Dependencias en la red BBVA
+
+En un equipo corporativo `npm install` resuelve contra el Artifactory interno (`Npm_Virtual2`), que responde `403 Forbidden` (realm `Artifactory Realm`) cuando no hay credenciales válidas para ese registro. `npm run setup` reproduce el criterio del instalador de FENIX:
+
+1. Prueba `npm install` con la configuración del usuario.
+2. Si el registro rechaza las descargas por autenticación, exporta las CA raíz e intermedias del almacén de certificados de Windows a `.cache/system-ca-bundle.pem` y reintenta contra `https://registry.npmjs.org/` con `NODE_EXTRA_CA_CERTS` y un `.npmrc` de proyecto (ignorado por git) que fija el registro, el `cafile` y desactiva la auditoría. El `.npmrc` del usuario no se modifica.
+3. Si npmjs también está bloqueado, hacen falta credenciales del Artifactory (`npm login --registry http://cibartifactory.igrupobbva:8084/artifactory/api/npm/Npm_Virtual2/`) o construir el instalador desde un equipo con salida a Internet e instalar el `.exe` resultante, que ya lleva todas las dependencias.
+
+`npm run build:dist` reutiliza ese mismo `.npmrc` y el paquete de certificados al instalar las dependencias del payload.
 
 Variables útiles: `DORIATH_HOME` (carpeta de datos), `DORIATH_PORT`, `DORIATH_GITHUB_HOST`, `DORIATH_VERBOSE=1`.
 
