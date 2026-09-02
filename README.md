@@ -80,6 +80,7 @@ npm run build        # ambos
 - `build:dist` copia por defecto el `node_modules` ya probado del checkout (como FENIX) y retira las dependencias de desarrollo con `npm prune --omit=dev`; con `--fresh`, o al construir desde otra plataforma, reinstala desde el registro con el mismo reintento que `npm run setup`. En ambos casos comprueba que el runtime nativo de Copilot (`@github/copilot-win32-x64`) está en el payload y, si npm no lo seleccionó, lo instala explícitamente. También descarga el Node portable indicado en `scripts/launcher/tools.json`.
 - `build:exe` empaqueta `scripts/launcher/launcher.cjs` y `setup.cjs` con esbuild, genera los blobs SEA e inyecta cada uno con `postject` en una copia de `node.exe`. El instalador lleva `dist/payload.zip` como asset embebido.
 - Los ejecutables no van firmados; firma Authenticode aparte si la política lo exige. Con `--platform linux` se generan binarios Linux para validar la mecánica.
+- **Espacio en disco**: el build necesita unos 3 GB libres (payload ~600 MB, instalador ~750 MB entre zip y exe, más la caché de npm con el runtime de Copilot, ~300 MB). Los scripts lo comprueban antes de empezar y retiran los intermedios al terminar. Si la unidad del repositorio va justa, construye en otra con `DORIATH_DIST=D:\doriath-dist npm run build`. Con el disco lleno, npm descarta en silencio el runtime de Copilot por ser una dependencia opcional.
 
 ## Estructura del código
 

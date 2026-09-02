@@ -45,7 +45,11 @@ function runNpm(extraArgs = [], extraEnv = {}) {
   const result = spawnSync(npm, npmArgs, { cwd: root, stdio: ["inherit", "pipe", "pipe"], env: { ...process.env, ...extraEnv }, shell: process.platform === "win32", encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
   process.stdout.write(result.stdout || "");
   process.stderr.write(result.stderr || "");
-  return { ok: result.status === 0, output: `${result.stdout || ""}\n${result.stderr || ""}` };
+  const output = `${result.stdout || ""}\n${result.stderr || ""}`;
+  if (/ENOSPC|no space left on device/i.test(output)) {
+    log("El disco está lleno (ENOSPC). npm descarta en silencio los paquetes opcionales que no puede extraer, como el runtime de Copilot (~300 MB). Libera espacio, limpia la caché (npm cache clean --force) y vuelve a ejecutar.");
+  }
+  return { ok: result.status === 0, output };
 }
 
 /** Exporta las CA raíz e intermedias del almacén de Windows a un PEM (NODE_EXTRA_CA_CERTS / cafile). */

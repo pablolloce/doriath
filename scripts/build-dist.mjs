@@ -21,7 +21,8 @@ import { extractZip } from "./launcher/zip.cjs";
 const require = createRequire(import.meta.url);
 const tools = require("./launcher/tools.json");
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const dist = path.join(root, "dist");
+// DORIATH_DIST permite construir en otra unidad con más espacio (p. ej. DORIATH_DIST=D:\\doriath-dist).
+const dist = process.env.DORIATH_DIST ? path.resolve(process.env.DORIATH_DIST) : path.join(root, "dist");
 const target = path.join(dist, "Doriath");
 const cache = path.join(root, ".cache");
 const args = process.argv.slice(2);
@@ -144,7 +145,31 @@ async function stageScaffold() {
   await writeFile(path.join(target, "BUILD.json"), JSON.stringify({ product: "Doriath", version: pkg.version, platform, commit, builtAt: new Date().toISOString(), node: tools.node.version }, null, 2));
 }
 
+/**
+ * El payload ocupa ~600 MB y el instalador otros ~750 MB (zip + exe); npm además cachea el runtime
+ * de Copilot (~300 MB). Sin espacio, npm descarta el paquete de plataforma en silencio por ser
+ * opcional, así que se comprueba antes de empezar.
+ */
+export async function ensureFreeSpace(directory, requiredBytes, label) {
+  const { statfs } = await import("node:fs/promises");
+  let probe = directory;
+  while (!existsSync(probe) && path.dirname(probe) !== probe) probe = path.dirname(probe);
+  try {
+    const info = await statfs(probe);
+    const free = Number(info.bavail) * Number(info.bsize);
+    const gb = (value) => (value / (1024 ** 3)).toFixed(1);
+    if (free < requiredBytes) {
+      throw new Error(`Espacio insuficiente en ${probe}: ${gb(free)} GB libres y ${label} necesita al menos ${gb(requiredBytes)} GB. Libera espacio (npm cache clean --force, borrar dist/) o construye en otra unidad con DORIATH_DIST=<carpeta>.`);
+    }
+    log(`Espacio libre en ${probe}: ${gb(free)} GB.`);
+  } catch (error) {
+    if (/Espacio insuficiente/.test(error.message)) throw error;
+    log(`No se pudo comprobar el espacio libre (${error.message}); se continúa.`);
+  }
+}
+
 async function main() {
+  if (!args.includes("--allow-low-space")) await ensureFreeSpace(dist, 2.5 * 1024 ** 3, "build:dist");
   log(`Limpiando ${dist}…`);
   await rm(dist, { recursive: true, force: true });
   await mkdir(target, { recursive: true });
@@ -167,7 +192,9 @@ async function folderSize(dir) {
   return total;
 }
 
-main().catch((error) => {
-  console.error(`[build-dist] ${error.message}`);
-  process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(`[build-dist] ${error.message}`);
+    process.exit(1);
+  });
+}

@@ -14,10 +14,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { createRequire } from "node:module";
+import { ensureFreeSpace } from "./build-dist.mjs";
 
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const dist = path.join(root, "dist");
+const dist = process.env.DORIATH_DIST ? path.resolve(process.env.DORIATH_DIST) : path.join(root, "dist");
 const target = path.join(dist, "Doriath");
 const build = path.join(dist, "build");
 const args = process.argv.slice(2);
@@ -89,6 +90,7 @@ async function makeSea({ name, entry, output, assets }) {
 
 async function main() {
   if (!existsSync(path.join(target, "app", "src", "cli.mjs"))) throw new Error("Ejecuta primero build-dist.");
+  if (!args.includes("--allow-low-space")) await ensureFreeSpace(dist, 1.5 * 1024 ** 3, "build:exe");
   await rm(build, { recursive: true, force: true });
   // 1. Launcher dentro del payload.
   await makeSea({ name: "launcher", entry: path.join(root, "scripts", "launcher", "launcher.cjs"), output: path.join(target, `Doriath${exe}`) });
@@ -99,7 +101,13 @@ async function main() {
   log(`payload.zip: ${(size / (1024 * 1024)).toFixed(0)} MB.`);
   // 3. Instalador con el payload embebido.
   await makeSea({ name: "setup", entry: path.join(root, "scripts", "launcher", "setup.cjs"), output: path.join(dist, `Doriath-Setup${exe}`), assets: { "payload.zip": payload } });
-  log("Listo: dist/Doriath-Setup" + exe + " y dist/Doriath/Doriath" + exe + ".");
+  // Los intermedios (payload.zip y los blobs SEA) duplican cientos de MB; se retiran salvo que se pidan.
+  if (!args.includes("--keep-artifacts")) {
+    await rm(payload, { force: true });
+    await rm(build, { recursive: true, force: true });
+    log("Intermedios retirados (payload.zip y blobs SEA); usa --keep-artifacts para conservarlos.");
+  }
+  log(`Listo: ${path.join(dist, `Doriath-Setup${exe}`)} y ${path.join(target, `Doriath${exe}`)}.`);
 }
 
 main().catch((error) => {
