@@ -21,13 +21,20 @@ export async function pickFolder({ title = "Selecciona una carpeta", initial = "
       "$owner.TopMost = $true",
       "if ($d.ShowDialog($owner) -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $d.SelectedPath }",
     ].filter(Boolean).join("; ");
-    const result = await runCommand("powershell.exe", ["-NoProfile", "-STA", "-NonInteractive", "-Command", script], { timeoutMs: 10 * 60 * 1000 });
-    if (!result.ok) return { supported: true, path: "", error: result.error };
+    const result = await runCommand("powershell.exe", ["-NoProfile", "-STA", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", script], { timeoutMs: 10 * 60 * 1000 });
+    // Fallo real al invocar PowerShell (política de ejecución, Modo de lenguaje restringido que
+    // bloquea Add-Type, etc.): se señala "no soportado" para que la UI recurra al explorador de
+    // respaldo. Solo cuando el proceso termina bien y no hay ruta se trata de una cancelación del
+    // usuario (no hay que recurrir a nada, simplemente no se eligió carpeta).
+    if (!result.ok) return { supported: false, path: "", error: result.error };
     return { supported: true, path: result.stdout.trim() };
   }
   if (process.platform === "darwin") {
     const result = await runCommand("osascript", ["-e", `POSIX path of (choose folder with prompt "${title.replace(/"/g, '\\"')}")`], { timeoutMs: 10 * 60 * 1000 });
-    return { supported: true, path: result.ok ? result.stdout.trim().replace(/\/$/, "") : "" };
+    if (result.ok) return { supported: true, path: result.stdout.trim().replace(/\/$/, "") };
+    // AppleScript representa cancelar como un error (-128): sigue siendo un diálogo que funcionó.
+    if (/User canceled|\(-128\)/.test(`${result.stderr || ""} ${result.error || ""}`)) return { supported: true, path: "" };
+    return { supported: false, path: "", error: result.error };
   }
   for (const [tool, args] of [["zenity", ["--file-selection", "--directory", `--title=${title}`]], ["kdialog", ["--getexistingdirectory", initial || os.homedir()]]]) {
     const probe = await runCommand("which", [tool], { timeoutMs: 3000 });

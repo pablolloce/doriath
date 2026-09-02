@@ -1,9 +1,11 @@
+import path from "node:path";
 import { HttpError } from "../server.mjs";
-import { getSource } from "../knowledge/sources.mjs";
+import { getSource, listSources } from "../knowledge/sources.mjs";
 import { getSpecStore } from "../kdd/store.mjs";
 import { scanForRepositories, listRegisteredRepositories, registerRepositories, unregisterRepository, refreshRepositories, inspectRepository } from "../work/repos.mjs";
 import { workTree, createRun, loadRun, listRuns, updateRun, executeTask, cancelTask, refreshTaskDiff, commitTask, discardTaskChanges, pushRun, openPullRequest, runRepositoryCommand, markTaskStatus, repositoryLog, suggestRepositoryAssignments } from "../work/runs.mjs";
-import { pathExists } from "../util/fs.mjs";
+import { pathExists, isPathWithin } from "../util/fs.mjs";
+import { getConfig } from "../config.mjs";
 
 export function registerWorkRoutes(router) {
   router.get("/api/sources/:id/work", async ({ params }) => {
@@ -27,9 +29,22 @@ export function registerWorkRoutes(router) {
   router.post("/api/sources/:id/repositories", async ({ params, body }) => {
     const source = await getSource(params.id);
     const repositories = Array.isArray(body?.repositories) ? body.repositories : [];
+    // Un repositorio no puede vivir en la carpeta de salidas del asistente ni dentro de (o
+    // conteniendo a) una base de conocimiento: mezclarlos ensucia el repo con documentos generados o
+    // specs que no le pertenecen.
+    const outputs = getConfig().paths.outputs;
+    const sources = await listSources();
     const inspected = [];
     for (const repo of repositories) {
       if (!repo?.path || !(await pathExists(repo.path))) continue;
+      const resolved = path.resolve(repo.path);
+      if (outputs && (isPathWithin(resolved, outputs) || isPathWithin(outputs, resolved))) {
+        throw new HttpError(400, `${repo.path} coincide con la carpeta de salidas. Un repositorio no puede vivir en la misma ruta donde el asistente genera documentos.`);
+      }
+      const overlapping = sources.find((candidate) => isPathWithin(resolved, candidate.path) || isPathWithin(candidate.path, resolved));
+      if (overlapping) {
+        throw new HttpError(400, `${repo.path} coincide con la base de conocimiento "${overlapping.name}". Un repositorio no puede vivir dentro de una base de conocimiento, ni al revés.`);
+      }
       inspected.push({ ...(await inspectRepository(repo.path)), ...(repo.id ? { id: repo.id } : {}) });
     }
     return { repositories: await registerRepositories(source.path, inspected) };

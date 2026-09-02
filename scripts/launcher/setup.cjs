@@ -39,7 +39,7 @@ function ask(question, fallback) {
 
 /** Genera un .ico a partir del isotipo (System.Drawing), como create-shortcut.ps1 de FENIX. */
 function createIcon(root) {
-  const png = path.join(root, "app", "public", "brand", "nfq-isotype.png");
+  const png = path.join(root, "app", "public", "brand", "doriath-icon.png");
   const ico = path.join(root, "data", "doriath.ico");
   if (!isWindows || !fs.existsSync(png)) return "";
   fs.mkdirSync(path.dirname(ico), { recursive: true });

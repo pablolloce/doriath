@@ -38,6 +38,19 @@ export async function writeText(file, text) {
   await writeFile(file, text, "utf8");
 }
 
+/**
+ * true si `child` es la misma carpeta que `parent` o está dentro de ella. Comparación insensible a
+ * mayúsculas (como el sistema de ficheros de Windows, la plataforma de destino de Doriath).
+ */
+export function isPathWithin(child, parent) {
+  const a = path.resolve(String(child || "")).toLowerCase();
+  const b = path.resolve(String(parent || "")).toLowerCase();
+  if (!a || !b) return false;
+  if (a === b) return true;
+  const rel = path.relative(b, a);
+  return rel !== "" && !rel.startsWith("..") && !path.isAbsolute(rel);
+}
+
 export async function listFiles(dir, { extensions, recursive = false } = {}) {
   const out = [];
   let entries;

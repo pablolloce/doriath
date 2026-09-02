@@ -1,12 +1,13 @@
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { readdir } from "node:fs/promises";
-import { readJson, writeJson, pathExists, ensureDir, writeText, slugify } from "../util/fs.mjs";
+import { readJson, writeJson, pathExists, ensureDir, writeText, slugify, isPathWithin } from "../util/fs.mjs";
 import { paths } from "../paths.mjs";
 import { SOURCE_META_FILE, allLayerFolders, documentsDir } from "../kdd/layout.mjs";
 import { getSpecStore, dropSpecStore } from "../kdd/store.mjs";
 import { buildGraph, graphStats } from "../kdd/graph.mjs";
 import { getConfig } from "../config.mjs";
+import { listRegisteredRepositories } from "../work/repos.mjs";
 
 /**
  * Registro de bases de conocimiento locales (`sources.json` en la carpeta de datos). Cada entrada
@@ -28,6 +29,27 @@ export async function readSourceMeta(dir) {
 
 async function writeSourceMeta(dir, meta) {
   await writeJson(path.join(dir, SOURCE_META_FILE), meta);
+}
+
+/**
+ * Una base de conocimiento no puede vivir dentro de la carpeta de salidas del asistente ni dentro de
+ * (o conteniendo a) un repositorio ya registrado: mezclarlos ensucia el repo con specs y el asistente
+ * podría sobrescribir documentos de la base. Se comprueba en ambas direcciones.
+ */
+async function assertSourcePathIsSeparate(dir) {
+  const outputs = getConfig().paths.outputs;
+  if (outputs && isPathWithin(dir, outputs)) {
+    throw Object.assign(new Error(`${dir} está dentro de la carpeta de salidas (${outputs}). Las bases de conocimiento y los documentos generados deben ir en carpetas separadas.`), { status: 400 });
+  }
+  const sources = await readRegistry();
+  for (const source of sources) {
+    const repositories = await listRegisteredRepositories(source.path).catch(() => []);
+    for (const repo of repositories) {
+      if (isPathWithin(dir, repo.path) || isPathWithin(repo.path, dir)) {
+        throw Object.assign(new Error(`${dir} coincide con el repositorio "${repo.name}" (${repo.path}). Una base de conocimiento no puede vivir dentro de un repositorio, ni al revés.`), { status: 400 });
+      }
+    }
+  }
 }
 
 function nextSourceId(sources) {
@@ -99,6 +121,7 @@ export async function addExistingSource(dir, { name, description } = {}) {
   const sources = await readRegistry();
   const duplicate = sources.find((item) => path.resolve(item.path).toLowerCase() === resolved.toLowerCase());
   if (duplicate) return { source: duplicate, created: false };
+  await assertSourcePathIsSeparate(resolved);
   const meta = await readSourceMeta(resolved);
   const isKdd = await looksLikeKddFolder(resolved);
   const sourceId = meta?.sourceId || nextSourceId(sources);
@@ -125,6 +148,7 @@ export async function createSource({ name, description = "", parentDir, sourceId
   if (!cleanName) throw Object.assign(new Error("Indica un nombre para la base de conocimiento."), { status: 400 });
   const base = parentDir ? path.resolve(parentDir) : getConfig().paths.knowledgeBases;
   const dir = path.join(base, slugify(cleanName, 40));
+  await assertSourcePathIsSeparate(dir);
   if (await pathExists(dir) && (await readdir(dir)).length) {
     throw Object.assign(new Error(`La carpeta ${dir} ya existe y no está vacía.`), { status: 409 });
   }

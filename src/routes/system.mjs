@@ -5,8 +5,38 @@ import { getAuthStatus, startGitHubLogin, logoutGitHub, getAuthenticatedUser, in
 import { copilotStatus, getModelCatalog, invalidateModelCatalog } from "../ai/copilot.mjs";
 import { pickFolder, listDirectory } from "../util/dialog.mjs";
 import { listSources } from "../knowledge/sources.mjs";
+import { listRegisteredRepositories } from "../work/repos.mjs";
 import { runCommand } from "../util/process.mjs";
 import { openInBrowser } from "../util/browser.mjs";
+import { isPathWithin } from "../util/fs.mjs";
+
+/**
+ * La carpeta de salidas (donde el asistente deja los documentos que genera) no puede coincidir con
+ * ninguna base de conocimiento ni con ningún repositorio registrado, ni contenerlos: son carpetas que
+ * Doriath no debe mezclar con lo que el usuario ya tiene versionado o catalogado.
+ */
+async function assertOutputPathsSeparate(patchPaths) {
+  if (!patchPaths) return;
+  const config = getConfig();
+  const outputs = String(patchPaths.outputs ?? config.paths.outputs ?? "").trim();
+  const knowledgeBases = String(patchPaths.knowledgeBases ?? config.paths.knowledgeBases ?? "").trim();
+  if (outputs && knowledgeBases && (isPathWithin(outputs, knowledgeBases) || isPathWithin(knowledgeBases, outputs))) {
+    throw new HttpError(400, "La carpeta de salidas y la carpeta de bases de conocimiento no pueden coincidir ni contenerse.");
+  }
+  if (!outputs) return;
+  const sources = await listSources();
+  for (const source of sources) {
+    if (isPathWithin(outputs, source.path) || isPathWithin(source.path, outputs)) {
+      throw new HttpError(400, `La carpeta de salidas coincide con la base de conocimiento "${source.name}" (${source.path}). Los documentos generados deben ir en una ruta aparte.`);
+    }
+    const repositories = await listRegisteredRepositories(source.path).catch(() => []);
+    for (const repo of repositories) {
+      if (isPathWithin(outputs, repo.path) || isPathWithin(repo.path, outputs)) {
+        throw new HttpError(400, `La carpeta de salidas coincide con el repositorio "${repo.name}" (${repo.path}). Los documentos generados deben ir en una ruta aparte.`);
+      }
+    }
+  }
+}
 
 export function registerSystemRoutes(router) {
   router.get("/api/health", async () => ({ ok: true, product: "Doriath", version: getConfig().product.version, pid: process.pid }));
@@ -56,6 +86,7 @@ export function registerSystemRoutes(router) {
   router.get("/api/config", async () => publicConfig());
 
   router.put("/api/config", async ({ body }) => {
+    await assertOutputPathsSeparate(body?.paths);
     const next = await updateConfig(body || {});
     invalidateModelCatalog();
     invalidateAuthCache();

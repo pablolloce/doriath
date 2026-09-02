@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
 import os from "node:os";
-import { mkdtemp } from "node:fs/promises";
+import { mkdtemp, mkdir } from "node:fs/promises";
 
 process.env.DORIATH_HOME = await mkdtemp(path.join(os.tmpdir(), "doriath-test-home-"));
 const { loadConfig } = await import("../src/config.mjs");
@@ -14,6 +14,9 @@ const { buildGraph, impact, validateGraph, activationBundle, detectCycles } = aw
 const { buildSpecIndex, tokenize } = await import("../src/kdd/search.mjs");
 const { getSpecStore } = await import("../src/kdd/store.mjs");
 const { createSource, addExistingSource, listSources } = await import("../src/knowledge/sources.mjs");
+const { isPathWithin } = await import("../src/util/fs.mjs");
+const { updateConfig } = await import("../src/config.mjs");
+const { registerRepositories } = await import("../src/work/repos.mjs");
 
 test("ids: parse, build, allocate", () => {
   assert.deepEqual(parseSpecId("DOM-REG-S001-002"), { id: "DOM-REG-S001-002", layer: "domain", prefix: "DOM", sourceId: "S001", domain: "REG", number: 2, numberText: "002" });
@@ -96,4 +99,28 @@ test("store and sources: create, persist, protect validated specs", async () => 
   const again = await addExistingSource(source.path);
   assert.equal(again.created, false);
   assert.equal((await listSources()).length, 1);
+});
+
+test("util/fs: isPathWithin detecta contención insensible a mayúsculas", () => {
+  assert.equal(isPathWithin("/data/repos/foo", "/data/repos"), true);
+  assert.equal(isPathWithin("/data/repos", "/data/repos"), true);
+  assert.equal(isPathWithin("/DATA/Repos/Foo", "/data/repos"), true, "insensible a mayúsculas (rutas de Windows)");
+  assert.equal(isPathWithin("/data/reposaster", "/data/repos"), false, "prefijo de texto sin ser subcarpeta real");
+  assert.equal(isPathWithin("/data", "/data/repos"), false);
+  assert.equal(isPathWithin("/other/place", "/data/repos"), false);
+});
+
+test("sources: una base de conocimiento no puede vivir en la carpeta de salidas ni dentro de un repositorio", async () => {
+  const parent = await mkdtemp(path.join(os.tmpdir(), "doriath-kb-guard-"));
+  const outputs = path.join(parent, "outputs");
+  await updateConfig({ paths: { outputs } });
+  await assert.rejects(createSource({ name: "Choca con salidas", parentDir: outputs }), /carpeta de salidas/);
+
+  const projectsRoot = await mkdtemp(path.join(os.tmpdir(), "doriath-repos-"));
+  const otherKb = await createSource({ name: "Base con repos", parentDir: projectsRoot });
+  const repoDir = path.join(projectsRoot, "mi-repo");
+  await mkdir(repoDir, { recursive: true });
+  await registerRepositories(otherKb.path, [{ path: repoDir, name: "mi-repo" }]);
+  await assert.rejects(addExistingSource(repoDir), /repositorio/);
+  await assert.rejects(createSource({ name: "Dentro del repo", parentDir: repoDir }), /repositorio/);
 });

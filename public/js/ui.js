@@ -119,20 +119,34 @@ export function fmtBytes(size) {
 }
 
 /* ---------- Modales ---------- */
-let overlayStack = 0;
+// Un modal puede abrir otro encima (por ejemplo, el selector de carpetas desde "Gestionar bases de
+// conocimiento" o desde "Ajustes"). En vez de sustituir el contenido del overlay -y perder el modal de
+// debajo, con el formulario a medio rellenar-, el de abajo se aparta (sin destruirlo) y vuelve a
+// mostrarse tal cual estaba en cuanto se cierra el de arriba. Solo cuando se cierra el último de la
+// pila se oculta el overlay.
+const modalStack = [];
 
 export function openModal(content, { wide = false, onClose } = {}) {
   const overlay = document.getElementById("overlay");
   const modal = h("div", { class: `modal${wide ? " modal--wide" : ""}` }, content);
   overlay.hidden = false;
   overlay.replaceChildren(modal);
-  overlayStack += 1;
+  modalStack.push(modal);
   const close = () => {
-    overlayStack = Math.max(0, overlayStack - 1);
-    overlay.hidden = true;
-    overlay.replaceChildren();
+    const index = modalStack.indexOf(modal);
+    if (index === -1) return;
+    modalStack.splice(index, 1);
+    const previous = modalStack.at(-1);
+    if (previous) {
+      overlay.replaceChildren(previous);
+      overlay.onclick = (event) => { if (event.target === overlay) previous.__close(); };
+    } else {
+      overlay.hidden = true;
+      overlay.replaceChildren();
+    }
     onClose?.();
   };
+  modal.__close = close;
   overlay.onclick = (event) => { if (event.target === overlay) close(); };
   return { close, modal };
 }
