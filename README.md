@@ -111,6 +111,10 @@ scripts/                               build, launcher e instalador
 docs/                                  FENIX-core.md, kdd-studio-funcionamiento.md, identidad BBVA, módulos de referencia de FENIX
 ```
 
+## Maqueta interactiva
+
+`docs/demo/doriath-demo.html` es una maqueta autónoma del frontal (un solo fichero, sin servidor ni dependencias): ábrela con doble clic en cualquier navegador. Simula la puerta de login, el menú de bases de conocimiento, los tres módulos (importar y analizar documentos, catálogo y grafo de specs, asistente con generación de ficheros, iniciativa → repositorios → ejecución con diff y commit) y los ajustes, con datos ficticios en memoria.
+
 ## Identidad visual
 
 La interfaz y los documentos generados siguen `docs/identidad-bbva`: paleta (Electric Blue, Serene, Sand, Midnight y acentos), tipografías Source Serif 4 y Lato (empaquetadas en `public/fonts`), cajas bentō con radios 16/24, retícula de 8 px, logo BBVA primario y NFQ como autoría. Los logos con transparencia de `public/brand` se derivan de los originales de la guía.
