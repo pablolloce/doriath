@@ -165,6 +165,17 @@ code,pre{font-family:var(--font-mono);font-size:13px} [hidden]{display:none!impo
 .learned__tick{color:var(--bbva-electric-blue);font-weight:700}
 .answer-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .avatar-sm{width:26px;height:26px;border-radius:50%;background:var(--bbva-serene-blue);color:var(--bbva-electric-blue);display:grid;place-items:center;font-weight:700;font-size:11px;flex-shrink:0}
+.kb-picker__label{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--bbva-gray-5);margin-bottom:8px}
+.kb-picker{display:flex;gap:10px;flex-wrap:wrap}
+.kb-chip{display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;font-family:inherit;padding:12px 16px;min-width:190px;border-radius:var(--radius-md);border:1px solid var(--bbva-gray-2);background:var(--bbva-white);color:var(--bbva-midnight);cursor:pointer;transition:border-color 120ms ease,transform 120ms ease}
+.kb-chip:hover{border-color:var(--bbva-serene-blue);transform:translateY(-1px)}
+.kb-chip.is-active{background:var(--bbva-electric-blue);border-color:var(--bbva-electric-blue);color:var(--bbva-sand)}
+.kb-chip.is-missing{opacity:.6;cursor:not-allowed}
+.kb-chip__name{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.kb-chip__meta{font-size:12px;opacity:.75}
+.kb-chip__dot{width:8px;height:8px;border-radius:50%;background:var(--bbva-lime);flex-shrink:0}
+.kb-chip.is-missing .kb-chip__dot{background:var(--bbva-mandarin)}
+.kb-chip--add{border-style:dashed;align-items:center;justify-content:center;min-width:150px;color:var(--bbva-gray-5);font-weight:700}
 </style>
 </head>
 <body>
@@ -372,8 +383,9 @@ function md(text) {
 // Cada rol ve su propio menú. El usuario no ve nada de KDD: ni specs, ni repositorios.
 const ROUTES = {
   user: [
-    { id: "knowledge", label: "Your Knowledge Bases", hint: "Tus documentos y tus respuestas" },
+    { id: "knowledge", label: "My Knowledge Bases", hint: "Tus documentos y tus respuestas" },
     { id: "assistant", label: "BBVA CIB Assistant", hint: "Conversación y entregables" },
+    { id: "work", label: "Knowledge-Driven Development", hint: "Iniciativas, repositorios y cambios" },
   ],
   admin: [
     { id: "studio", label: "Knowledge Bases Studio", hint: "Specs, gobernanza y salud" },
@@ -397,8 +409,9 @@ function renderNav() {
 function setRole(role) {
   if (state.role === role) return;
   state.role = role;
-  // Al cambiar de rol se salta a la primera pantalla disponible si la actual no existe en ese rol.
-  if (!routesForRole().some((route) => route.id === state.route)) state.route = routesForRole()[0].id;
+  // Cambiar de rol lleva siempre a la pantalla propia de ese rol: es justo lo que cambia entre uno y
+  // otro, y así el salto se ve de inmediato.
+  state.route = routesForRole()[0].id;
   renderRolePicker(); renderSources(); renderSession(); render();
   toast(role === "admin" ? "Modo administrador: mantenimiento de la base de conocimiento." : "Modo usuario: importar documentos y preguntar.", "info");
 }
@@ -528,16 +541,43 @@ async function streamTools(typing, tools) {
 }
 
 /* =====================================================================================
-   01 · Your Knowledge Bases (rol usuario)
+   01 · My Knowledge Bases (rol usuario)
    Sin una sola palabra de KDD: ni specs, ni capas, ni IDs. Documentos que se suben y
    conocimiento que se puede preguntar y corregir.
    ===================================================================================== */
+/**
+ * Selector de base de conocimiento: primero eliges con cuál trabajas y después ya viene el menú de
+ * la vista. Se usa igual en las dos caras, cambiando solo lo que se cuenta de cada base.
+ */
+function kbPicker({ expert = false, label = "Elige tu base de conocimiento" } = {}) {
+  return h("div", { style: { marginBottom: "var(--space-3)" } },
+    h("p", { class: "kb-picker__label", text: label }),
+    h("div", { class: "kb-picker" },
+      ...state.sources.map((source) => h("button", {
+        class: `kb-chip${source.id === state.activeSource ? " is-active" : ""}${source.ok ? "" : " is-missing"}`,
+        onclick: () => {
+          if (!source.ok) { toast("Esa carpeta no está disponible en este equipo.", "error"); return; }
+          if (source.id === state.activeSource) return;
+          state.activeSource = source.id;
+          state.selectedSpec = null;
+          renderSources(); render();
+          toast(`Trabajando sobre ${source.name}`);
+        },
+      },
+        h("span", { class: "kb-chip__name" }, h("span", { class: "kb-chip__dot" }), source.name),
+        h("span", { class: "kb-chip__meta", text: !source.ok ? "carpeta no encontrada"
+          : expert ? `${source.sourceId} · ${source.specs} specs · ${source.docs} docs`
+            : `${source.docs} documento${source.docs === 1 ? "" : "s"} · lista para preguntar` }))),
+      h("button", { class: "kb-chip kb-chip--add", text: "+ Añadir otra", onclick: openSourcesManager })));
+}
+
 function renderUserKnowledge(container) {
-  setBreadcrumb("Your Knowledge Bases");
+  setBreadcrumb("My Knowledge Bases");
+  container.append(kbPicker({}));
   const source = activeSource();
   if (!source) {
     container.append(h("div", { class: "card card--electric" },
-      h("p", { class: "ante-title", text: "Tus bases de conocimiento" }),
+      h("p", { class: "ante-title", text: "Mis bases de conocimiento" }),
       h("h1", { text: "Empieza creando una" }),
       h("p", { class: "lead", style: { marginTop: "12px" }, text: "Una base de conocimiento es, sencillamente, todo lo que Doriath sabe sobre un tema tuyo." }),
       h("div", { class: "card__actions", style: { marginTop: "20px" } }, h("button", { class: "btn btn--accent", text: "Crear una base de conocimiento", onclick: openSourcesManager }))));
@@ -832,6 +872,7 @@ function healthScore(issues) {
 
 function renderStudio(container) {
   setBreadcrumb("Knowledge Bases Studio");
+  container.append(kbPicker({ expert: true, label: "Base de conocimiento sobre la que trabajas" }));
   const source = activeSource();
   if (!source) {
     container.append(h("div", { class: "card card--electric" }, h("p", { class: "ante-title", text: "Knowledge Bases Studio" }), h("h1", { text: "Selecciona una base de conocimiento" })));
@@ -1285,11 +1326,14 @@ function renderAssistant(container) {
   const listNode = h("div", { class: "list" }); const chatHost = h("div"); const filesNode = h("div", { class: "files-panel" }); const scopeNode = h("div", { class: "list" });
   const refreshList = () => listNode.replaceChildren(...state.assistantChats.map((c) => h("div", { class: `list-item is-clickable${c.id === state.activeChat ? " is-active" : ""}`, onclick: () => { state.activeChat = c.id; refreshList(); mountChat(); } }, h("div", { class: "list-item__main" }, h("div", { class: "list-item__title", text: c.title }), h("div", { class: "list-item__meta", text: c.updated })), h("button", { class: "btn btn--ghost btn--xs", text: "✕", title: "Eliminar", onclick: (e) => { e.stopPropagation(); state.assistantChats = state.assistantChats.filter((x) => x !== c); if (state.activeChat === c.id) state.activeChat = state.assistantChats[0]?.id; refreshList(); mountChat(); } }))));
   const refreshFiles = () => filesNode.replaceChildren(...(state.files.length ? state.files.map((f) => h("div", { class: "file-card" }, h("div", { style: { minWidth: 0 } }, h("div", { class: "file-card__name", text: f.name }), h("div", { class: "small muted", text: `${f.kind.toUpperCase()} · ${f.size} · outputs/` })), h("button", { class: "btn btn--outline btn--xs", text: "Abrir", onclick: () => toast(`Se abre ${f.name}`) }))) : [h("div", { class: "empty small", text: "Aún no hay ficheros generados." })]));
-  scopeNode.append(...state.sources.map((s) => h("label", { class: "list-item checkbox" }, h("span", { class: "list-item__main" }, h("span", { class: "list-item__title", text: s.name }), h("span", { class: "list-item__meta", text: `${s.sourceId} · ${s.specs} specs` })), h("input", { type: "checkbox", checked: s.ok, disabled: !s.ok, onchange: () => toast("Contexto actualizado; se aplicará en el siguiente mensaje.") }))));
+  scopeNode.append(...state.sources.map((s) => h("label", { class: "list-item checkbox" }, h("span", { class: "list-item__main" }, h("span", { class: "list-item__title", text: s.name }), h("span", { class: "list-item__meta", text: state.role === "admin" ? `${s.sourceId} · ${s.specs} specs` : `${s.docs} documento${s.docs === 1 ? "" : "s"}` })), h("input", { type: "checkbox", checked: s.ok, disabled: !s.ok, onchange: () => toast("Contexto actualizado; se aplicará en el siguiente mensaje.") }))));
   container.append(h("div", { class: "bento", style: { gridTemplateColumns: "280px minmax(0,1fr) 280px" } },
     h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } },
-      h("div", { class: "card card--electric" }, h("p", { class: "ante-title", text: "Asistente" }), h("h2", { text: "Conversaciones" }), h("p", { class: "small", style: { marginTop: "8px", opacity: .85 }, text: "El asistente consulta las specs de las bases de conocimiento y genera ficheros con la identidad BBVA." }), h("div", { class: "card__actions", style: { marginTop: "16px" } }, h("button", { class: "btn btn--accent", text: "Nueva conversación", onclick: () => { const c = { id: `c${Date.now()}`, title: "Nueva conversación", updated: "ahora", messages: [] }; state.assistantChats.unshift(c); state.activeChat = c.id; refreshList(); mountChat(); } }))),
-      h("div", { class: "card" }, h("p", { class: "ante-title", text: "Historial" }), listNode)),
+      h("div", { class: "card" },
+        h("div", { class: "card__header", style: { marginBottom: "12px", alignItems: "center" } },
+          h("p", { class: "ante-title", style: { marginBottom: 0 }, text: "Conversaciones" }),
+          h("button", { class: "btn btn--outline btn--xs", text: "+ Nueva", onclick: () => { const c = { id: `c${Date.now()}`, title: "Nueva conversación", updated: "ahora", messages: [] }; state.assistantChats.unshift(c); state.activeChat = c.id; refreshList(); mountChat(); } })),
+        listNode)),
     chatHost,
     h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } }, h("div", { class: "card" }, h("p", { class: "ante-title", text: "Bases de conocimiento en contexto" }), scopeNode), h("div", { class: "card" }, h("p", { class: "ante-title", text: "Ficheros generados" }), filesNode), h("div", { class: "card card--serene" }, h("p", { class: "ante-title", text: "Formatos" }), h("div", { class: "chips" }, ["docx", "xlsx", "pptx", "html", "md", "csv", "json", "código"].map((f) => h("span", { class: "chip", text: f })))))));
   refreshList(); refreshFiles();
