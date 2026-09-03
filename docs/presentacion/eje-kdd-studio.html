@@ -64,9 +64,9 @@ body{
 .fbtn .sw{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
 .fbtn[data-f="all"] .sw{background:var(--g4)}
 .fbtn[data-f="tuyo"] .sw{background:var(--lime)}
-.fbtn[data-f="doriath"] .sw{background:var(--electric)}
+.fbtn[data-f="kdd"] .sw{background:var(--electric)}
 .fbtn[data-f="humano"] .sw{background:var(--mandarin)}
-.fbtn[data-f="local"] .sw{background:var(--purple)}
+.fbtn[data-f="perfil"] .sw{background:var(--purple)}
 .fbtn[data-f="abierto"] .sw{border:1.6px dashed var(--mute2);background:transparent;border-radius:2px}
 
 /* ── cuerpo ── */
@@ -95,6 +95,10 @@ svg.dg{width:100%;height:100%;display:block;font-family:var(--body)}
 .dg .wire-bus{stroke:var(--serene);stroke-width:1.7;fill:none;stroke-linecap:round}
 .dg .wire-d{stroke:var(--mute2);stroke-width:1.7;fill:none;stroke-dasharray:8 7;stroke-linecap:round}
 .dg .hmark{stroke:var(--mandarin);stroke-width:4.4;stroke-linecap:round}
+.dg .pmark{stroke:var(--purple);stroke-width:4.4;stroke-linecap:round}
+.dg .pill-p{fill:var(--white);stroke:var(--purple);stroke-width:2.2}
+.dg .pnum{font-size:9.5px;font-weight:700;fill:var(--purple-ink);font-family:var(--mono)}
+.dg .note-p{font-size:10px;fill:var(--purple-ink);font-weight:700}
 .dg .underline{stroke:var(--lime);stroke-width:3.2;stroke-linecap:round}
 .dg .note{font-size:10.5px;fill:var(--mute);font-weight:400}
 .dg .note-b{font-size:10.5px;fill:var(--mute);font-weight:700}
@@ -116,9 +120,9 @@ svg.dg{width:100%;height:100%;display:block;font-family:var(--body)}
 
 .dg .dimmable{transition:opacity .25s}
 svg.dg[data-filter="tuyo"]    .dimmable:not(.s-tuyo){opacity:.08}
-svg.dg[data-filter="doriath"] .dimmable:not(.s-doriath){opacity:.08}
+svg.dg[data-filter="kdd"] .dimmable:not(.s-kdd){opacity:.08}
 svg.dg[data-filter="humano"]  .dimmable:not(.s-humano){opacity:.08}
-svg.dg[data-filter="local"]   .dimmable:not(.s-local){opacity:.08}
+svg.dg[data-filter="perfil"]  .dimmable:not(.s-perfil){opacity:.08}
 svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
 
 /* ── panel ── */
@@ -134,9 +138,9 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
 .dp-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .tag{font-size:10px;font-weight:700;letter-spacing:.05em;padding:4px 10px;border-radius:999px;white-space:nowrap;text-transform:uppercase}
 .tag.tuyo{background:rgba(136,231,131,.34);color:var(--lime-ink)}
-.tag.doriath{background:rgba(0,19,145,.09);color:var(--electric)}
+.tag.kdd{background:rgba(0,19,145,.09);color:var(--electric)}
 .tag.humano{background:rgba(255,181,107,.36);color:var(--mandarin-ink)}
-.tag.local{background:rgba(150,148,255,.28);color:var(--purple-ink)}
+.tag.perfil{background:rgba(150,148,255,.28);color:var(--purple-ink)}
 .tag.abierto{background:rgba(0,19,145,.06);color:var(--ink2)}
 .dp-d{font-size:14px;color:var(--ink2);margin-top:14px;line-height:1.65;max-width:62ch}
 .dp-d b{color:var(--ink);font-weight:700}
@@ -154,7 +158,7 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
   background:var(--electric)}
 .dp-block.tuyo li::before{background:var(--lime)}
 .dp-block.humano li::before{background:var(--mandarin)}
-.dp-block.local li::before{background:var(--purple)}
+.dp-block.perfil li::before{background:var(--purple)}
 .dp-block.stop li::before{background:var(--canary)}
 
 .dp-call{margin-top:16px;padding:13px 15px;border-radius:12px;font-size:13px;line-height:1.6;
@@ -184,7 +188,7 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
 .lg .i-dash{width:22px;height:0;border-top:2px dashed var(--mute2)}
 .lg .i-can{width:13px;height:13px;border-radius:4px;background:rgba(255,231,97,.55);border:1.5px solid var(--canary)}
 .lg .i-aqua{width:13px;height:13px;border-radius:4px;background:rgba(139,225,233,.5);border:1.5px solid var(--aqua)}
-.lg .i-serene{width:22px;height:3.4px;border-radius:2px;background:var(--serene)}
+.lg .i-purple{width:4px;height:15px;border-radius:2px;background:var(--purple)}
 
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -204,9 +208,9 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
   <span class="lb">Resaltar</span>
   <button class="fbtn on" data-f="all"><span class="sw"></span>Todo</button>
   <button class="fbtn" data-f="tuyo"><span class="sw"></span>Lo que aporta tu equipo</button>
-  <button class="fbtn" data-f="doriath"><span class="sw"></span>Lo que fija KDD Studio</button>
+  <button class="fbtn" data-f="kdd"><span class="sw"></span>Lo que fija KDD Studio</button>
   <button class="fbtn" data-f="humano"><span class="sw"></span>Donde decides tú</button>
-  <button class="fbtn" data-f="local"><span class="sw"></span>No sale de tu equipo</button>
+  <button class="fbtn" data-f="perfil"><span class="sw"></span>Quién puede qué</button>
   <button class="fbtn" data-f="abierto"><span class="sw"></span>Lo que crece</button>
 </div>
 <div class="main">
@@ -240,37 +244,37 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
       <line class="sep" x1="1500" y1="14" x2="1500" y2="600"/>
 
       <!-- ══════════ CABECERAS ══════════ -->
-      <g class="colgroup dimmable s-tuyo s-local" data-key="kb">
+      <g class="colgroup dimmable s-tuyo" data-key="kb">
         <rect class="hitbox" x="30" y="14" width="264" height="82"/>
         <text class="colhead" x="162" y="42" text-anchor="middle">KB</text>
         <line class="underline" x1="126" y1="53" x2="198" y2="53"/>
         <text class="colrole" x="162" y="80" text-anchor="middle">Lo que sabe la IA</text>
       </g>
-      <g class="colgroup dimmable s-doriath s-humano" data-key="manifest">
+      <g class="colgroup dimmable s-kdd s-humano" data-key="manifest">
         <rect class="hitbox" x="308" y="14" width="324" height="82"/>
         <text class="colhead" x="470" y="42" text-anchor="middle">MANIFEST</text>
         <text class="colsub" x="470" y="59" text-anchor="middle">LAS OPCIONES DE KDD STUDIO</text>
         <text class="colrole" x="470" y="80" text-anchor="middle">Por dónde entras</text>
       </g>
-      <g class="colgroup dimmable s-doriath" data-key="agents">
+      <g class="colgroup dimmable s-kdd" data-key="agents">
         <rect class="hitbox" x="648" y="14" width="344" height="82"/>
         <text class="colhead" x="820" y="42" text-anchor="middle">AGENTS</text>
         <text class="colsub" x="820" y="59" text-anchor="middle">LAS PERSONALIDADES DE LA IA</text>
         <text class="colrole" x="820" y="80" text-anchor="middle">Con quién hablas</text>
       </g>
-      <g class="colgroup dimmable s-doriath" data-key="skills">
+      <g class="colgroup dimmable s-kdd" data-key="skills">
         <rect class="hitbox" x="1008" y="14" width="274" height="82"/>
         <text class="colhead" x="1145" y="42" text-anchor="middle">SKILLS</text>
         <text class="colsub" x="1145" y="59" text-anchor="middle">QUÉ ES CAPAZ DE HACER LA IA</text>
         <text class="colrole" x="1145" y="80" text-anchor="middle">22 herramientas · 4 tipos</text>
       </g>
-      <g class="colgroup dimmable s-doriath" data-key="harness">
+      <g class="colgroup dimmable s-kdd" data-key="harness">
         <rect class="hitbox" x="1298" y="14" width="194" height="82"/>
         <text class="colhead" x="1395" y="42" text-anchor="middle">HARNESS</text>
         <text class="colsub" x="1395" y="59" text-anchor="middle">LAS LIMITACIONES DE LA IA</text>
         <text class="colrole" x="1395" y="80" text-anchor="middle">Impide antes de actuar</text>
       </g>
-      <g class="colgroup dimmable s-doriath" data-key="evaluation">
+      <g class="colgroup dimmable s-kdd" data-key="evaluation">
         <rect class="hitbox" x="1508" y="14" width="196" height="82"/>
         <text class="colhead" x="1602" y="42" text-anchor="middle">EVALUATION</text>
         <text class="colsub" x="1602" y="59" text-anchor="middle">TODO BAJO EL ESTÁNDAR BBVA</text>
@@ -278,14 +282,14 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
       </g>
 
       <!-- ══════════ 1 · KB ══════════ -->
-      <g class="node dimmable s-tuyo s-local s-abierto" data-key="documentos">
+      <g class="node dimmable s-tuyo s-abierto" data-key="documentos">
         <rect class="pill" x="36" y="100" width="252" height="46" rx="10"/>
         <text class="lbl-sm" x="162" y="120" text-anchor="middle">DOCUMENTOS</text>
         <text class="note" x="162" y="137" text-anchor="middle">PDF · Word · Excel · PPT · Markdown · código</text>
         <rect class="hitbox" x="32" y="96" width="260" height="54"/>
       </g>
 
-      <g class="node dimmable s-tuyo s-local" data-key="kb">
+      <g class="node dimmable s-tuyo" data-key="kb">
         <polygon class="box" points="94,246 128,190 196,190 230,246 196,302 128,302"/>
         <text class="lbl" x="162" y="254" text-anchor="middle">KB</text>
         <rect class="hitbox" x="90" y="186" width="144" height="120"/>
@@ -314,13 +318,13 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
         <text class="lbl-xs" x="162" y="516" text-anchor="middle">+ n bases de conocimiento</text>
         <rect class="hitbox" x="42" y="488" width="240" height="46"/>
       </g>
-      <text class="note-b dimmable s-local" x="162" y="554" text-anchor="middle">Una carpeta en tu equipo</text>
-      <text class="note dimmable s-local" x="162" y="570" text-anchor="middle">specs/ · docs-tecnicos/ · .kdd-studio/</text>
+      <text class="note-b dimmable" x="162" y="554" text-anchor="middle">Una carpeta en tu equipo</text>
+      <text class="note dimmable" x="162" y="570" text-anchor="middle">specs/ · docs-tecnicos/ · .kdd-studio/</text>
 
       <!-- documentos → KB Studio -->
-      <path class="wire dimmable s-doriath" d="M288,120 H336" marker-end="url(#arw)"/>
+      <path class="wire dimmable s-kdd" d="M288,120 H336" marker-end="url(#arw)"/>
       <!-- KB → los tres manifiestos (lectura) -->
-      <g class="dimmable s-doriath">
+      <g class="dimmable s-kdd">
         <path class="wire-read" d="M230,246 H316"/>
         <path class="wire-read" d="M316,150 V448"/>
         <path class="wire-read" d="M316,150 H336" marker-end="url(#arwr)"/>
@@ -328,14 +332,14 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
         <path class="wire-read" d="M316,448 H336" marker-end="url(#arwr)"/>
       </g>
       <!-- KB Studio → KB (escritura) -->
-      <g class="node dimmable s-doriath s-tuyo" data-key="escribe">
+      <g class="node dimmable s-kdd s-tuyo" data-key="escribe">
         <path class="wire-write" d="M348,166 V300 H206" marker-end="url(#arwl)"/>
         <text class="note-l" x="356" y="292">escribe</text>
         <rect class="hitbox" x="300" y="284" width="100" height="30"/>
       </g>
 
       <!-- ══════════ 2 · MANIFEST ══════════ -->
-      <g class="node dimmable s-doriath" data-key="studio">
+      <g class="node dimmable s-kdd" data-key="studio">
         <rect class="box" x="340" y="106" width="260" height="60" rx="6"/>
         <text class="lbl" x="470" y="132" text-anchor="middle">KB STUDIO</text>
         <text class="note" x="470" y="152" text-anchor="middle">construye y mantiene la base</text>
@@ -344,14 +348,14 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
         <rect class="hitbox" x="336" y="102" width="268" height="68"/>
       </g>
 
-      <g class="node dimmable s-doriath" data-key="asistente">
+      <g class="node dimmable s-kdd" data-key="asistente">
         <rect class="box" x="340" y="210" width="260" height="60" rx="6"/>
         <text class="lbl" x="470" y="236" text-anchor="middle">ASISTENTE</text>
         <text class="note" x="470" y="256" text-anchor="middle">pregunta y genera entregables</text>
         <rect class="hitbox" x="336" y="206" width="268" height="68"/>
       </g>
 
-      <path class="wire dimmable s-doriath" d="M470,306 V276" marker-end="url(#arw)"/>
+      <path class="wire dimmable s-kdd" d="M470,306 V276" marker-end="url(#arw)"/>
       <g class="node dimmable s-humano" data-key="h-corregir">
         <line class="hmark" x1="470" y1="284" x2="470" y2="302"/>
         <text class="hnum" x="484" y="298">corriges</text>
@@ -365,78 +369,89 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
         <rect class="hitbox" x="428" y="312" width="80" height="66"/>
       </g>
 
-      <path class="wire dimmable s-doriath" d="M470,382 V410" marker-end="url(#arw)"/>
+      <path class="wire dimmable s-kdd" d="M470,382 V410" marker-end="url(#arw)"/>
       <g class="node dimmable s-humano" data-key="h-guardar">
         <line class="hmark" x1="470" y1="388" x2="470" y2="406"/>
         <text class="hnum" x="484" y="402">guardas</text>
         <rect class="hitbox" x="456" y="382" width="90" height="30"/>
       </g>
 
-      <g class="node dimmable s-doriath" data-key="kdd">
+      <g class="node dimmable s-kdd" data-key="kdd">
         <rect class="box" x="340" y="418" width="260" height="60" rx="6"/>
         <text class="lbl" x="470" y="444" text-anchor="middle">KDD</text>
         <text class="note" x="470" y="464" text-anchor="middle">iniciativa · features · historias</text>
         <rect class="hitbox" x="336" y="414" width="268" height="68"/>
       </g>
 
-      <g class="node dimmable s-humano" data-key="roles">
-        <rect class="pill" x="340" y="500" width="260" height="44" rx="10"/>
-        <text class="lbl-sm" x="470" y="520" text-anchor="middle">DOS ROLES</text>
-        <text class="note" x="470" y="536" text-anchor="middle">Usuario para aportar · Admin para mantener</text>
-        <rect class="hitbox" x="336" y="496" width="268" height="52"/>
+      <g class="node dimmable s-perfil" data-key="p-modulos">
+        <rect class="pill-p" x="340" y="496" width="260" height="48" rx="10"/>
+        <text class="lbl-sm" x="482" y="517" text-anchor="middle">QUÉ MÓDULOS ABRES</text>
+        <text class="note" x="482" y="534" text-anchor="middle">Usuario para aportar · Admin para mantener</text>
+        <line class="pmark" x1="352" y1="508" x2="352" y2="532"/>
+        <rect class="hitbox" x="336" y="492" width="268" height="56"/>
       </g>
-      <text class="note-b dimmable s-doriath" x="470" y="566" text-anchor="middle">Los tres leen la misma base.</text>
-      <text class="note dimmable s-doriath" x="470" y="582" text-anchor="middle">Solo el KB Studio escribe en ella.</text>
+      <text class="note-b dimmable s-kdd" x="470" y="566" text-anchor="middle">Los tres leen la misma base.</text>
+      <text class="note dimmable s-kdd" x="470" y="582" text-anchor="middle">Solo el KB Studio escribe en ella.</text>
 
       <!-- manifiestos → agentes -->
-      <path class="wire dimmable s-doriath" d="M600,136 H636" marker-end="url(#arw)"/>
-      <path class="wire dimmable s-doriath" d="M600,240 H636" marker-end="url(#arw)"/>
-      <path class="wire dimmable s-doriath" d="M600,448 H636" marker-end="url(#arw)"/>
+      <path class="wire dimmable s-kdd" d="M600,136 H636" marker-end="url(#arw)"/>
+      <path class="wire dimmable s-kdd" d="M600,240 H636" marker-end="url(#arw)"/>
+      <path class="wire dimmable s-kdd" d="M600,448 H636" marker-end="url(#arw)"/>
 
       <!-- ══════════ 3 · AGENTS ══════════ -->
-      <g class="dimmable s-doriath">
+      <g class="dimmable s-perfil">
+        <line class="pmark" x1="622" y1="124" x2="622" y2="148"/>
+        <line class="pmark" x1="622" y1="228" x2="622" y2="252"/>
+        <line class="pmark" x1="622" y1="436" x2="622" y2="460"/>
+      </g>
+      <g class="dimmable s-kdd">
         <path class="wire" d="M636,136 H652 M652,124 V228 M652,124 H672 M652,176 H672 M652,228 H672"/>
         <path class="wire" d="M636,240 H660 V288 H672"/>
         <path class="wire" d="M636,448 H660 M660,392 V464 M660,392 H672 M660,464 H672"/>
       </g>
 
-      <g class="node dimmable s-doriath" data-key="a-analizador">
+      <g class="node dimmable s-kdd" data-key="a-analizador">
         <rect class="pill" x="672" y="104" width="304" height="40" rx="9"/>
         <text class="lbl-xs" x="824" y="129" text-anchor="middle">Agente analizador</text>
         <rect class="hitbox" x="668" y="100" width="312" height="48"/>
       </g>
-      <g class="node dimmable s-doriath" data-key="a-conocimiento">
+      <g class="node dimmable s-kdd" data-key="a-conocimiento">
         <rect class="pill" x="672" y="156" width="304" height="40" rx="9"/>
         <text class="lbl-xs" x="824" y="181" text-anchor="middle">Agente de conocimiento</text>
         <rect class="hitbox" x="668" y="152" width="312" height="48"/>
       </g>
-      <g class="node dimmable s-doriath" data-key="a-resolucion">
+      <g class="node dimmable s-kdd" data-key="a-resolucion">
         <rect class="pill" x="672" y="208" width="304" height="40" rx="9"/>
         <text class="lbl-xs" x="824" y="233" text-anchor="middle">Agente de resolución</text>
         <rect class="hitbox" x="668" y="204" width="312" height="48"/>
       </g>
-      <g class="node dimmable s-doriath" data-key="a-asistente">
+      <g class="node dimmable s-kdd" data-key="a-asistente">
         <rect class="pill" x="672" y="268" width="304" height="40" rx="9"/>
         <text class="lbl-xs" x="824" y="293" text-anchor="middle">Agente asistente</text>
         <rect class="hitbox" x="668" y="264" width="312" height="48"/>
       </g>
-      <g class="node dimmable s-doriath" data-key="a-iniciativa">
+      <g class="node dimmable s-kdd" data-key="a-iniciativa">
         <rect class="pill" x="672" y="372" width="304" height="40" rx="9"/>
         <text class="lbl-xs" x="824" y="397" text-anchor="middle">Agente de iniciativa</text>
         <rect class="hitbox" x="668" y="368" width="312" height="48"/>
       </g>
-      <g class="node dimmable s-doriath s-humano" data-key="a-ejecucion">
+      <g class="node dimmable s-kdd s-humano" data-key="a-ejecucion">
         <rect x="672" y="444" width="304" height="40" rx="9" fill="#fff" stroke="#FFB56B" stroke-width="2.2"/>
         <text class="lbl-xs" x="836" y="469" text-anchor="middle">Agente de ejecución</text>
         <line class="hmark" x1="684" y1="454" x2="684" y2="474"/>
         <rect class="hitbox" x="668" y="440" width="312" height="48"/>
       </g>
-      <text class="note-b dimmable s-doriath" x="824" y="520" text-anchor="middle">El roster lo fija KDD Studio: seis agentes.</text>
-      <text class="note dimmable s-doriath" x="824" y="536" text-anchor="middle">Cada uno con su prompt, sus skills</text>
-      <text class="note dimmable s-doriath" x="824" y="552" text-anchor="middle">y su contrato de salida.</text>
+      <g class="node dimmable s-perfil" data-key="p-agentes">
+        <rect class="pill-p" x="672" y="500" width="304" height="48" rx="10"/>
+        <text class="lbl-sm" x="836" y="521" text-anchor="middle">CON QUÉ AGENTES HABLAS</text>
+        <text class="note" x="836" y="538" text-anchor="middle">el perfil decide a cuáles llegas</text>
+        <line class="pmark" x1="686" y1="512" x2="686" y2="536"/>
+        <rect class="hitbox" x="668" y="496" width="312" height="56"/>
+      </g>
+      <text class="note-b dimmable s-kdd" x="824" y="572" text-anchor="middle">El roster lo fija KDD Studio: seis agentes, seis contratos.</text>
 
       <!-- agentes → bus de skills -->
-      <g class="dimmable s-doriath">
+      <g class="dimmable s-kdd">
         <path class="wire-bus" d="M976,124 H988 M976,176 H988 M976,228 H988 M976,288 H988 M976,392 H988 M976,464 H988"/>
         <path class="wire-bus" d="M988,124 V464"/>
         <path class="wire-bus" d="M988,130 H1012" marker-end="url(#arwr)"/>
@@ -448,131 +463,153 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
       </g>
 
       <!-- ══════════ 4 · SKILLS ══════════ -->
-      <g class="node dimmable s-doriath" data-key="s-consulta">
+      <g class="node dimmable s-kdd" data-key="s-consulta">
         <rect class="pill" x="1016" y="106" width="258" height="48" rx="10"/>
         <text class="lbl-sm" x="1145" y="126" text-anchor="middle">CONSULTAR LA BASE</text>
         <text class="note" x="1145" y="143" text-anchor="middle">buscar · leer · validar · impacto — 9</text>
         <rect class="hitbox" x="1012" y="102" width="266" height="56"/>
       </g>
-      <g class="node dimmable s-doriath" data-key="s-docs">
+      <g class="node dimmable s-kdd" data-key="s-docs">
         <rect class="pill" x="1016" y="162" width="258" height="48" rx="10"/>
         <text class="lbl-sm" x="1145" y="182" text-anchor="middle">LEER LOS DOCUMENTOS</text>
         <text class="note" x="1145" y="199" text-anchor="middle">listar · buscar · sección · grep — 4</text>
         <rect class="hitbox" x="1012" y="158" width="266" height="56"/>
       </g>
-      <g class="node dimmable s-doriath" data-key="s-gen">
+      <g class="node dimmable s-kdd" data-key="s-gen">
         <rect class="pill" x="1016" y="244" width="258" height="48" rx="10"/>
         <text class="lbl-sm" x="1145" y="264" text-anchor="middle">GENERAR ENTREGABLES</text>
         <text class="note" x="1145" y="281" text-anchor="middle">Word · Excel · PPT · HTML · texto — 5</text>
         <rect class="hitbox" x="1012" y="240" width="266" height="56"/>
       </g>
-      <g class="node dimmable s-tuyo s-local" data-key="s-repo">
+      <g class="node dimmable s-tuyo" data-key="s-repo">
         <rect class="pill" x="1016" y="326" width="258" height="48" rx="10"/>
         <text class="lbl-sm" x="1145" y="346" text-anchor="middle">LEER TUS REPOSITORIOS</text>
         <text class="note" x="1145" y="363" text-anchor="middle">carpetas locales con .git — 4</text>
         <rect class="hitbox" x="1012" y="322" width="266" height="56"/>
       </g>
-      <g class="node dimmable s-humano s-local" data-key="s-git">
+      <g class="node dimmable s-humano" data-key="s-git">
         <rect x="1016" y="382" width="258" height="48" rx="10" fill="#fff" stroke="#FFB56B" stroke-width="2.2"/>
         <text class="lbl-sm" x="1157" y="402" text-anchor="middle">TRABAJAR EL CÓDIGO</text>
         <text class="note" x="1157" y="419" text-anchor="middle">rama · diff · commit · push · PR</text>
         <line class="hmark" x1="1028" y1="392" x2="1028" y2="412"/>
         <rect class="hitbox" x="1012" y="378" width="266" height="56"/>
       </g>
-      <g class="node dimmable s-doriath" data-key="s-tipos">
+      <g class="node dimmable s-kdd" data-key="s-tipos">
         <rect class="pill" x="1016" y="438" width="258" height="48" rx="10"/>
         <text class="lbl-sm" x="1145" y="458" text-anchor="middle">TIPOS DE HISTORIA</text>
         <text class="note" x="1145" y="475" text-anchor="middle">código · documento · pruebas · manual</text>
         <rect class="hitbox" x="1012" y="434" width="266" height="56"/>
       </g>
-      <text class="note-b dimmable s-doriath" x="1145" y="520" text-anchor="middle">El catálogo es compartido:</text>
-      <text class="note dimmable s-doriath" x="1145" y="536" text-anchor="middle">lo que cambia es qué juego</text>
-      <text class="note dimmable s-doriath" x="1145" y="552" text-anchor="middle">recibe cada agente.</text>
+      <g class="node dimmable s-perfil" data-key="p-skills">
+        <rect class="pill-p" x="1016" y="500" width="258" height="48" rx="10"/>
+        <text class="lbl-sm" x="1157" y="521" text-anchor="middle">QUÉ PUEDES EJECUTAR</text>
+        <text class="note" x="1157" y="538" text-anchor="middle">por perfil, repositorio y entorno</text>
+        <line class="pmark" x1="1028" y1="512" x2="1028" y2="536"/>
+        <rect class="hitbox" x="1012" y="496" width="266" height="56"/>
+      </g>
+      <text class="note-b dimmable s-kdd" x="1145" y="572" text-anchor="middle">El catálogo es común; el perfil lo recorta.</text>
 
       <!-- skills → harness -->
-      <g class="dimmable s-doriath">
+      <g class="dimmable s-kdd">
         <path d="M1274,130 C1292,130 1292,172 1306,172" fill="none" stroke="#FFB56B" stroke-width="1.5" stroke-opacity=".6"/>
         <path d="M1274,268 C1292,268 1292,300 1306,300" fill="none" stroke="#FFB56B" stroke-width="1.5" stroke-opacity=".6"/>
         <path d="M1274,350 C1292,350 1292,236 1306,236" fill="none" stroke="#FFB56B" stroke-width="1.5" stroke-opacity=".6"/>
         <path d="M1274,406 C1292,406 1292,364 1306,364" fill="none" stroke="#FFB56B" stroke-width="1.5" stroke-opacity=".6"/>
       </g>
 
-      <!-- ══════════ 5 · HARNESS ══════════ -->
-      <g class="node dimmable s-doriath" data-key="harness">
-        <rect x="1306" y="104" width="178" height="420" rx="16" fill="url(#ghar)" stroke="#FFB56B" stroke-width="1.8"/>
-        <text class="barlbl" x="1395" y="130" text-anchor="middle" fill="#8A4B0B">NO SE PERMITE</text>
-        <rect class="hitbox" x="1302" y="100" width="186" height="42"/>
+      <!-- ══════════ 5 · HARNESS · global BBVA + por área ══════════ -->
+      <g class="node dimmable s-kdd" data-key="harness">
+        <rect x="1306" y="104" width="178" height="418" rx="16" fill="url(#ghar)" stroke="#FFB56B" stroke-width="1.8"/>
+        <rect class="hitbox" x="1302" y="100" width="186" height="30"/>
       </g>
-      <g class="node dimmable s-doriath s-humano" data-key="h-commit">
-        <rect x="1320" y="146" width="150" height="52" rx="10" fill="#fff" stroke="#FFB56B" stroke-width="1.6"/>
-        <text class="lbl-sm" x="1395" y="168" text-anchor="middle">COMMIT</text>
-        <text class="note" x="1395" y="185" text-anchor="middle">sin que revises el diff</text>
-        <rect class="hitbox" x="1316" y="142" width="158" height="60"/>
+      <g class="node dimmable s-kdd" data-key="h-global">
+        <text class="barlbl" x="1395" y="126" text-anchor="middle" fill="#8A4B0B">GLOBAL BBVA</text>
+        <rect class="hitbox" x="1310" y="112" width="170" height="22"/>
       </g>
-      <g class="node dimmable s-doriath" data-key="h-rama">
-        <rect x="1320" y="210" width="150" height="52" rx="10" fill="#fff" stroke="#FFB56B" stroke-width="1.6"/>
-        <text class="lbl-sm" x="1395" y="232" text-anchor="middle">RAMA BASE</text>
-        <text class="note" x="1395" y="249" text-anchor="middle">una rama por iniciativa</text>
-        <rect class="hitbox" x="1316" y="206" width="158" height="60"/>
+      <g class="node dimmable s-kdd" data-key="h-nube">
+        <rect x="1320" y="138" width="150" height="48" rx="10" fill="#fff" stroke="#FFB56B" stroke-width="1.6"/>
+        <text class="lbl-sm" x="1395" y="158" text-anchor="middle">LA NUBE</text>
+        <text class="note" x="1395" y="175" text-anchor="middle">todo se queda en tu equipo</text>
+        <rect class="hitbox" x="1316" y="134" width="158" height="56"/>
       </g>
-      <g class="node dimmable s-doriath" data-key="h-sistema">
-        <rect x="1320" y="274" width="150" height="52" rx="10" fill="#fff" stroke="#FFB56B" stroke-width="1.6"/>
-        <text class="lbl-sm" x="1395" y="296" text-anchor="middle">TU SISTEMA</text>
-        <text class="note" x="1395" y="313" text-anchor="middle">solo toca el repositorio</text>
-        <rect class="hitbox" x="1316" y="270" width="158" height="60"/>
+      <g class="node dimmable s-kdd s-humano" data-key="h-commit">
+        <rect x="1320" y="196" width="150" height="48" rx="10" fill="#fff" stroke="#FFB56B" stroke-width="1.6"/>
+        <text class="lbl-sm" x="1395" y="216" text-anchor="middle">COMMIT</text>
+        <text class="note" x="1395" y="233" text-anchor="middle">sin que revises el diff</text>
+        <rect class="hitbox" x="1316" y="192" width="158" height="56"/>
       </g>
-      <g class="node dimmable s-doriath" data-key="h-mezcla">
-        <rect x="1320" y="338" width="150" height="52" rx="10" fill="#fff" stroke="#FFB56B" stroke-width="1.6"/>
-        <text class="lbl-sm" x="1395" y="360" text-anchor="middle">SIN MEZCLAR</text>
-        <text class="note" x="1395" y="377" text-anchor="middle">salidas fuera de repos y KB</text>
-        <rect class="hitbox" x="1316" y="334" width="158" height="60"/>
+      <g class="node dimmable s-kdd" data-key="h-sistema">
+        <rect x="1320" y="254" width="150" height="48" rx="10" fill="#fff" stroke="#FFB56B" stroke-width="1.6"/>
+        <text class="lbl-sm" x="1395" y="274" text-anchor="middle">TU SISTEMA</text>
+        <text class="note" x="1395" y="291" text-anchor="middle">solo toca el repositorio</text>
+        <rect class="hitbox" x="1316" y="250" width="158" height="56"/>
       </g>
-      <g class="node dimmable s-local" data-key="h-nube">
-        <rect x="1320" y="402" width="150" height="52" rx="10" fill="#fff" stroke="#9694FF" stroke-width="1.8"/>
-        <text class="lbl-sm" x="1395" y="424" text-anchor="middle">LA NUBE</text>
-        <text class="note" x="1395" y="441" text-anchor="middle">todo se queda en tu equipo</text>
-        <rect class="hitbox" x="1316" y="398" width="158" height="60"/>
+      <g class="node dimmable s-kdd" data-key="h-mezcla">
+        <rect x="1320" y="312" width="150" height="48" rx="10" fill="#fff" stroke="#FFB56B" stroke-width="1.6"/>
+        <text class="lbl-sm" x="1395" y="332" text-anchor="middle">SIN MEZCLAR</text>
+        <text class="note" x="1395" y="349" text-anchor="middle">salidas fuera de repos y KB</text>
+        <rect class="hitbox" x="1316" y="308" width="158" height="56"/>
       </g>
-      <text class="note-b dimmable s-doriath" x="1395" y="482" text-anchor="middle">Un límite aplica a una</text>
-      <text class="note dimmable s-doriath" x="1395" y="497" text-anchor="middle">o a varias skills a la vez.</text>
-      <text class="note-b dimmable s-doriath" x="1395" y="552" text-anchor="middle">El agente propone.</text>
-      <text class="note dimmable s-doriath" x="1395" y="568" text-anchor="middle">Tú decides. KDD Studio ejecuta.</text>
+
+      <line x1="1320" y1="378" x2="1470" y2="378" stroke="#FFB56B" stroke-width="1" stroke-dasharray="4 4" class="dimmable s-kdd"/>
+      <g class="node dimmable s-tuyo" data-key="h-area">
+        <text class="barlbl" x="1395" y="400" text-anchor="middle" fill="#1F6B33">POR ÁREA</text>
+        <rect class="hitbox" x="1310" y="386" width="170" height="22"/>
+      </g>
+      <g class="node dimmable s-tuyo" data-key="h-rama">
+        <rect x="1320" y="412" width="150" height="48" rx="10" fill="#fff" stroke="#88E783" stroke-width="1.8"/>
+        <text class="lbl-sm" x="1395" y="432" text-anchor="middle">RAMA Y PREFIJO</text>
+        <text class="note" x="1395" y="449" text-anchor="middle">tu modelo de ramas</text>
+        <rect class="hitbox" x="1316" y="408" width="158" height="56"/>
+      </g>
+      <g class="node dimmable s-tuyo s-perfil" data-key="h-entornos">
+        <rect x="1320" y="466" width="150" height="48" rx="10" fill="#fff" stroke="#88E783" stroke-width="1.8"/>
+        <text class="lbl-sm" x="1401" y="486" text-anchor="middle">REPOS Y ENTORNOS</text>
+        <text class="note" x="1401" y="503" text-anchor="middle">cuáles registra tu equipo</text>
+        <line class="pmark" x1="1330" y1="478" x2="1330" y2="502"/>
+        <rect class="hitbox" x="1316" y="462" width="158" height="56"/>
+      </g>
+
+      <text class="note-b dimmable s-kdd" x="1395" y="546" text-anchor="middle">Un límite aplica a una</text>
+      <text class="note dimmable s-kdd" x="1395" y="561" text-anchor="middle">o a varias skills a la vez.</text>
+      <text class="note-b dimmable s-kdd" x="1395" y="582" text-anchor="middle">El agente propone. Tú decides.</text>
 
       <!-- ══════════ 6 · EVALUATION ══════════ -->
-      <g class="node dimmable s-doriath" data-key="evaluation">
-        <rect x="1516" y="104" width="172" height="356" rx="16" fill="url(#gev)" stroke="#001391"
+      <g class="node dimmable s-kdd" data-key="evaluation">
+        <rect x="1516" y="104" width="172" height="362" rx="16" fill="url(#gev)" stroke="#001391"
               stroke-width="1.6" stroke-opacity=".5"/>
         <text class="barlbl" x="1602" y="130" text-anchor="middle" fill="#0F6470">SE DEBE CUMPLIR</text>
         <rect class="hitbox" x="1512" y="100" width="180" height="42"/>
       </g>
-      <g class="node dimmable s-doriath" data-key="e-estructura">
+      <g class="node dimmable s-kdd" data-key="e-estructura">
         <rect x="1530" y="146" width="144" height="52" rx="10" fill="#fff" stroke="#8BE1E9" stroke-width="1.8"/>
         <text class="lbl-sm" x="1602" y="168" text-anchor="middle">ESTRUCTURA</text>
         <text class="note" x="1602" y="185" text-anchor="middle">secciones obligatorias</text>
         <rect class="hitbox" x="1526" y="142" width="152" height="60"/>
       </g>
-      <g class="node dimmable s-doriath" data-key="e-criterios">
+      <g class="node dimmable s-kdd" data-key="e-criterios">
         <rect x="1530" y="210" width="144" height="52" rx="10" fill="#fff" stroke="#8BE1E9" stroke-width="1.8"/>
         <text class="lbl-sm" x="1602" y="232" text-anchor="middle">CRITERIOS</text>
         <text class="note" x="1602" y="249" text-anchor="middle">verificables, no deseos</text>
         <rect class="hitbox" x="1526" y="206" width="152" height="60"/>
       </g>
-      <g class="node dimmable s-doriath" data-key="e-grafo">
+      <g class="node dimmable s-kdd" data-key="e-grafo">
         <rect x="1530" y="274" width="144" height="52" rx="10" fill="#fff" stroke="#8BE1E9" stroke-width="1.8"/>
         <text class="lbl-sm" x="1602" y="296" text-anchor="middle">GRAFO</text>
         <text class="note" x="1602" y="313" text-anchor="middle">sin referencias rotas</text>
         <rect class="hitbox" x="1526" y="270" width="152" height="60"/>
       </g>
-      <g class="node dimmable s-doriath" data-key="e-salud">
+      <g class="node dimmable s-kdd" data-key="e-salud">
         <rect x="1530" y="338" width="144" height="52" rx="10" fill="#fff" stroke="#8BE1E9" stroke-width="1.8"/>
         <text class="lbl-sm" x="1602" y="360" text-anchor="middle">SALUD</text>
         <text class="note" x="1602" y="377" text-anchor="middle">puntuación e incidencias</text>
         <rect class="hitbox" x="1526" y="334" width="152" height="60"/>
       </g>
-      <text class="note-b dimmable s-doriath" x="1602" y="418" text-anchor="middle">Verifica TODO lo que</text>
-      <text class="note dimmable s-doriath" x="1602" y="434" text-anchor="middle">se escribe en la base.</text>
-      <text class="note-b dimmable s-doriath" x="1602" y="490" text-anchor="middle">Un bloqueante rechaza</text>
-      <text class="note dimmable s-doriath" x="1602" y="506" text-anchor="middle">el paquete entero.</text>
+      <text class="barlbl dimmable s-kdd" x="1602" y="420" text-anchor="middle" fill="#0F6470">SOLO GLOBAL</text>
+      <text class="note dimmable s-kdd" x="1602" y="438" text-anchor="middle">Idéntica para todas las áreas.</text>
+      <text class="note dimmable s-kdd" x="1602" y="452" text-anchor="middle">Se endurece; no se relaja.</text>
+      <text class="note-b dimmable s-kdd" x="1602" y="496" text-anchor="middle">Verifica TODO lo que se escribe.</text>
+      <text class="note dimmable s-kdd" x="1602" y="512" text-anchor="middle">Un bloqueante rechaza el paquete.</text>
 
       <!-- ══════════ LO QUE SALE ══════════ -->
       <text class="colsub" x="44" y="620" text-anchor="start">LO QUE SALE</text>
@@ -588,7 +625,7 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
         <text class="note" x="542" y="632" text-anchor="middle">Word · Excel · PowerPoint · HTML · código</text>
         <rect class="hitbox" x="414" y="592" width="256" height="54"/>
       </g>
-      <g class="node dimmable s-tuyo s-local" data-key="o-commits">
+      <g class="node dimmable s-tuyo" data-key="o-commits">
         <rect class="pill-soft" x="686" y="596" width="248" height="46" rx="10"/>
         <text class="lbl-xs" x="810" y="616" text-anchor="middle">Commits en tus repositorios</text>
         <text class="note" x="810" y="632" text-anchor="middle">revisados por ti, en su rama</text>
@@ -596,7 +633,7 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
       </g>
 
       <!-- barrido de verificación hacia atrás -->
-      <g class="dimmable s-doriath">
+      <g class="dimmable s-kdd">
         <path d="M1602,522 V680 H210" fill="none" stroke="#001391" stroke-width="1.8"
               stroke-dasharray="8 7" stroke-opacity=".55" marker-end="url(#arw)"/>
         <text class="note" x="900" y="672" text-anchor="middle" fill="#001391">
@@ -620,7 +657,7 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
 
 <div class="legend">
   <span class="lg"><i class="i-lime"></i>Verde = lo aporta tu equipo</span>
-  <span class="lg"><i class="i-serene"></i>Azul claro = lectura de la base</span>
+  <span class="lg"><i class="i-purple"></i>Morado = perfilado: quién puede qué</span>
   <span class="lg"><i class="i-mand"></i>Naranja = decide una persona</span>
   <span class="lg"><i class="i-dash"></i>Discontinua = crece sin límite</span>
   <span class="lg"><i class="i-can"></i>HARNESS = lo que <b>NO</b> se permite</span>
@@ -632,7 +669,7 @@ var N = {
 
 /* ══════ 1 · KB ══════ */
 kb:{k:"Capa 1 · Conocimiento",h:"KB",role:"Lo que sabe la IA · una carpeta por aplicación",
-  tags:[["tuyo","Lo aporta tu equipo"],["local","No sale de tu equipo"]],
+  tags:[["tuyo","Lo aporta tu equipo"],["perfil","Según tu perfil"]],
   d:"El conocimiento destilado de una aplicación: dominio, procesos, integraciones y decisiones. Es la <b>única fuente de verdad</b> del eje. Los tres módulos leen exactamente la misma, de forma que la respuesta que te dan y el código que se genera parten del <em>mismo sitio</em>.",
   L:[["Qué hay dentro",["<code>specs/</code> — el conocimiento, una carpeta por capa","<code>docs-tecnicos/</code> — los documentos originales, copiados","<code>.kdd-studio/</code> — cachés derivadas y el registro de actividad","<code>kdd-source.json</code> — la identidad de la base"]],
     ["Lo global — el contrato",["La anatomía de cada spec y su frontmatter","La taxonomía de capas y el ciclo de vida","Los identificadores: <code>TIPO-[DOMINIO-]S###-NNN</code>"]],
@@ -640,7 +677,7 @@ kb:{k:"Capa 1 · Conocimiento",h:"KB",role:"Lo que sabe la IA · una carpeta por
   call:["ok","Portátil por diseño","La base es una carpeta, no un servicio: la copias y se va contigo entera —documentos, historia y actividad—. Cualquier equipo con el mismo formato puede abrirla."]},
 
 documentos:{k:"Capa 1 · Entrada",h:"Documentos",role:"La materia prima",
-  tags:[["tuyo","Lo aporta tu equipo"],["local","No sale de tu equipo"],["abierto","Crece sin límite"]],
+  tags:[["tuyo","Lo aporta tu equipo"],["perfil","Según tu perfil"],["abierto","Crece sin límite"]],
   d:"Todo empieza con lo que ya tienes escrito: PDF, Word, Excel, PowerPoint, Markdown, texto plano o código. KDD Studio los <b>copia dentro de la propia base</b> —no los enlaza— para que la carpeta sea autocontenida.",
   L:[["Qué se guarda de cada uno",["El fichero, en <code>docs-tecnicos/</code>","Quién lo subió y cuándo","Qué specs salieron de él"]],
     ["Qué no ocurre",["No se sube a ninguna nube","No se indexa fuera de tu equipo"]]],
@@ -654,7 +691,7 @@ documentos:{k:"Capa 1 · Entrada",h:"Documentos",role:"La materia prima",
   call:["","Cómo se rellenan","No a mano: salen del agente analizador a partir de tus documentos, y tú confirmas el resultado."]},
 
 "capas-w":{k:"KB · Eje trabajo",h:"Iniciativa, feature, historia",role:"Lo que se está haciendo",
-  tags:[["tuyo","Lo aporta tu equipo"],["doriath","Formato fijo"]],
+  tags:[["tuyo","Lo aporta tu equipo"],["kdd","Formato fijo"]],
   d:"El trabajo en curso, en tres niveles. Es lo que produce KDD y lo que se ejecuta sobre tus repositorios. A diferencia del conocimiento, esto <b>sí caduca</b>: cuando la iniciativa termina, queda como historia.",
   L:[["Los tres niveles",["<b>Iniciativa</b> — Problem Statement · Proposed Change · Acceptance Criteria","<b>Feature</b> — Approach · Task Breakdown","<b>Historia de usuario</b> — Objective · Acceptance Criteria"]],
     ["La conexión con el conocimiento",["La iniciativa declara qué specs <code>activa</code>","Ese vínculo es lo que hace que el código generado respete lo que ya se sabía","Las features y las historias lo heredan: no lo redeclaran"]]],
@@ -675,7 +712,7 @@ documentos:{k:"Capa 1 · Entrada",h:"Documentos",role:"La materia prima",
   call:["","Por qué esta inversión","El eje original imaginaba un marco donde cada área añadía agentes y skills. KDD Studio es un producto terminado: el marco ya está, y lo que cada equipo aporta es conocimiento."]},
 
 escribe:{k:"Escritura en la base",h:"Quién escribe en la base",role:"La única flecha que va hacia atrás",
-  tags:[["doriath","Lo fija KDD Studio"],["tuyo","El resultado es tuyo"]],
+  tags:[["kdd","Lo fija KDD Studio"],["tuyo","El resultado es tuyo"]],
   d:"Los tres módulos <b>leen</b> la base. Solo uno la <b>escribe</b>: el KB Studio. El Asistente y KDD no la modifican nunca por su cuenta — y esa asimetría es lo que hace que la base no se degrade sola.",
   L:[["Las dos excepciones, y las dos pasan por ti",["Cuando corriges una respuesta del Asistente, la corrección se anota como evidencia sobre la spec","Cuando guardas una propuesta de KDD, la iniciativa y sus historias se persisten"]],
     ["Lo que nunca pasa",["Un agente no escribe en la base «de paso» mientras hace otra cosa","No hay escritura sin una acción explícita de una persona"]]],
@@ -683,28 +720,28 @@ escribe:{k:"Escritura en la base",h:"Quién escribe en la base",role:"La única 
 
 /* ══════ 2 · MANIFEST ══════ */
 manifest:{k:"Capa 2 · Orquestación",h:"Los tres módulos",role:"Las opciones de KDD Studio",
-  tags:[["doriath","Lo fija KDD Studio"],["humano","Tú eres quien entra"]],
+  tags:[["kdd","Lo fija KDD Studio"],["humano","Tú eres quien entra"]],
   d:"Los manifiestos son <b>las opciones que te ofrece KDD Studio</b>: los tres sitios por donde entra una persona. Declaran qué agentes existen detrás, con qué conocimiento se les alimenta y qué tienen que devolver. Es <em>la capa que no se toca</em>.",
   L:[["Los tres",["<b>KB Studio</b> — construye y mantiene la base. El único que escribe en ella","<b>Asistente</b> — pregunta al conocimiento y produce entregables","<b>KDD</b> — convierte una necesidad en iniciativa y la ejecuta sobre el código"]],
     ["Lo que comparten",["La misma base de conocimiento","El mismo catálogo de herramientas","Los mismos límites y las mismas reglas de verificación"]]],
   call:["","Por qué no se llaman entre ellos","Porque no hace falta. Si los tres leen la misma base, la coherencia sale sola; una integración entre módulos solo añadiría una fuente de desincronización."]},
 
 studio:{k:"Manifiesto · KB Studio",h:"Knowledge Bases Studio",role:"Construye y mantiene la base",
-  tags:[["doriath","Lo fija KDD Studio"],["humano","Tú confirmas"]],
+  tags:[["kdd","Lo fija KDD Studio"],["humano","Tú confirmas"]],
   d:"El único módulo que <b>escribe en la base</b>. Le das documentos, sus agentes los analizan y te proponen qué conocimiento han encontrado; tú lo revisas y confirmas. Después es también donde se mantiene: catálogo, grafo, impacto, gobernanza y actividad.",
   L:[["Sus pestañas",["<b>Panel</b> — specs totales, reparto por capa, salud e incidencias","<b>Documentos</b> — qué se importó, quién y cuándo","<b>Análisis</b> — los preview pendientes de confirmar","<b>Specs</b> — catálogo, edición y estados","<b>Grafo</b> — qué activa qué, y qué está roto","<b>Gobernanza</b> — ADR, RFC y reglas","<b>Actividad</b> — el registro completo de cambios"]],
     ["Qué agentes orquesta",["Agente analizador","Agente de conocimiento","Agente de resolución"]]],
   call:["ok","La pieza sin la que no hay eje","El Asistente y KDD <em>consumen</em> la base. El KB Studio es el que la <b>construye</b>: sin él los otros dos no tienen de qué hablar."]},
 
 asistente:{k:"Manifiesto · Asistente",h:"BBVA CIB Assistant",role:"Preguntar y producir entregables",
-  tags:[["doriath","Lo fija KDD Studio"],["humano","Corriges lo que no encaje"]],
+  tags:[["kdd","Lo fija KDD Studio"],["humano","Corriges lo que no encaje"]],
   d:"Conversación con el conocimiento de las bases que elijas. La propiedad que lo define: <b>no recuerda nada</b>. Consulta la base con sus herramientas antes de afirmar, cita los identificadores en los que se apoya, y si algo no está, lo dice en vez de rellenarlo.",
   L:[["Qué agente orquesta",["Agente asistente — uno solo, con el catálogo de consulta, documentos y generación"]],
     ["Qué genera",["Word, Excel, PowerPoint, HTML","Markdown, código, SQL, JSON o CSV","Con la identidad BBVA × NFQ ya puesta"]]],
   call:["ok","Qué gana la base cuando preguntas","Si una respuesta no te encaja y pulsas «No es así, corregir», tu corrección se anota como evidencia sobre la spec afectada y le sube la versión. Preguntar <b>mejora</b> la base."]},
 
 kdd:{k:"Manifiesto · KDD",h:"Knowledge-Driven Development",role:"Del cambio que necesitas al commit",
-  tags:[["doriath","Lo fija KDD Studio"],["humano","Decides tres veces"]],
+  tags:[["kdd","Lo fija KDD Studio"],["humano","Decides tres veces"]],
   d:"Le cuentas qué necesitas cambiar, en lenguaje de negocio. Te entrevista, consulta el conocimiento, mira tus repositorios y propone la <b>iniciativa</b> con sus <b>features</b> e <b>historias de usuario</b>. Después trabaja cada historia sobre tu código real.",
   L:[["Qué agentes orquesta",["Agente de iniciativa — la entrevista en cuatro fases","Agente de ejecución — el que escribe código en el repositorio"]],
     ["Los tres puntos donde decides",["Guardar la propuesta","Elegir el repositorio de cada historia","Revisar el diff antes de cada commit"]]],
@@ -716,12 +753,27 @@ usuario:{k:"El centro del eje",h:"Tú",role:"Quien decide en cada tramo",
   L:[["Los cinco puntos donde decides",["<b>Confirmar el preview</b> — nada entra en la base antes","<b>Corregir una respuesta</b> — cuando algo no encaja, se corrige la base","<b>Guardar la propuesta</b> — la iniciativa y sus historias","<b>Revisar el diff</b> — antes de cada commit, sin excepción","<b>Aceptar o rechazar</b> — en gobernanza"]]],
   call:["stop","La diferencia con «dale a generar»","Un agente que escribe sin que nadie mire produce trabajo que hay que revisar entero después. Aquí la revisión está <em>dentro</em> del flujo, en el punto donde todavía es barata."]},
 
-roles:{k:"Manifiesto · Roles",h:"Usuario y Admin",role:"Dos caras de la misma base",
-  tags:[["humano","Tú eliges"],["doriath","Lo fija KDD Studio"]],
-  d:"El mismo KDD Studio, con dos niveles de exposición. Se cambia con un conmutador en la cabecera y se recuerda en el navegador.",
-  L:[["Usuario — para quien aporta",["<b>My Knowledge Bases</b>: sube documentos, pulsa «Aprender de estos documentos» y pregunta","Ni una spec, ni una capa, ni un identificador en pantalla","Cada respuesta lleva «Es correcto» y «No es así, corregir»"]],
-    ["Admin — para quien mantiene",["El <b>KB Studio</b> al completo: panel, grafo, gobernanza, actividad e identificadores"]]],
+"p-modulos":{k:"Perfilado · Nivel 1",h:"Qué módulos abres",role:"El primer corte",
+  tags:[["perfil","Perfilado"],["humano","Tú eliges"]],
+  d:"El perfilado empieza aquí: <b>qué opciones de KDD Studio te aparecen</b>. Hoy se resuelve con dos roles, que se cambian con un conmutador en la cabecera y se recuerdan en el navegador.",
+  L:[["Usuario — para quien aporta",["<b>My Knowledge Bases</b>: sube documentos, aprende de ellos y pregunta","El Asistente y KDD, en su versión sin jerga","Ni una spec, ni una capa, ni un identificador en pantalla"]],
+    ["Admin — para quien mantiene",["El <b>KB Studio</b> al completo: panel, grafo, gobernanza, actividad","Y los identificadores a la vista"]],
+    ["De dónde sale la identidad",["De la sesión de GitHub Enterprise de la persona","Es la que firma cada cambio en el registro de actividad"]]],
   call:["","Por qué dos y no uno","Porque quien más conocimiento tiene de un dominio no suele ser quien sabe qué es KDD. Si para aportar hay que aprender el formato, no aporta nadie."]},
+
+"p-agentes":{k:"Perfilado · Nivel 2",h:"Con qué agentes hablas",role:"El segundo corte",
+  tags:[["perfil","Perfilado"]],
+  d:"No todos los perfiles tienen por qué llegar a los seis agentes. El corte que de verdad importa es el que separa <b>consultar</b> de <b>construir</b>: hablar con el agente asistente no es lo mismo que poder invocar al de ejecución.",
+  L:[["Hoy",["Se deriva del módulo: si abres KDD, llegas a sus dos agentes","No hay todavía un permiso agente a agente"]],
+    ["Lo que el modelo permite",["Llegar al de iniciativa pero no al de ejecución","Abrir el KB Studio en solo lectura, sin poder confirmar un preview","Restringir el analizador a quien mantiene la base"]]],
+  call:["stop","El corte más sensible","Entre <b>consultar</b> y <b>construir</b>. Aquí el perfilado y los límites tienen que coincidir: si el perfil lo permite pero el límite no, gana el límite."]},
+
+"p-skills":{k:"Perfilado · Nivel 3",h:"Qué puedes ejecutar",role:"El corte más fino",
+  tags:[["perfil","Perfilado"],["humano","Y sigue pasando por ti"]],
+  d:"El último nivel: dentro de un agente al que sí llegas, <b>qué skills puedes disparar</b>. No es lo mismo consultar la base que lanzar pruebas contra un entorno compartido o escribir en un repositorio.",
+  L:[["Hoy",["Las herramientas de repositorio solo existen si la base tiene repositorios registrados","Todo lo que escribe código pasa por tu revisión del diff"]],
+    ["Lo que el modelo permite",["Por perfil — quién puede tocar código","Por repositorio — sobre cuáles","Por entorno — contra DEV, INT o PRE"]]],
+  call:["","La pregunta que resuelve cada skill nueva","¿Qué perfiles pueden ejecutarla, sobre qué repositorios y contra qué entornos? Si no tiene respuesta, la skill todavía no está lista."]},
 
 "h-corregir":{k:"Punto de decisión",h:"Corriges una respuesta",role:"Cuando algo no te encaja",
   tags:[["humano","Aquí decides tú"]],
@@ -737,49 +789,49 @@ roles:{k:"Manifiesto · Roles",h:"Usuario y Admin",role:"Dos caras de la misma b
 
 /* ══════ 3 · AGENTS ══════ */
 agents:{k:"Capa 3 · Agentes",h:"Seis agentes",role:"Las personalidades de la IA",
-  tags:[["doriath","Roster fijo"]],
+  tags:[["kdd","Roster fijo"]],
   d:"Un agente es una <b>personalidad</b> de la IA: un prompt que le dice quién es y de qué entiende, un juego de herramientas y un contrato de salida. Con cada uno hablas en un sitio distinto, y cada uno sabe hacer cosas distintas. Aquí está la segunda corrección frente al eje original: en KDD Studio el roster <em>no es un catálogo abierto</em> — son seis, los fija el producto, y cada uno existe porque hay un trabajo que solo él hace.",
   L:[["Los seis",["<b>Analizador</b> — de documento a specs, en tres etapas","<b>De conocimiento</b> — entrevista para crear specs a mano","<b>De resolución</b> — resuelve las preguntas de un preview","<b>Asistente</b> — responde y genera entregables","<b>De iniciativa</b> — la entrevista de KDD en cuatro fases","<b>De ejecución</b> — escribe código en el repositorio"]],
     ["Qué comparten todos",["El mismo catálogo de herramientas, cada uno con su subconjunto","La obligación de consultar antes de afirmar","La sujeción al harness y a las reglas de verificación"]]],
   call:["","Por qué seis y no «los que quieras»","Porque cada agente nuevo es un contrato nuevo que mantener. Seis roles cubren el ciclo entero —analizar, consultar, resolver, responder, planificar, ejecutar— y cada uno tiene una razón de existir que no es «por si acaso»."]},
 
 "a-analizador":{k:"Agente · KB Studio",h:"Agente analizador",role:"De documento a specs",
-  tags:[["doriath","Lo fija KDD Studio"],["humano","Tú confirmas su preview"]],
+  tags:[["kdd","Lo fija KDD Studio"],["humano","Tú confirmas su preview"]],
   d:"El que convierte tus documentos en conocimiento. No es un resumen: es un proceso en <b>tres etapas</b>, pensado para no perder detalle en la primera y no inventar estructura en la segunda. Termina en un preview que no toca la base.",
   L:[["Sus tres etapas, tres prompts distintos",["<b>1 · Extracción</b> — recorre el documento por trozos y saca todos los átomos que encuentra, sin agrupar ni juzgar","<b>2 · Plan de curación</b> — clasifica, fusiona duplicados, descarta ruido, conecta y comprueba cobertura, todavía <em>sin escribir contenido</em>","<b>3 · Generación</b> — redacta el cuerpo de cada spec por grupos, volviendo a las rebanadas del documento que le tocan"]],
     ["Qué entrega",["Las specs propuestas con sus incidencias","Las preguntas abiertas que no ha podido resolver","Los conflictos entre documentos","Los átomos descartados, y por qué"]]],
   call:["stop","La regla de oro","Nunca escribe en la base directamente. Produce un preview. Lo que entra lo decide una persona."]},
 
 "a-conocimiento":{k:"Agente · KB Studio",h:"Agente de conocimiento",role:"Crear una spec sin documento",
-  tags:[["doriath","Lo fija KDD Studio"]],
+  tags:[["kdd","Lo fija KDD Studio"]],
   d:"A veces el conocimiento no está en ningún documento: está en la cabeza de alguien. Este agente lo saca con una <b>entrevista estricta</b> — pregunta por el negocio, insiste en lo que falta, y traduce en silencio a la forma KDD.",
   L:[["Cómo trabaja",["Es pesado con el <em>qué</em>: pregunta las veces que haga falta hasta entender la lógica real","Es mudo con el <em>cómo</em>: nunca te pregunta por frontmatter, secciones ni identificadores","No rellena hechos de negocio con valores por defecto"]],
     ["Qué produce",["Specs de conocimiento o de gobernanza, en un paquete que revisas antes de guardar"]]],
   call:["","La regla que lo define","«Insiste en el qué, calla en el cómo.» Preguntarte cómo se redacta un criterio de aceptación sería trasladarte un trabajo que le toca a él."]},
 
 "a-resolucion":{k:"Agente · KB Studio",h:"Agente de resolución",role:"Cerrar lo que quedó abierto",
-  tags:[["doriath","Lo fija KDD Studio"],["humano","Tú decides el desenlace"]],
+  tags:[["kdd","Lo fija KDD Studio"],["humano","Tú decides el desenlace"]],
   d:"Cuando el analizador termina, casi siempre quedan cabos: preguntas que el documento no contesta y contradicciones entre documentos. Este agente trabaja <b>sobre el preview</b>, contigo, hasta que se pueden persistir.",
   L:[["Sobre qué actúa",["Las preguntas abiertas del análisis","Los conflictos detectados entre documentos","Las specs del preview: puede editarlas según lo que le digas"]],
     ["Lo que no puede",["Persistir por su cuenta: sus cambios se aplican al preview, no a la base"]]],
   call:["","Por qué es un agente aparte","Porque analizar y negociar el resultado son trabajos distintos. El analizador no conversa; este solo conversa."]},
 
 "a-asistente":{k:"Agente · Asistente",h:"Agente asistente",role:"Responder y entregar",
-  tags:[["doriath","Lo fija KDD Studio"]],
+  tags:[["kdd","Lo fija KDD Studio"]],
   d:"El agente de consulta. Su contrato es explícito en el prompt: <b>no recuerdas el contenido de las bases, lo consultas con tus herramientas antes de afirmar nada</b>, y citas los identificadores en los que te apoyas.",
   L:[["Su juego de herramientas",["Consultar la base — las 9","Leer los documentos — las 4","Generar entregables — las 5"]],
     ["Lo que no tiene",["Herramientas de repositorio","Ninguna forma de escribir en la base por su cuenta"]]],
   call:["","Qué hace cuando no sabe","Lo dice. El prompt le obliga a distinguir lo que está en la base de lo que es conocimiento general, y a declarar explícitamente cuando algo no está."]},
 
 "a-iniciativa":{k:"Agente · KDD",h:"Agente de iniciativa",role:"La entrevista en cuatro fases",
-  tags:[["doriath","Lo fija KDD Studio"]],
+  tags:[["kdd","Lo fija KDD Studio"]],
   d:"Es a la vez <b>entrevistador del negocio</b> y <b>autor de la forma KDD</b>. Le cuentas el cambio en tus palabras; él pregunta lo que falte, mira los repositorios y emite la iniciativa completa con sus features y sus historias.",
   L:[["Las cuatro fases",["<b>Entender</b> — pregunta hasta capturar la lógica real","<b>Clasificar</b> — sitúa el cambio en el conocimiento que ya existe","<b>Validar</b> — comprueba que la propuesta se sostiene","<b>Generar</b> — emite el paquete entero en un solo turno"]],
     ["Antes de planificar",["Inspecciona los repositorios con sus herramientas","Así el plan cita módulos y ficheros reales, no inventados"]]],
   call:["","Lo que nunca te pregunta","Nada de forma: ni el tipo de historia, ni qué specs activar, ni cómo se redacta un criterio. Eso lo deduce del inventario y del contexto."]},
 
 "a-ejecucion":{k:"Agente · KDD",h:"Agente de ejecución",role:"El que escribe código",
-  tags:[["doriath","Lo fija KDD Studio"],["humano","Su salida pasa por ti"],["local","Sobre tu clon local"]],
+  tags:[["kdd","Lo fija KDD Studio"],["humano","Su salida pasa por ti"],["perfil","Según tu perfil"]],
   d:"El único agente que <b>modifica ficheros</b>. Trabaja dentro del repositorio que tú le has asignado, con la iniciativa, la feature y la historia completas como contexto, y aplica los cambios de verdad — no describe la solución.",
   L:[["Lo que su prompt le prohíbe, literalmente",["Hacer commits — «KDD Studio los hace tras la revisión del usuario»","Ejecutar comandos que modifiquen el sistema fuera del repositorio"]],
     ["Qué recibe como contexto",["La iniciativa completa","La feature a la que pertenece la historia","Las historias hermanas ya ejecutadas y su resumen","El conocimiento que la iniciativa activa"]]],
@@ -787,7 +839,7 @@ agents:{k:"Capa 3 · Agentes",h:"Seis agentes",role:"Las personalidades de la IA
 
 /* ══════ 4 · SKILLS ══════ */
 skills:{k:"Capa 4 · Skills",h:"Qué es capaz de hacer la IA",role:"22 herramientas · 4 tipos de historia",
-  tags:[["doriath","Catálogo fijo"]],
+  tags:[["kdd","Catálogo fijo"]],
   d:"Los agentes no «saben» cosas: <b>tienen herramientas y las usan</b>. Es la diferencia entre un modelo que recuerda —y por tanto inventa— y uno que consulta y cita. El catálogo es común; lo que cambia es <em>qué juego recibe cada agente</em>.",
   L:[["Las cuatro familias de herramientas",["<b>Consultar la base</b> — 9","<b>Leer los documentos</b> — 4","<b>Leer los repositorios</b> — 4","<b>Generar entregables</b> — 5"]],
     ["Y una quinta cosa",["Los <b>tipos de historia</b>: qué automatización dispara cada historia de usuario cuando se lanza"]],
@@ -795,41 +847,41 @@ skills:{k:"Capa 4 · Skills",h:"Qué es capaz de hacer la IA",role:"22 herramien
   call:["","La regla que lo sostiene","El prompt lo dice explícitamente: <em>no recuerdas el contenido, lo consultas antes de afirmar nada</em>. Sin esa regla las herramientas sobran; con ella, son lo único que hay."]},
 
 "s-consulta":{k:"Skills · Familia 1",h:"Consultar la base",role:"Nueve formas de preguntarle al conocimiento",
-  tags:[["doriath","Lo fija KDD Studio"]],
+  tags:[["kdd","Lo fija KDD Studio"]],
   d:"El grupo que convierte la base en algo consultable. Búsqueda por relevancia sobre el texto de las specs, lectura directa por identificador, y las consultas que solo tienen sentido sobre un grafo.",
   L:[["Las nueve",["<code>search_specs</code> — búsqueda por relevancia","<code>read_spec</code> — leer una spec entera","<code>list_specs</code> — listar por capa o estado","<code>validate_spec</code> — comprobar su estructura","<code>spec_impact</code> — qué se ve afectado si esto cambia","<code>list_work_items</code> — el trabajo en curso","<code>list_pending_tasks</code> — lo que queda por hacer","<code>get_open_questions</code> — lo que quedó sin resolver","<code>search_decision_history</code> — qué se decidió antes y por qué"]],
     ["Qué agentes la tienen",["Prácticamente todos: es la familia común del eje"]]],
   call:["","La más infravalorada","<code>spec_impact</code>. Antes de tocar algo, saber qué más depende de ello es la diferencia entre un cambio y un incidente."]},
 
 "s-docs":{k:"Skills · Familia 2",h:"Leer los documentos",role:"Volver al original",
-  tags:[["doriath","Lo fija KDD Studio"]],
+  tags:[["kdd","Lo fija KDD Studio"]],
   d:"Las specs son el destilado, pero el documento original sigue dentro de la base. Estas cuatro permiten volver a la fuente cuando la spec no basta o cuando hay que comprobar de dónde salió algo.",
   L:[["Las cuatro",["<code>list_documents</code> — qué documentos tiene la base","<code>search_document</code> — buscar dentro de ellos","<code>read_section</code> — leer una sección concreta","<code>grep_document</code> — buscar un patrón literal"]]],
   call:["","Por qué se conservan","Porque destilar pierde matices, y a veces el matiz es lo que importa. La base guarda las dos cosas: el conocimiento y su origen."]},
 
 "s-gen":{k:"Skills · Familia 3",h:"Generar entregables",role:"Del conocimiento al documento",
-  tags:[["doriath","Lo fija KDD Studio"]],
+  tags:[["kdd","Lo fija KDD Studio"]],
   d:"El asistente elige el formato que mejor encaje y lo genera <b>sin pedir permiso</b>. Tú aportas la pregunta; él aporta contenido estructurado, y la maqueta la pone la identidad BBVA × NFQ automáticamente.",
   L:[["Las cinco",["<code>generate_docx</code> — informes y documentos","<code>generate_xlsx</code> — tablas, inventarios, matrices de prueba","<code>generate_pptx</code> — presentaciones","<code>generate_html_document</code> — informes navegables","<code>write_output_file</code> — Markdown, código, SQL, JSON, CSV"]],
     ["Quién las tiene",["Solo el agente asistente"]]],
   call:["stop","Dónde escriben","En la carpeta de salidas, <b>nunca dentro de un repositorio ni de una base</b>. Un documento generado que aparece en un repo acaba en un commit que nadie quería."]},
 
 "s-repo":{k:"Skills · Familia 4",h:"Leer tus repositorios",role:"Sobre el código que ya tienes",
-  tags:[["tuyo","Lo aporta tu equipo"],["local","No sale de tu equipo"]],
+  tags:[["tuyo","Lo aporta tu equipo"],["perfil","Según tu perfil"]],
   d:"KDD Studio no clona nada ni trabaja sobre copias: <b>trabaja sobre tus clones locales</b>. Le señalas las carpetas, detecta las que tienen <code>.git</code> y las registra con su rama, su remoto y su stack.",
   L:[["Las cuatro",["<code>list_repositories</code> — los repositorios registrados","<code>repo_tree</code> — la estructura de carpetas","<code>grep_repo</code> — buscar en el código","<code>read_repo_file</code> — leer un fichero concreto"]],
     ["Cuándo aparecen",["Solo si la base tiene repositorios registrados. Sin repositorios, estas herramientas no existen para el agente"]]],
   call:["","Una restricción que es una garantía","Un repositorio no puede estar dentro de una base de conocimiento ni de la carpeta de salidas, ni al revés. Mezclarlos ensucia el repo con documentos generados o con specs que no le pertenecen."]},
 
 "s-git":{k:"Skills · La crítica",h:"Trabajar el código",role:"Rama, diff, commit, push, PR",
-  tags:[["humano","Decides dos veces"],["local","Sobre tu clon local"]],
+  tags:[["humano","Decides dos veces"],["perfil","Según tu perfil"]],
   d:"La skill de mayor impacto, y por eso la más acotada. KDD Studio abre una rama por iniciativa, deja que el agente edite los ficheros, y <b>para</b>. El commit no lo hace el agente: lo hace KDD Studio cuando tú has visto el diff.",
   L:[["La secuencia",["Abre o cambia a la rama de la iniciativa","El agente edita los ficheros que necesita","KDD Studio calcula el diff y te lo enseña","<b>Tú revisas y confirmas el commit</b>","<b>Tú pides el push y la pull request</b>"]],
     ["Los límites que activa a la vez",["Commit sin revisión","Rama base","Fuera del repositorio"]]],
   call:["stop","Skill crítica","Es donde un límite mal definido se convierte en un incidente. Los dos únicos momentos en que algo sale del área de trabajo los decides tú."]},
 
 "s-tipos":{k:"Skills · Automatización",h:"Tipos de historia",role:"Qué dispara cada historia al lanzarse",
-  tags:[["doriath","Lo fija KDD Studio"]],
+  tags:[["kdd","Lo fija KDD Studio"]],
   d:"Cada historia de usuario declara <b>qué clase de trabajo es</b>, y de ahí sale qué automatización se ejecuta cuando la lanzas. Es el equivalente en KDD Studio a las skills que colgaban de un agente en el eje original.",
   L:[["Los cuatro tipos",["<b>Código</b> — modifica ficheros en uno o varios repositorios; la ejecuta el agente de ejecución","<b>Documento</b> — produce un documento a partir del contexto","<b>Pruebas</b> — produce un documento de casos de prueba","<b>Manual</b> — la hace una persona fuera de KDD Studio: un despliegue, una aprobación, una reunión"]],
     ["Quién lo decide",["El agente de iniciativa, a partir de la naturaleza de la historia","Nunca te lo pregunta","Y si ninguno encaja, lo omite: una historia sin automatización es legítima"]]],
@@ -837,42 +889,63 @@ skills:{k:"Capa 4 · Skills",h:"Qué es capaz de hacer la IA",role:"22 herramien
 
 /* ══════ 5 · HARNESS ══════ */
 harness:{k:"Capa 5 · Harness",h:"Las limitaciones de la IA",role:"Impide antes de actuar",
-  tags:[["doriath","Marco global"]],
+  tags:[["kdd","Marco global"]],
   d:"El harness <b>no es un catálogo de accesos: es un catálogo de límites</b>. Se lee siempre en negativo — «no se permite X» — y una misma limitación puede aplicar a <b>una o varias skills</b> a la vez.",
-  L:[["Los cinco de hoy",["<b>Commit</b> — nunca sin que revises el diff","<b>Rama base</b> — nunca directamente; una rama por iniciativa","<b>Tu sistema</b> — el agente solo toca el repositorio asignado","<b>Sin mezclar</b> — las salidas nunca dentro de un repo ni de una base","<b>La nube</b> — nada sale de tu equipo"]],
-    ["Cómo se formula uno",["Un enunciado prohibitivo, no un permiso","Las skills a las que aplica","El mecanismo que lo hace efectivo — no basta con escribirlo"]]],
+  L:[["Globales de BBVA — no negociables",["<b>La nube</b> — nada sale de tu equipo","<b>Commit</b> — nunca sin que revises el diff","<b>Tu sistema</b> — el agente solo toca el repositorio asignado","<b>Sin mezclar</b> — las salidas nunca dentro de un repo ni de una base"]],
+    ["Por área — dentro del marco",["<b>Rama y prefijo</b> — tu modelo de ramas","<b>Repositorios y entornos</b> — cuáles registra tu equipo y contra cuáles se lanza"]],
+    ["Cómo se formula uno",["Un enunciado prohibitivo, no un permiso","Las skills a las que aplica","Su ámbito: global de BBVA o del área","El mecanismo que lo hace efectivo — no basta con escribirlo"]]],
   call:["stop","La diferencia con Evaluation","El harness <b>impide</b> antes de actuar; Evaluation <b>verifica</b> después. Uno es una puerta cerrada, el otro es un examen."]},
 
+"h-global":{k:"Harness · Global",h:"Los límites de BBVA",role:"Iguales para todas las áreas",
+  tags:[["kdd","Global"]],
+  d:"Cuatro límites que <b>no admiten excepción por área</b>. Son el suelo mínimo: seguridad, dato y control de lo que cambia fuera de KDD Studio. Un área no puede relajarlos ni negociarlos.",
+  L:[["Los cuatro",["<b>La nube</b> — nada sale de tu equipo","<b>Commit</b> — nunca sin que revises el diff","<b>Tu sistema</b> — el agente solo toca el repositorio asignado","<b>Sin mezclar</b> — las salidas nunca dentro de un repo ni de una base"]]],
+  call:["stop","Por qué estos son globales","Porque el daño que evitan no depende del área. Una fuga de conocimiento o un commit que nadie miró son igual de graves en Pagos que en Riesgos."]},
+
+"h-area":{k:"Harness · Por área",h:"Lo que ajusta cada equipo",role:"Dentro del marco global",
+  tags:[["tuyo","Lo decide tu equipo"],["perfil","Ligado al perfilado"]],
+  d:"Debajo del suelo global, cada área tiene margen: <b>su modelo de ramas, sus repositorios y sus entornos</b>. Son decisiones de stack y de proceso, no de seguridad, y por eso no tienen por qué ser iguales en todo el banco.",
+  L:[["Lo que ajusta un área",["El prefijo y el modelo de ramas","Qué repositorios se registran en cada base","Contra qué entornos se puede lanzar"]],
+    ["Lo que no puede",["Relajar ninguno de los cuatro límites globales","Saltarse una regla de verificación"]]],
+  call:["","El criterio para colocar un límite","Si es de <b>seguridad o de dato</b>, es global. Si es de <b>stack o de convención</b>, es del área, salvo que se demuestre lo contrario."]},
+
+"h-entornos":{k:"Límite · Por área",h:"Repositorios y entornos",role:"Dónde se puede trabajar",
+  tags:[["tuyo","Lo decide tu equipo"],["perfil","Perfilado"]],
+  d:"Cada base registra los repositorios sobre los que trabaja, y cada historia se asigna a uno. Es el punto donde el perfilado y los límites se tocan: <b>qué repositorios ve un perfil y contra qué entornos puede lanzar</b>.",
+  L:[["Cómo se registra un repositorio",["Señalas carpetas y se detectan las que tienen <code>.git</code>","Se guardan con su rama, su remoto y su stack","Se rechaza si está dentro de una base o de la carpeta de salidas"]],
+    ["La decisión de entorno",["Quién puede lanzar contra DEV, INT o PRE","Producción no es una opción para ningún perfil"]]],
+  call:["","Por qué se asigna a mano","Porque adivinar sobre qué repositorio se trabaja es exactamente el tipo de acierto que no compensa. Lo eliges tú, historia a historia."]},
+
 "h-commit":{k:"Límite",h:"Ningún commit a ciegas",role:"El diff siempre pasa por ti",
-  tags:[["humano","Aquí decides tú"],["doriath","Lo fija KDD Studio"]],
+  tags:[["humano","Aquí decides tú"],["kdd","Lo fija KDD Studio"]],
   d:"El agente <b>no hace commits</b>. Edita ficheros; KDD Studio calcula el diff, te lo enseña y espera. El commit lo hace KDD Studio con el mensaje que tú apruebas, y no antes.",
   L:[["Aplica a",["Trabajar el código","Cualquier skill futura que escriba en el repositorio"]],
     ["Qué ves antes de confirmar",["Qué ficheros ha tocado y en qué repositorio","El diff completo","El informe de qué ha hecho y por qué","El mensaje de commit propuesto, editable"]]],
   call:["","La trazabilidad que sí se mantiene","El mensaje de commit lleva el identificador de la historia. Es el hilo entre el código y el conocimiento que lo justifica, y vive en el repositorio, no en la interfaz."]},
 
 "h-rama":{k:"Límite",h:"Nunca sobre la rama base",role:"Una rama por iniciativa",
-  tags:[["doriath","Lo fija KDD Studio"]],
+  tags:[["kdd","Lo fija KDD Studio"]],
   d:"KDD Studio abre una rama para la iniciativa y trabaja siempre ahí. El nombre sale del identificador y del título, con el prefijo que tengas configurado.",
   L:[["Aplica a",["Trabajar el código","Todas las historias de una misma iniciativa comparten rama"]],
     ["Qué garantiza",["Tu rama de trabajo no se toca","El trabajo de una iniciativa se puede descartar entero","La pull request es la unidad de revisión, como siempre"]]],
   call:["","Se integra con lo que ya tienes","No hay un flujo de git paralelo. Es tu repositorio, tu modelo de ramas y tu proceso de revisión."]},
 
 "h-sistema":{k:"Límite",h:"Solo el repositorio",role:"No toca tu sistema",
-  tags:[["doriath","Lo fija KDD Studio"]],
+  tags:[["kdd","Lo fija KDD Studio"]],
   d:"El prompt del agente de ejecución lo dice literalmente: trabaja dentro del repositorio asignado y <b>no ejecuta comandos que modifiquen el sistema fuera de él</b>. Cada historia se ejecuta contra un repositorio concreto, que eliges tú.",
   L:[["Aplica a",["El agente de ejecución","Cualquier skill que ejecute algo"]],
     ["Qué implica",["Un agente no instala nada en tu equipo","No toca configuración del sistema","No escribe fuera del repositorio de la historia"]]],
   call:["","Por qué se asigna repositorio a mano","Porque adivinar sobre qué repositorio se trabaja es exactamente el tipo de acierto que no compensa. Lo eliges tú, historia a historia."]},
 
 "h-mezcla":{k:"Límite",h:"Sin mezclar carpetas",role:"Cada cosa en su sitio",
-  tags:[["doriath","Lo fija KDD Studio"]],
+  tags:[["kdd","Lo fija KDD Studio"]],
   d:"Los documentos generados van a la carpeta de salidas, y esa carpeta <b>no puede estar dentro de un repositorio ni de una base</b>. Tampoco una base puede vivir dentro de un repositorio, ni contenerlo.",
   L:[["Aplica a",["Generar entregables","El registro de repositorios","El registro de bases de conocimiento"]],
     ["Qué se comprueba al registrar",["Que la base no está dentro de las salidas","Que no está dentro de un repositorio registrado, ni lo contiene","Y si lo está, se rechaza diciendo por qué"]]],
   call:["","Lo que evita","Un repositorio que amanece con veinte informes generados dentro, o una base versionada por accidente dentro del código."]},
 
 "h-nube":{k:"Límite",h:"Nada sale de tu equipo",role:"Todo es local",
-  tags:[["local","No sale de tu equipo"],["doriath","Lo fija KDD Studio"]],
+  tags:[["perfil","Según tu perfil"],["kdd","Lo fija KDD Studio"]],
   d:"Las bases son carpetas de tu equipo. Los repositorios son tus clones locales. Los documentos se copian dentro de la base. El registro de actividad vive en la propia base. <b>No hay un servidor de KDD Studio</b> al que se suba nada.",
   L:[["Aplica a",["Todas las skills, sin excepción"]],
     ["Qué sí sale",["Las peticiones al modelo, por el canal corporativo de Copilot, con la sesión de GitHub Enterprise de la persona","Y nada más"]]],
@@ -880,41 +953,41 @@ harness:{k:"Capa 5 · Harness",h:"Las limitaciones de la IA",role:"Impide antes 
 
 /* ══════ 6 · EVALUATION ══════ */
 evaluation:{k:"Capa 6 · Evaluation",h:"Todo bajo el estándar BBVA",role:"Comprueba después de actuar",
-  tags:[["doriath","Global"]],
-  d:"Nada se escribe en la base con una forma propia. <b>Todo pasa por las mismas comprobaciones</b> —venga del analizador, de una edición a mano o de una propuesta de KDD—, así que todas las bases salen con la misma anatomía. No limita lo que se puede hacer: <em>comprueba que lo hecho cumple</em>.",
+  tags:[["kdd","Solo global"]],
+  d:"A diferencia de los límites, <b>la verificación no tiene versión por área</b>. Nada se escribe en la base con una forma propia. <b>Todo pasa por las mismas comprobaciones</b> —venga del analizador, de una edición a mano o de una propuesta de KDD—, así que todas las bases salen con la misma anatomía. No limita lo que se puede hacer: <em>comprueba que lo hecho cumple</em>.",
   L:[["Las cuatro reglas",["<b>Estructura</b> — las secciones obligatorias de cada capa","<b>Criterios</b> — que los criterios de aceptación sean verificables","<b>Grafo</b> — que las referencias apunten a algo que existe","<b>Salud</b> — la puntuación agregada de la base y sus incidencias"]],
     ["Dos severidades",["<b>Bloqueante</b> — no se persiste","<b>Aviso</b> — se persiste, pero queda anotado"]],
     ["Por qué es un estándar y no una preferencia",["Una base escrita con criterio propio solo la entiende quien la escribió","El estándar es lo que hace que la base de Pagos y la de Riesgos se lean igual","Y que quien cambia de equipo no empiece de cero","Un área puede endurecerlo; nunca relajarlo"]]],
   call:["stop","Atómico a propósito","Si una sola spec del paquete tiene un bloqueante, se rechaza el paquete <b>entero</b>. Media propuesta guardada deja la base en un estado que nadie sabe interpretar."]},
 
 "e-estructura":{k:"Regla de verificación",h:"Estructura",role:"Las secciones obligatorias",
-  tags:[["doriath","Lo fija KDD Studio"]],
+  tags:[["kdd","Lo fija KDD Studio"]],
   d:"Cada capa tiene sus secciones canónicas, y faltar una es un error bloqueante. No es burocracia: es lo que permite que una spec escrita por otra persona, hace un año, se lea sin preguntarle a nadie.",
   L:[["Qué exige cada capa",["<b>Conocimiento</b> — Intent · Definition · Acceptance Criteria · Evidence · Traceability","<b>Iniciativa</b> — Problem Statement · Proposed Change · Acceptance Criteria","<b>Feature</b> — Approach · Task Breakdown","<b>Historia</b> — Objective · Acceptance Criteria","<b>ADR</b> — Context · Decision · Rationale · Consequences"]],
     ["Verifica a",["Todos los agentes que producen specs","Y también las ediciones manuales"]]],
   call:["","También avisa de lo pobre","Una sección Definition con dos líneas no es un error, pero sí un aviso: cumple la forma sin aportar nada."]},
 
 "e-criterios":{k:"Regla de verificación",h:"Criterios verificables",role:"Nada de buenas intenciones",
-  tags:[["doriath","Lo fija KDD Studio"]],
+  tags:[["kdd","Lo fija KDD Studio"]],
   d:"Un criterio de aceptación tiene que poder comprobarse. «Mejorar el rendimiento» no es un criterio; «cuando la orden supera 100.000 EUR, se rechaza con el código AC04» sí lo es.",
   L:[["Qué detecta",["Que la sección exista pero esté vacía — bloqueante","Que los criterios suenen aspiracionales en vez de verificables — aviso","Y sugiere el patrón <em>cuando X → Y</em>"]]],
   call:["","Por qué es un aviso y no un error","Porque distinguir un criterio verificable de uno aspiracional es un juicio, y bloquear por un juicio automático crea más fricción de la que evita. Se señala, y decide una persona."]},
 
 "e-grafo":{k:"Regla de verificación",h:"El grafo",role:"Que las referencias existan",
-  tags:[["doriath","Lo fija KDD Studio"]],
+  tags:[["kdd","Lo fija KDD Studio"]],
   d:"Las specs se referencian entre ellas: una iniciativa declara qué conocimiento <code>activa</code>, una feature declara de qué iniciativa cuelga. Si esas referencias apuntan a specs que no existen, el grafo miente y el impacto deja de ser fiable.",
   L:[["Qué comprueba",["Que <code>activates</code> apunte a specs reales","Que <code>parent</code> exista en las features y las historias","Que <code>activates</code> solo se declare en la iniciativa: los hijos lo heredan"]]],
   call:["","Lo que se pierde si no se cuida","<code>spec_impact</code>. Un grafo con referencias rotas responde «esto no afecta a nada» justo cuando afecta a todo."]},
 
 "e-salud":{k:"Regla de verificación",h:"Salud de la base",role:"La foto agregada",
-  tags:[["doriath","Lo fija KDD Studio"]],
+  tags:[["kdd","Lo fija KDD Studio"]],
   d:"El panel del KB Studio resume el estado de la base en una puntuación con sus incidencias detrás: cuántas specs hay, cómo se reparten por capa, cuántas siguen en borrador y qué está roto.",
   L:[["Qué mirar cuando baja",["Specs en borrador que nadie ha revisado","Preguntas abiertas sin responder","Referencias rotas en el grafo","Documentos importados que no generaron nada"]]],
   call:["","Para qué sirve","Para saber si la base está viva o se quedó parada hace tres meses, sin tener que abrirla spec a spec."]},
 
 /* ══════ Salidas ══════ */
 "o-specs":{k:"Resultado",h:"Conocimiento en tu base",role:"Lo que queda después",
-  tags:[["tuyo","Se queda contigo"],["local","No sale de tu equipo"]],
+  tags:[["tuyo","Se queda contigo"],["perfil","Según tu perfil"]],
   d:"Specs nuevas y actualizadas, cada una con su evidencia, su versión y su rastro en el registro de actividad. Es el resultado que <b>se acumula</b>: cada documento que importas y cada corrección que haces dejan la base mejor que antes.",
   L:[["Lo que hace que valga",["Que se pueda citar por identificador","Que se sepa de qué documento salió","Que se sepa quién la tocó y cuándo"]]],
   call:["ok","El único resultado que crece","Los entregables se consumen y los commits se mezclan. La base es lo que queda, y lo que hace que la siguiente pregunta se conteste mejor que la anterior."]},
@@ -926,16 +999,17 @@ evaluation:{k:"Capa 6 · Evaluation",h:"Todo bajo el estándar BBVA",role:"Compr
   call:["","Con la fuente detrás","Un informe generado desde la base cita las specs en las que se apoya. Si alguien pregunta de dónde sale un dato, la respuesta está en el propio documento."]},
 
 "o-commits":{k:"Resultado",h:"Commits en tus repositorios",role:"Código real, en tu rama",
-  tags:[["tuyo","Se queda contigo"],["local","No sale de tu equipo"]],
+  tags:[["tuyo","Se queda contigo"],["perfil","Según tu perfil"]],
   d:"Commits en tu clon local, en la rama de la iniciativa, con el identificador de la historia en el mensaje. Revisados por ti antes de existir.",
   L:[["Y a partir de ahí",["Push cuando tú lo pides","Pull request contra tu proceso de revisión de siempre"]]],
   call:["","No es un flujo aparte","KDD Studio entrega en el mismo sitio donde ya trabajas. A partir del push, es una rama más."]}
 };
 
 var DEF = {k:"Eje KDD Studio",h:"Seis capas, dos naturalezas",role:"Recorre el diagrama",
-  tags:[["tuyo","Lo tuyo"],["doriath","Lo fijo"],["humano","Tú decides"],["local","Local"],["abierto","Abierto"]],
+  tags:[["tuyo","Lo tuyo"],["kdd","Lo fijo"],["humano","Tú decides"],["perfil","Perfilado"],["abierto","Abierto"]],
   d:"Seis capas encadenadas: <b>qué sabe</b> la IA, <b>por dónde entras</b>, <b>con qué personalidad hablas</b>, <b>qué es capaz de hacer</b>, <b>qué no puede hacer</b> y <b>cómo se comprueba que todo sale bajo el estándar BBVA</b>.",
   L:[["Las dos capas de control",["<b>HARNESS</b> — limitaciones: «no se permite X». Aplican a una o varias skills. Actúan <em>antes</em>.","<b>EVALUATION</b> — reglas de verificación: aseguran que todo lo que se escribe cumple. Actúan <em>después</em>."]],
+    ["El perfilado va por niveles",["<b>Qué módulos abres</b> — hoy, dos roles: Usuario y Admin","<b>Con qué agentes hablas</b> — el corte entre consultar y construir","<b>Qué puedes ejecutar</b> — por perfil, repositorio y entorno"]],
     ["Dos correcciones frente al eje genérico",["Los <b>manifiestos</b> son los tres módulos reales: KB Studio, Asistente y KDD — y solo el KB Studio escribe en la base","Lo <b>abierto</b> no son los agentes ni las skills, que KDD Studio fija: es tu contenido — bases, documentos y repositorios"]],
     ["Cómo leer los colores",["<b>Verde</b> — lo aporta tu equipo","<b>Azul claro</b> — lectura de la base","<b>Naranja</b> — donde decide una persona","<b>Morado</b> — no sale de tu equipo","<b>Discontinuo</b> — crece sin límite"]]],
   call:["","Cómo usar el diagrama","Pasa el cursor sobre cualquier elemento para leerlo aquí, haz clic para fijarlo y usa los filtros de arriba para aislar una lectura."]};
@@ -951,7 +1025,7 @@ function render(o){
     var t=b[0], c='';
     if(/tu equipo|Se queda|tuyo|tus repositorios|contenido/i.test(t)) c=' tuyo';
     if(/decides|puedes hacer|Punto/i.test(t)) c=' humano';
-    if(/no sale|local|sí sale/i.test(t)) c=' local';
+    if(/perfil|Hoy|modelo permite|identidad|ajusta un área/i.test(t)) c=' perfil';
     if(/Prohib|prohíbe|evita|garantiza|implica|severidad|nunca|no puede|no ocurre|no crece|no tiene/i.test(t)) c=' stop';
     h+='<div class="dp-block'+c+'"><div class="bt">'+t+'</div><ul>';
     b[1].forEach(function(li){h+='<li>'+li+'</li>';});
