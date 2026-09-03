@@ -8,7 +8,25 @@ import { listSources } from "../knowledge/sources.mjs";
 import { listRegisteredRepositories } from "../work/repos.mjs";
 import { runCommand } from "../util/process.mjs";
 import { openInBrowser } from "../util/browser.mjs";
-import { isPathWithin } from "../util/fs.mjs";
+import { isPathWithin, readJson } from "../util/fs.mjs";
+import path from "node:path";
+
+/**
+ * Identidad de la instalación en marcha. Sin esto es fácil creer que se está probando lo último
+ * cuando en realidad se abrió el acceso directo de una instalación anterior.
+ */
+async function buildInfo() {
+  const config = getConfig();
+  const file = paths.installRoot ? path.join(paths.installRoot, "BUILD.json") : "";
+  const data = file ? await readJson(file, null) : null;
+  return {
+    version: config.product.version,
+    commit: data?.commit ? String(data.commit).slice(0, 8) : "",
+    builtAt: data?.builtAt || "",
+    installed: Boolean(paths.installRoot),
+    root: paths.installRoot || paths.appRoot,
+  };
+}
 
 /**
  * La carpeta de salidas (donde el asistente deja los documentos que genera) no puede coincidir con
@@ -51,6 +69,7 @@ export function registerSystemRoutes(router) {
     return {
       product: config.product,
       paths: { dataRoot: paths.dataRoot, outputs: config.paths.outputs, knowledgeBases: config.paths.knowledgeBases, installRoot: paths.installRoot },
+      build: await buildInfo(),
       github: { host: config.github.host, ...auth, user },
       git: { installed: git.ok, version: git.ok ? git.stdout : "" },
       copilot,

@@ -55,9 +55,10 @@ Datos existentes en `data/`, `outputs/` y `knowledge-bases/` se conservan al rei
 
 La sesión sale de la CLI `gh`. Si ya has hecho login y Doriath sigue pidiéndolo:
 
-1. En la propia pantalla de inicio de sesión, despliega **"Qué ve Doriath al comprobar la sesión"**: ahí aparece la salida literal de `gh` y, si la sesión está en otro host (por ejemplo `github.com` en vez de `bbva.ghe.com`), se avisa explícitamente.
+1. La propia pantalla de inicio de sesión muestra, bajo **"Qué ve Doriath al comprobar la sesión"**, el host configurado, qué ejecutable `gh` está usando, qué versión de Doriath se está ejecutando (con su commit y fecha de construcción) y la salida literal de `gh`. Si la sesión está en otro host (por ejemplo `github.com` en vez de `bbva.ghe.com`), se avisa explícitamente.
 2. `npm run doctor` (o `Doriath.cmd doctor`) imprime lo mismo desde la consola, incluido el host configurado.
 3. Si el host no es el correcto, cámbialo en **Ajustes → Host de GitHub Enterprise**.
+4. Comprueba que estás ejecutando lo que acabas de construir: **Ajustes** muestra la ruta de instalación, la versión, el commit y la fecha de construcción. `npm run build` regenera `dist\Doriath`, pero el acceso directo del Escritorio apunta a la carpeta donde instalaste (`%LOCALAPPDATA%\Doriath`), que sigue con la versión anterior hasta que vuelvas a ejecutar el `Doriath-Setup.exe` nuevo.
 
 Doriath no depende solo del código de salida de `gh auth status`: esa comprobación valida el token contra la API y en la red corporativa puede fallar por el proxy, los certificados o el SSO aunque la sesión sea válida. Cuando eso pasa, Doriath pide el token con `gh auth token` y, si existe, entra igualmente avisando de que no pudo validarlo. También busca `gh` fuera del PATH (la copia portable de `runtime/gh`, `%LOCALAPPDATA%\GitHubCLI` y `Program Files`), por si se instaló con Doriath ya abierto.
 

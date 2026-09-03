@@ -294,10 +294,15 @@ function renderGate() {
   const overlay = document.getElementById("overlay");
   overlay.hidden = false;
   overlay.onclick = null;
+  const build = state.status?.build;
   const detail = [
-    github.otherHosts?.length ? `Hay sesión de gh en: ${github.otherHosts.join(", ")}. Doriath está configurado para ${github.host} (cámbialo en Ajustes si no es el correcto).` : "",
+    `Host configurado: ${github.host}`,
+    github.executable ? `GitHub CLI: ${github.executable}` : "",
+    build ? `Doriath ${build.version}${build.commit ? ` · commit ${build.commit}` : ""}${build.builtAt ? ` · construido ${new Date(build.builtAt).toLocaleString("es-ES")}` : " · ejecutando desde el código fuente"}` : "",
+    build?.root ? `Instalación: ${build.root}` : "",
+    github.otherHosts?.length ? `Hay sesión de gh en: ${github.otherHosts.join(", ")}. Doriath busca ${github.host}; cámbialo en Ajustes si no es el correcto.` : "",
     github.authOutput || github.error || "",
-  ].filter(Boolean).join("\n\n");
+  ].filter(Boolean).join("\n");
   overlay.replaceChildren(h("div", { class: "gate", id: "gate" },
     h("img", { src: "/brand/doriath-mark-white.png", alt: "", class: "gate__mark" }),
     h("div", {}, h("p", { class: "ante-title", text: "Doriath · BBVA CIB" }), h("h1", { text: github.installed ? "Inicia sesión en GitHub" : "Falta GitHub CLI" })),
@@ -308,8 +313,8 @@ function renderGate() {
       github.installed ? h("button", { class: "btn btn--accent", text: "Iniciar sesión en GitHub", onclick: startLogin }) : null,
       h("button", { class: "btn btn--outline", style: { color: "#F7F8F8", borderColor: "#85C8FF" }, text: "Reintentar", onclick: async () => { try { await refreshStatus({ refresh: true }); } catch (error) { toast(error.message, "error"); } } }),
       h("button", { class: "btn btn--ghost", style: { color: "#85C8FF" }, text: "Continuar sin sesión", onclick: () => { state.gateDismissed = true; closeGate(); } })),
-    detail ? h("details", { class: "gate__detail" },
-      h("summary", { text: "Qué ve Doriath al comprobar la sesión" }),
+    detail ? h("div", { class: "gate__detail" },
+      h("p", { class: "ante-title", style: { color: "#85C8FF" }, text: "Qué ve Doriath al comprobar la sesión" }),
       h("pre", { class: "gate__output", text: detail })) : null,
     h("p", { class: "small", style: { opacity: 0.8 }, text: `También puedes ejecutarlo a mano: gh auth login --hostname ${github.host} --web --git-protocol https` }),
   ));
@@ -352,7 +357,11 @@ async function openSettings() {
       h("div", { class: "field" }, h("label", { text: "Carpeta por defecto para nuevas bases" }), h("div", { class: "form-row" }, kbs, h("button", { class: "btn btn--outline btn--sm", text: "Elegir", onclick: async () => { const folder = await pickFolder({ title: "Carpeta de bases de conocimiento" }); if (folder) kbs.value = folder; } }))),
       h("div", { class: "field" }, h("label", { text: "Prefijo de ramas de trabajo" }), prefix),
       h("div", { class: "field" }, h("label", { text: "Navegador" }), browser)),
-    h("dl", { class: "kv" }, h("dt", { text: "Datos" }), h("dd", { class: "mono", text: state.status?.paths?.dataRoot || "" }), h("dt", { text: "Versión" }), h("dd", { text: config.product.version })),
+    h("dl", { class: "kv" },
+      h("dt", { text: "Datos" }), h("dd", { class: "mono", text: state.status?.paths?.dataRoot || "" }),
+      h("dt", { text: "Instalación" }), h("dd", { class: "mono", text: state.status?.build?.root || "" }),
+      h("dt", { text: "Versión" }), h("dd", { text: `${config.product.version}${state.status?.build?.commit ? ` · commit ${state.status.build.commit}` : ""}${state.status?.build?.builtAt ? ` · construido ${new Date(state.status.build.builtAt).toLocaleString("es-ES")}` : " · desde el código fuente"}` }),
+      h("dt", { text: "GitHub CLI" }), h("dd", { class: "mono", text: state.status?.github?.executable || "no encontrada" })),
     h("div", { class: "card__actions", style: { justifyContent: "flex-end" } },
       h("button", { class: "btn btn--outline", text: "Cerrar sesión de GitHub", onclick: async () => { if (await confirmDialog("Cerrar sesión", "Se cerrará la sesión de gh en este equipo.", { okLabel: "Cerrar sesión", danger: true })) { await post("/api/auth/logout"); close(); await refreshStatus(); } } }),
       h("button", { class: "btn", text: "Guardar", onclick: async () => {

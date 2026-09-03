@@ -117,14 +117,25 @@ async function makeSea({ name, entry, output, assets }) {
  * SmartScreen. resedit edita los recursos del PE en JavaScript puro: no descarga binarios, que en la
  * red corporativa es justo lo que hay que evitar.
  */
+/**
+ * resedit es una dependencia de desarrollo relativamente nueva: si alguien actualiza el repositorio y
+ * construye sin reinstalar, faltaría y el ejecutable saldría con el icono de Node sin que se note.
+ * Mejor parar aquí con una instrucción clara que entregar un binario mal.
+ */
+function requireResedit() {
+  try {
+    return require("resedit");
+  } catch (error) {
+    if (error.code !== "MODULE_NOT_FOUND") throw error;
+    throw new Error("Falta el paquete 'resedit', necesario para poner el icono en los ejecutables. Ejecuta \"npm install\" (o \"npm run setup\") y vuelve a construir.");
+  }
+}
+
 async function brandExecutable(target, name) {
   const icon = path.join(root, "public", "brand", "doriath.ico");
-  if (!existsSync(icon)) {
-    log(`Sin ${path.relative(root, icon)}: el ejecutable se queda con el icono de Node.`);
-    return;
-  }
+  if (!existsSync(icon)) throw new Error(`Falta ${path.relative(root, icon)}: el ejecutable se quedaría con el icono de Node.`);
   try {
-    const ResEdit = require("resedit");
+    const ResEdit = requireResedit();
     // ignoreCert descarta la firma heredada de node.exe, que postject ya deja inservible al inyectar
     // el blob: mejor sin firma que con una corrupta.
     const executable = ResEdit.NtExecutable.from(await readFile(target), { ignoreCert: true });
@@ -147,7 +158,7 @@ async function brandExecutable(target, name) {
     await writeFile(target, Buffer.from(executable.generate()));
     log(`${path.basename(target)}: icono y versión aplicados.`);
   } catch (error) {
-    log(`No se pudo aplicar el icono a ${path.basename(target)}: ${error.message}`);
+    throw new Error(`No se pudo aplicar el icono a ${path.basename(target)}: ${error.message}`);
   }
 }
 
@@ -168,6 +179,7 @@ async function appendPayload(target, payload) {
 
 async function main() {
   if (!existsSync(path.join(target, "app", "src", "cli.mjs"))) throw new Error("Ejecuta primero build-dist.");
+  if (platform === "win32") requireResedit();
   if (!args.includes("--allow-low-space")) await ensureFreeSpace(dist, 1.5 * 1024 ** 3, "build:exe");
   await rm(build, { recursive: true, force: true });
   // 1. Launcher dentro del payload.

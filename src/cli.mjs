@@ -29,11 +29,15 @@ async function main() {
     const config = await loadConfig();
     const gh = await inspectGitHubCli(config.github.host);
     const git = await runCommand("git", ["--version"], { timeoutMs: 10000 });
+    const { readJson } = await import("./util/fs.mjs");
+    const build = paths.installRoot ? await readJson(`${paths.installRoot}/BUILD.json`, null) : null;
+    console.log(`Versión:          ${config.product.version}${build?.commit ? ` · commit ${String(build.commit).slice(0, 8)}` : ""}${build?.builtAt ? ` · construido ${build.builtAt}` : " · ejecutando desde el código fuente"}`);
+    console.log(`Instalación:      ${paths.installRoot || paths.appRoot}`);
     console.log(`Datos:            ${paths.dataRoot}`);
     console.log(`Host GitHub:      ${config.github.host}`);
     console.log(`Proxy de salida:  ${config.network.proxyUrl || "(ninguno)"}`);
     console.log(`Git:              ${git.ok ? git.stdout : "NO DISPONIBLE"}`);
-    console.log(`GitHub CLI:       ${gh.installed ? gh.version : "NO DISPONIBLE"}`);
+    console.log(`GitHub CLI:       ${gh.installed ? gh.version : "NO DISPONIBLE"}${gh.executable ? ` (${gh.executable})` : ""}`);
     console.log(`Sesión gh:        ${gh.authenticated ? `OK (${gh.login || "usuario"})` : "NO INICIADA"}`);
     if (gh.warning) console.log(`Aviso:            ${gh.warning}`);
     if (gh.otherHosts?.length) console.log(`Sesión en otros:  ${gh.otherHosts.join(", ")}`);

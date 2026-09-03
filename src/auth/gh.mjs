@@ -82,7 +82,7 @@ export function githubApiBase(host, type) {
 export async function inspectGitHubCli(host) {
   const version = await gh(["--version"], { timeoutMs: 15000 });
   if (!version.ok) {
-    return { installed: false, authenticated: false, error: version.error || "GitHub CLI no está instalado.", authOutput: "", warning: "", otherHosts: [] };
+    return { installed: false, authenticated: false, error: version.error || "GitHub CLI no está instalado.", authOutput: "", warning: "", otherHosts: [], executable: await ghCommand() };
   }
   const hostname = normalizeHostname(host);
   const auth = await gh(["auth", "status", "--hostname", hostname]);
@@ -119,6 +119,7 @@ export async function inspectGitHubCli(host) {
     warning,
     otherHosts,
     authOutput: output,
+    executable: await ghCommand(),
   };
 }
 
