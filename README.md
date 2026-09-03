@@ -123,7 +123,12 @@ docs/                                  FENIX-core.md, kdd-studio-funcionamiento.
 
 ## Maqueta interactiva
 
-`docs/demo/doriath-demo.html` es una maqueta autónoma del frontal (un solo fichero, sin servidor ni dependencias): ábrela con doble clic en cualquier navegador. Simula la puerta de login, el menú de bases de conocimiento, los tres módulos (importar y analizar documentos, catálogo y grafo de specs, asistente con generación de ficheros, iniciativa → repositorios → ejecución con diff y commit) y los ajustes, con datos ficticios en memoria.
+`docs/demo/doriath-demo.html` es una maqueta autónoma del frontal (un solo fichero, sin servidor ni dependencias): ábrela con doble clic en cualquier navegador. Lleva datos ficticios en memoria y un conmutador **Usuario / Admin** en la cabecera, porque la aplicación enseña dos caras muy distintas de la misma base de conocimiento:
+
+- **Usuario** — *Your Knowledge Bases*: sin una sola palabra de KDD. Sube documentos, Doriath "aprende" de ellos y contesta preguntas; si una respuesta no encaja, se corrige desde el propio chat y queda aprendida. Nunca se le habla de specs, capas ni IDs.
+- **Admin** — *Knowledge Bases Studio*: panel de salud (grafo, total de specs y reparto por capa ARCH/DOM/PROD/FEAT…), documentos con quién los incluyó y qué specs generaron, catálogo de specs con análisis y edición, gobernanza (ADR, RFC y reglas con responsable y estado) y un registro de actividad con quién ha cambiado qué y desde dónde.
+
+Las dos caras están conectadas: una corrección hecha por el usuario desde el chat aparece en el registro del administrador como un cambio en la spec correspondiente, listo para revisar.
 
 ## Identidad visual
 

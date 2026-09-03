@@ -91,6 +91,7 @@ code,pre{font-family:var(--font-mono);font-size:13px} [hidden]{display:none!impo
 .table th:first-child{border-radius:var(--radius-sm) 0 0 var(--radius-sm)} .table th:last-child{border-radius:0 var(--radius-sm) var(--radius-sm) 0}
 .table td{padding:10px 12px;border-bottom:1px solid var(--bbva-gray-2);vertical-align:top} .table tr.is-clickable{cursor:pointer} .table tr.is-clickable:hover td{background:rgba(133,200,255,.18)} .table tr.is-selected td{background:rgba(133,200,255,.35)}
 .table--compact td,.table--compact th{padding:6px 8px} .mono{font-family:var(--font-mono);font-size:12.5px}
+.table .mono{white-space:nowrap}
 .list{display:flex;flex-direction:column;gap:8px}
 .list-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-radius:var(--radius-sm);background:var(--bbva-sand);border:1px solid var(--bbva-gray-2)}
 .list-item.is-clickable{cursor:pointer} .list-item.is-clickable:hover{border-color:var(--bbva-serene-blue)} .list-item.is-active{background:var(--bbva-serene-blue);border-color:var(--bbva-serene-blue);color:var(--bbva-electric-blue)}
@@ -137,6 +138,33 @@ code,pre{font-family:var(--font-mono);font-size:13px} [hidden]{display:none!impo
 .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px} .legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;background:var(--dot)}
 .spinner{width:18px;height:18px;border:3px solid var(--bbva-gray-3);border-top-color:var(--bbva-electric-blue);border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:middle} @keyframes spin{to{transform:rotate(360deg)}}
 .demo-banner{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:40;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:6px 14px;border-radius:var(--radius-full);background:var(--bbva-canary);color:var(--bbva-electric-blue);box-shadow:var(--shadow-card)}
+.rolepick{display:inline-flex;padding:3px;gap:3px;border-radius:var(--radius-full);background:var(--bbva-gray-2)}
+.rolepick button{border:0;background:transparent;padding:5px 14px;border-radius:var(--radius-full);font-size:12px;font-weight:700;cursor:pointer;color:var(--bbva-gray-5)}
+.rolepick button.is-active{background:var(--bbva-electric-blue);color:#fff}
+.role-note{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--bbva-gray-5)}
+.bar-row{display:grid;grid-template-columns:132px 1fr 44px;align-items:center;gap:10px;font-size:13px;margin-bottom:7px}
+.bar{height:12px;border-radius:var(--radius-full);background:var(--bbva-gray-2);overflow:hidden}
+.bar span{display:block;height:100%;border-radius:var(--radius-full)}
+.bar-row b{text-align:right;font-variant-numeric:tabular-nums}
+.health{display:flex;align-items:baseline;gap:10px}
+.health__score{font-family:var(--bbva-font-display);font-size:52px;font-weight:700;line-height:1}
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl{display:grid;grid-template-columns:22px 1fr;gap:12px}
+.tl__rail{display:flex;flex-direction:column;align-items:center}
+.tl__dot{width:11px;height:11px;border-radius:50%;background:var(--bbva-serene-blue);margin-top:5px;flex-shrink:0}
+.tl__dot.is-chat{background:var(--bbva-canary)} .tl__dot.is-import{background:var(--bbva-lime)} .tl__dot.is-edit{background:var(--bbva-purple)} .tl__dot.is-gov{background:var(--bbva-mandarin)}
+.tl__line{flex:1;width:2px;background:var(--bbva-gray-2);margin:4px 0 0}
+.tl__body{padding-bottom:16px;min-width:0}
+.tl__meta{font-size:12px;color:var(--bbva-gray-5)}
+.dropzone{border:2px dashed var(--bbva-gray-3);border-radius:var(--radius-md);padding:var(--space-4);text-align:center;background:var(--bbva-white);cursor:pointer}
+.dropzone:hover{border-color:var(--bbva-serene-blue);background:rgba(133,200,255,.08)}
+.step{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px}
+.step__n{width:26px;height:26px;border-radius:50%;background:var(--bbva-electric-blue);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex-shrink:0}
+.learned{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--bbva-gray-2);font-size:14px}
+.learned:last-child{border-bottom:0}
+.learned__tick{color:var(--bbva-electric-blue);font-weight:700}
+.answer-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.avatar-sm{width:26px;height:26px;border-radius:50%;background:var(--bbva-serene-blue);color:var(--bbva-electric-blue);display:grid;place-items:center;font-weight:700;font-size:11px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -149,11 +177,7 @@ code,pre{font-family:var(--font-mono);font-size:13px} [hidden]{display:none!impo
         <div class="sidebar__product"><span class="sidebar__kicker">NFQ · BBVA CIB</span><span class="sidebar__name">Doriath</span></div>
       </div>
     </div>
-    <nav class="sidebar__nav" id="nav">
-      <a class="navlink" data-route="knowledge"><span class="navlink__index">01</span><span class="navlink__label">Knowledge Base Studio</span><span class="navlink__hint">Documentos y specs</span></a>
-      <a class="navlink" data-route="assistant"><span class="navlink__index">02</span><span class="navlink__label">BBVA CIB Assistant</span><span class="navlink__hint">Conversación y entregables</span></a>
-      <a class="navlink" data-route="work"><span class="navlink__index">03</span><span class="navlink__label">Knowledge-Driven Development</span><span class="navlink__hint">Iniciativas, repositorios y cambios</span></a>
-    </nav>
+    <nav class="sidebar__nav" id="nav"></nav>
     <div class="sidebar__sources">
       <div class="sidebar__section-title"><span>Bases de conocimiento</span><button class="btn btn--ghost btn--xs" id="btnManageSources">Gestionar</button></div>
       <div id="sourceMenu" class="source-menu"></div>
@@ -167,6 +191,7 @@ code,pre{font-family:var(--font-mono);font-size:13px} [hidden]{display:none!impo
     <header class="topbar">
       <div class="breadcrumb" id="breadcrumb"><span>DORIATH</span></div>
       <div class="topbar__actions">
+        <div class="rolepick" id="rolePicker"></div>
         <div class="model-picker"><select id="modelPicker"><option>Modelo automático</option><option>gpt-5</option><option>claude-sonnet-4.5</option><option>gpt-4.1</option></select></div>
         <button class="btn btn--ghost btn--sm" id="btnSettings">Ajustes</button>
         <span class="wordmark wordmark--electric">BBVA</span>
@@ -185,6 +210,8 @@ code,pre{font-family:var(--font-mono);font-size:13px} [hidden]{display:none!impo
    ni Copilot, ni git. Sirve para enseñar el flujo y el aspecto del frontal real.
    ===================================================================================== */
 const state = {
+  // "user": quien solo aporta documentos y pregunta. "admin": quien mantiene la base de conocimiento.
+  role: "user",
   route: "knowledge", loggedIn: false, gateDismissed: false,
   activeSource: "cib-payments",
   sources: [
@@ -192,18 +219,46 @@ const state = {
     { id: "trade-finance", name: "Trade Finance Core", sourceId: "S002", path: "C:\\Doriath\\knowledge-bases\\trade-finance", specs: 9, docs: 2, ok: true },
     { id: "fx-desk", name: "FX Desk Tools", sourceId: "S003", path: "D:\\repos\\fx-desk\\kdd", specs: 0, docs: 0, ok: false },
   ],
-  kbTab: "documents", workTab: "initiatives",
+  studioTab: "dashboard", workTab: "initiatives",
   documents: [
-    { name: "Manual-Operativo-Pagos-SEPA.docx", size: "1,2 MB", pages: 48, imported: "hoy 09:12", status: "analizado" },
-    { name: "Requisitos-Instant-Payments-v3.pdf", size: "860 KB", pages: 31, imported: "ayer 17:40", status: "analizado" },
-    { name: "Arquitectura-Target2-Conectividad.pptx", size: "4,1 MB", pages: 22, imported: "ayer 16:05", status: "pendiente" },
-    { name: "Catalogo-Errores-ISO20022.xlsx", size: "310 KB", pages: 6, imported: "ayer 16:05", status: "pendiente" },
+    { name: "Manual-Operativo-Pagos-SEPA.docx", size: "1,2 MB", pages: 48, imported: "hoy 09:12", status: "analizado", by: "Ana López", specs: ["DOM-PAY-S001-003", "FEAT-PAY-S001-001", "DOC-PAY-S001-001"] },
+    { name: "Requisitos-Instant-Payments-v3.pdf", size: "860 KB", pages: 31, imported: "ayer 17:40", status: "analizado", by: "Carlos Ruiz", specs: ["PROD-PAY-S001-002", "FEAT-PAY-S001-004"] },
+    { name: "Arquitectura-Target2-Conectividad.pptx", size: "4,1 MB", pages: 22, imported: "ayer 16:05", status: "pendiente", by: "Marta Gil", specs: [] },
+    { name: "Catalogo-Errores-ISO20022.xlsx", size: "310 KB", pages: 6, imported: "ayer 16:05", status: "pendiente", by: "Marta Gil", specs: [] },
   ],
   analyses: [], specs: [], selectedSpec: null,
   assistantChats: [], activeChat: null, files: [],
   workChats: [], activeWork: null, repos: [], runs: [], activeRun: null,
   analyzing: false,
+  // Lo que el usuario "de a pie" ve de su base: sin specs ni IDs, solo lo aprendido.
+  learned: [
+    "Una transferencia SEPA se valida comprobando el IBAN y, si viene, el BIC.",
+    "El límite por operación en transferencia inmediata es de 100.000 EUR.",
+    "Si el filtro de sanciones da un acierto, la orden queda bloqueada hasta revisión manual.",
+    "Los canales de emisión para clientes corporativos son Host-to-Host y Net Cash.",
+  ],
+  userChat: [],
+  // Registro de gobernanza: quién ha tocado qué y desde dónde.
+  activity: [
+    { at: "hoy 09:14", actor: "Ana López", kind: "import", title: "Importó Manual-Operativo-Pagos-SEPA.docx", detail: "3 specs creadas: DOM-PAY-S001-003, FEAT-PAY-S001-001, DOC-PAY-S001-001" },
+    { at: "hoy 08:41", actor: "Carlos Ruiz", kind: "edit", title: "Modificó FEAT-PAY-S001-002", detail: "Límite por operación acotado a SCT Inst · versión 1.0 → 1.1" },
+    { at: "ayer 18:02", actor: "Marta Gil", kind: "gov", title: "Aceptó ADR-PAY-S001-001", detail: "Kafka como bus de eventos de pagos" },
+    { at: "ayer 17:45", actor: "Carlos Ruiz", kind: "import", title: "Importó Requisitos-Instant-Payments-v3.pdf", detail: "2 specs creadas: PROD-PAY-S001-002, FEAT-PAY-S001-004" },
+    { at: "ayer 16:20", actor: "Ana López", kind: "chat", title: "Corrigió desde el chat", detail: "PROD-PAY-S001-002: el plazo de confirmación es de 10 s, no de 20 s" },
+  ],
+  governance: [
+    { id: "ADR-PAY-S001-001", kind: "ADR", title: "Kafka como bus de eventos de pagos", status: "accepted", owner: "Marta Gil", at: "ayer" },
+    { id: "ADR-PAY-S001-002", kind: "ADR", title: "Idempotencia por end-to-end id", status: "discussion", owner: "Carlos Ruiz", at: "hoy" },
+    { id: "RFC-PAY-S001-001", kind: "RFC", title: "Devoluciones automáticas de SCT Inst", status: "proposed", owner: "Ana López", at: "hoy" },
+    { id: "RULE-PAY-S001-001", kind: "Regla", title: "Nomenclatura de eventos de dominio", status: "active", owner: "Marta Gil", at: "hace 3 días" },
+    { id: "RULE-PAY-S001-002", kind: "Regla", title: "Toda spec de producto necesita criterios de aceptación", status: "active", owner: "Marta Gil", at: "hace 3 días" },
+  ],
 };
+const PEOPLE = { "Ana López": "AL", "Carlos Ruiz": "CR", "Marta Gil": "MG" };
+const ME = "Ana López";
+function logActivity(entry) {
+  state.activity.unshift({ at: "ahora", actor: ME, ...entry });
+}
 const seedSpecs = [
   ["ARCH-PAY-S001-001","architecture","Plataforma de pagos CIB","active","1.2"],
   ["ARCH-PAY-S001-002","architecture","Conectividad TARGET2 y EBA STEP2","active","1.0"],
@@ -224,7 +279,13 @@ const seedSpecs = [
   ["ADR-PAY-S001-001","adr","Kafka como bus de eventos de pagos","active","1.0"],
   ["RULE-PAY-S001-001","rule","Nomenclatura de eventos de dominio","active","1.0"],
 ];
-state.specs = seedSpecs.map(([id, layer, title, status, version]) => ({ id, layer, title, status, version, deps: [] }));
+const OWNERS = ["Ana López", "Carlos Ruiz", "Marta Gil"];
+const TOUCHED = ["hoy 09:14", "hoy 08:41", "ayer 18:02", "ayer 17:45", "hace 2 días", "hace 5 días"];
+state.specs = seedSpecs.map(([id, layer, title, status, version], index) => ({
+  id, layer, title, status, version, deps: [],
+  owner: OWNERS[index % OWNERS.length],
+  updatedAt: TOUCHED[index % TOUCHED.length],
+}));
 state.specs[5].deps = ["DOM-PAY-S001-001","FEAT-PAY-S001-001","FEAT-PAY-S001-002"];
 state.specs[6].deps = ["DOM-PAY-S001-003","ARCH-PAY-S001-002","FEAT-PAY-S001-003"];
 state.specs[12].deps = ["PROD-PAY-S001-002"]; state.specs[13].deps = ["WSPEC-PAY-S001-001"]; state.specs[14].deps = ["WPLAN-PAY-S001-001"]; state.specs[15].deps = ["WPLAN-PAY-S001-001"];
@@ -308,8 +369,43 @@ function md(text) {
 }
 
 /* ---------- shell: navegación, fuentes, sesión, puerta de login ---------- */
+// Cada rol ve su propio menú. El usuario no ve nada de KDD: ni specs, ni repositorios.
+const ROUTES = {
+  user: [
+    { id: "knowledge", label: "Your Knowledge Bases", hint: "Tus documentos y tus respuestas" },
+    { id: "assistant", label: "BBVA CIB Assistant", hint: "Conversación y entregables" },
+  ],
+  admin: [
+    { id: "studio", label: "Knowledge Bases Studio", hint: "Specs, gobernanza y salud" },
+    { id: "assistant", label: "BBVA CIB Assistant", hint: "Conversación y entregables" },
+    { id: "work", label: "Knowledge-Driven Development", hint: "Iniciativas, repositorios y cambios" },
+  ],
+};
+function routesForRole() { return ROUTES[state.role]; }
+
 function renderNav() {
-  for (const link of document.querySelectorAll(".navlink")) link.classList.toggle("is-active", link.dataset.route === state.route);
+  const nav = $("nav");
+  nav.replaceChildren(...routesForRole().map((route, index) => h("a", {
+    class: `navlink${route.id === state.route ? " is-active" : ""}`,
+    onclick: () => { state.route = route.id; render(); },
+  },
+  h("span", { class: "navlink__index", text: String(index + 1).padStart(2, "0") }),
+  h("span", { class: "navlink__label", text: route.label }),
+  h("span", { class: "navlink__hint", text: route.hint }))));
+}
+
+function setRole(role) {
+  if (state.role === role) return;
+  state.role = role;
+  // Al cambiar de rol se salta a la primera pantalla disponible si la actual no existe en ese rol.
+  if (!routesForRole().some((route) => route.id === state.route)) state.route = routesForRole()[0].id;
+  renderRolePicker(); renderSources(); renderSession(); render();
+  toast(role === "admin" ? "Modo administrador: mantenimiento de la base de conocimiento." : "Modo usuario: importar documentos y preguntar.", "info");
+}
+
+function renderRolePicker() {
+  $("rolePicker").replaceChildren(...[["user", "Usuario"], ["admin", "Admin"]].map(([id, label]) =>
+    h("button", { class: state.role === id ? "is-active" : "", text: label, onclick: () => setRole(id) })));
 }
 function renderSources() {
   const menu = $("sourceMenu"); menu.replaceChildren();
@@ -317,12 +413,15 @@ function renderSources() {
   for (const source of state.sources) {
     menu.append(h("div", { class: `source-item${source.id === state.activeSource ? " is-active" : ""}${source.ok ? "" : " is-missing"}`, onclick: () => { state.activeSource = source.id; renderSources(); render(); } },
       h("span", { class: "source-item__dot" }),
-      h("div", { style: { minWidth: 0 } }, h("div", { class: "source-item__name", text: source.name }), h("div", { class: "source-item__meta", text: source.ok ? `${source.sourceId} · ${source.specs} specs · ${source.docs} docs` : `${source.sourceId} · carpeta no encontrada` }))));
+      h("div", { style: { minWidth: 0 } }, h("div", { class: "source-item__name", text: source.name }),
+        h("div", { class: "source-item__meta", text: !source.ok ? "carpeta no encontrada"
+          : state.role === "admin" ? `${source.sourceId} · ${source.specs} specs · ${source.docs} docs`
+            : `${source.docs} documento${source.docs === 1 ? "" : "s"}` }))));
   }
 }
 function renderSession() {
   const badge = $("sessionBadge"); badge.replaceChildren();
-  if (state.loggedIn) badge.append(h("div", { class: "session__avatar", text: "AL" }), h("div", {}, h("div", { class: "session__name", text: "ana.lopez@bbva.com" }), h("div", { class: "session__state", text: "bbva.ghe.com · Copilot OK · 4 modelos" })));
+  if (state.loggedIn) badge.append(h("div", { class: "session__avatar", text: PEOPLE[ME] }), h("div", {}, h("div", { class: "session__name", text: "ana.lopez@bbva.com" }), h("div", { class: "session__state", text: state.role === "admin" ? "Administradora de la base · bbva.ghe.com" : "bbva.ghe.com · Copilot OK" })));
   else badge.append(h("div", { class: "session__avatar", text: "?" }), h("div", {}, h("div", { class: "session__name", text: "Sin sesión" }), h("button", { class: "btn btn--accent btn--xs", text: "Iniciar sesión", onclick: startLogin })));
 }
 function renderGate() {
@@ -429,151 +528,749 @@ async function streamTools(typing, tools) {
 }
 
 /* =====================================================================================
-   01 · Knowledge Base Studio
+   01 · Your Knowledge Bases (rol usuario)
+   Sin una sola palabra de KDD: ni specs, ni capas, ni IDs. Documentos que se suben y
+   conocimiento que se puede preguntar y corregir.
    ===================================================================================== */
-const KB_TABS = [["documents", "Documentos"], ["analyses", "Análisis"], ["specs", "Specs"], ["graph", "Grafo"], ["create", "Crear specs"], ["pending", "Pendientes"]];
-function renderKnowledge(container) {
-  setBreadcrumb("Knowledge Base Studio");
+function renderUserKnowledge(container) {
+  setBreadcrumb("Your Knowledge Bases");
   const source = activeSource();
-  if (!source) { container.append(h("div", { class: "card card--electric" }, h("p", { class: "ante-title", text: "Knowledge Base Studio" }), h("h1", { text: "Empieza con una base de conocimiento" }), h("p", { class: "lead", style: { marginTop: "12px" }, text: "Añade una carpeta KDD local o crea una nueva." }), h("div", { class: "card__actions", style: { marginTop: "20px" } }, h("button", { class: "btn btn--accent", text: "Gestionar bases de conocimiento", onclick: openSourcesManager })))); return; }
-  const specs = state.specs;
-  const tabsNode = h("div", { class: "tabs" }); const body = h("div");
-  container.append(
-    h("div", { class: "card card--electric" }, h("div", { class: "card__header" }, h("div", {}, h("p", { class: "ante-title", text: `Base de conocimiento · ${source.sourceId}` }), h("h1", { text: source.name }), h("p", { class: "small", style: { marginTop: "6px", opacity: .85 }, text: source.path })), h("div", { class: "card__actions" }, h("button", { class: "btn btn--accent btn--sm", text: "Abrir carpeta", onclick: () => toast("Se abre la carpeta en el Explorador") })))),
-    h("div", { class: "bento bento--4" },
-      h("div", { class: "card card--serene" }, h("div", { class: "stat" }, h("span", { class: "stat__value", text: specs.length }), h("span", { class: "stat__label", text: "specs" }))),
-      h("div", { class: "card card--lime" }, h("div", { class: "stat" }, h("span", { class: "stat__value", text: specs.filter((s) => s.status === "active").length }), h("span", { class: "stat__label", text: "activas" }))),
-      h("div", { class: "card card--canary" }, h("div", { class: "stat" }, h("span", { class: "stat__value", text: specs.filter((s) => s.status === "draft").length }), h("span", { class: "stat__label", text: "borradores" }))),
-      h("div", { class: "card card--ice" }, h("div", { class: "stat" }, h("span", { class: "stat__value", text: state.documents.length }), h("span", { class: "stat__label", text: "documentos" })))),
-    tabsNode, body);
-  const select = (id) => { state.kbTab = id; tabsNode.replaceChildren(...KB_TABS.map(([tid, label]) => h("button", { class: `tab${tid === id ? " is-active" : ""}`, text: label, onclick: () => select(tid) }))); body.replaceChildren(); ({ documents: renderDocuments, analyses: renderAnalyses, specs: renderSpecs, graph: renderGraph, create: renderCreate, pending: renderPending })[id](body); };
-  select(state.kbTab);
+  if (!source) {
+    container.append(h("div", { class: "card card--electric" },
+      h("p", { class: "ante-title", text: "Tus bases de conocimiento" }),
+      h("h1", { text: "Empieza creando una" }),
+      h("p", { class: "lead", style: { marginTop: "12px" }, text: "Una base de conocimiento es, sencillamente, todo lo que Doriath sabe sobre un tema tuyo." }),
+      h("div", { class: "card__actions", style: { marginTop: "20px" } }, h("button", { class: "btn btn--accent", text: "Crear una base de conocimiento", onclick: openSourcesManager }))));
+    return;
+  }
 
-  function renderDocuments(node) {
+  const learnedNode = h("div", {});
+  const resultNode = h("div", {});
+  const chatHost = h("div", {});
+
+  container.append(
+    h("div", { class: "card card--electric" },
+      h("div", { class: "card__header" },
+        h("div", {},
+          h("p", { class: "ante-title", text: "Tu base de conocimiento" }),
+          h("h1", { text: source.name }),
+          h("p", { class: "lead", style: { marginTop: "10px", opacity: .9 }, text: "Sube los documentos de tu equipo y Doriath los lee y aprende de ellos. Después pregúntale lo que necesites; si una respuesta no te encaja, se lo dices y lo corrige." })),
+        h("div", { class: "card__actions" }, h("button", { class: "btn btn--accent btn--sm", text: "Nueva base", onclick: openSourcesManager }))),
+      h("div", { class: "chips", style: { marginTop: "18px" } },
+        h("span", { class: "chip chip--serene", text: `${state.documents.length} documentos` }),
+        h("span", { class: "chip chip--lime", text: `${state.learned.length} cosas aprendidas` }),
+        h("span", { class: "chip chip--ice", text: "Lista para preguntar" }))),
+    h("div", { class: "bento bento--main-aside" }, documentsCard(), howItWorksCard()),
+    resultNode,
+    h("div", { class: "bento bento--main-aside" }, chatCard(), learnedCard()),
+  );
+  renderLearned();
+  mountChat();
+
+  function documentsCard() {
     const selected = new Set();
-    const analyzeButton = h("button", { class: "btn btn--lime", text: "Analizar seleccionados", disabled: true, onclick: () => startAnalysis([...selected]) });
-    const tbody = h("tbody");
-    const refresh = () => tbody.replaceChildren(...state.documents.map((d) => h("tr", { class: `is-clickable${selected.has(d.name) ? " is-selected" : ""}`, onclick: () => { selected.has(d.name) ? selected.delete(d.name) : selected.add(d.name); analyzeButton.disabled = !selected.size; refresh(); } },
-      h("td", {}, h("input", { type: "checkbox", checked: selected.has(d.name), onclick: (e) => e.stopPropagation(), onchange: () => { selected.has(d.name) ? selected.delete(d.name) : selected.add(d.name); analyzeButton.disabled = !selected.size; refresh(); } })),
-      h("td", {}, h("strong", { text: d.name }), h("div", { class: "small muted", text: `${d.size} · ${d.pages} páginas` })), h("td", { text: d.imported }), h("td", {}, statusChip(d.status)),
-      h("td", {}, h("div", { class: "card__actions" }, h("button", { class: "btn btn--outline btn--xs", text: "Texto", onclick: (e) => { e.stopPropagation(); showText(d); } }), h("button", { class: "btn btn--outline btn--xs", text: "Descargar", onclick: (e) => { e.stopPropagation(); toast(`Descargando ${d.name}`); } }), h("button", { class: "btn btn--danger btn--xs", text: "Borrar", onclick: (e) => { e.stopPropagation(); state.documents = state.documents.filter((x) => x !== d); refresh(); toast(`${d.name} borrado`); } }))))));
+    const listNode = h("div", { class: "list" });
+    const learnButton = h("button", { class: "btn btn--lime", text: "Aprender de estos documentos", disabled: true, onclick: () => learn([...selected]) });
+    const refresh = () => {
+      listNode.replaceChildren(...state.documents.map((doc) => {
+        const checkbox = h("input", { type: "checkbox", checked: selected.has(doc.name), onchange: () => { selected.has(doc.name) ? selected.delete(doc.name) : selected.add(doc.name); learnButton.disabled = !selected.size; refresh(); } });
+        return h("label", { class: `list-item${selected.has(doc.name) ? " is-active" : ""}`, style: { cursor: "pointer" } },
+          h("span", { class: "list-item__main" },
+            h("span", { class: "list-item__title", text: doc.name }),
+            h("span", { class: "list-item__meta", text: `${doc.size} · lo subió ${doc.by}, ${doc.imported}` })),
+          h("span", { style: { display: "flex", alignItems: "center", gap: "10px" } },
+            doc.status === "analizado" ? h("span", { class: "chip chip--lime", text: "Aprendido" }) : h("span", { class: "chip", text: "Sin aprender" }),
+            checkbox));
+      }));
+    };
+    refresh();
+    return h("div", { class: "card" },
+      h("div", { class: "card__header" },
+        h("div", {}, h("p", { class: "ante-title", text: "Paso 1" }), h("h2", { text: "Sube tus documentos" })),
+        h("span", { class: "chip chip--outline", text: "PDF · Word · PowerPoint · Excel" })),
+      h("div", { class: "dropzone", onclick: addDocument },
+        h("p", { style: { fontWeight: 700, marginBottom: "4px" }, text: "Arrastra aquí tus documentos" }),
+        h("p", { class: "small muted", text: "o pulsa para elegirlos en tu equipo" })),
+      h("div", { style: { marginTop: "16px" } }, listNode),
+      h("div", { class: "card__actions", style: { marginTop: "16px" } }, learnButton,
+        h("span", { class: "small muted", text: "Marca los que quieras que lea." })));
+
+    function addDocument() {
+      const nuevo = { name: "Politica-Sanciones-2026.pdf", size: "540 KB", pages: 17, imported: "ahora", status: "pendiente", by: ME, specs: [] };
+      if (state.documents.some((doc) => doc.name === nuevo.name)) { toast("Ese documento ya está subido."); return; }
+      state.documents.push(nuevo);
+      logActivity({ kind: "import", title: `Subió ${nuevo.name}`, detail: "Pendiente de analizar" });
+      refresh(); toast("Documento subido", "ok");
+    }
+
+    async function learn(names) {
+      resultNode.replaceChildren();
+      const progress = h("div", { class: "progress" }, h("div", { class: "progress__bar", style: { width: "8%" } }));
+      const stepText = h("p", { class: "small", style: { marginTop: "10px" } }, "Abriendo los documentos…");
+      const card = h("div", { class: "card card--serene" },
+        h("p", { class: "ante-title", text: "Aprendiendo" }),
+        h("h3", { text: names.join(", ") }), h("div", { style: { marginTop: "14px" } }, progress), stepText);
+      resultNode.append(card);
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+      const steps = [["Leyendo los documentos…", 35], ["Ordenando lo que ha aprendido…", 70], ["Comprobando que no se contradice con lo anterior…", 92]];
+      for (const [text, width] of steps) {
+        await sleep(1100);
+        stepText.textContent = text;
+        progress.firstChild.style.width = `${width}%`;
+      }
+      await sleep(900);
+      progress.firstChild.style.width = "100%";
+
+      const nuevas = [
+        "Una orden bloqueada por sanciones se resuelve a mano en un máximo de 2 días hábiles.",
+        "Las transferencias inmediatas funcionan 24x7, también fines de semana y festivos.",
+        "El canal Host-to-Host admite envíos en lote; Net Cash es de uno en uno.",
+      ];
+      state.learned.push(...nuevas);
+      for (const name of names) {
+        const doc = state.documents.find((item) => item.name === name);
+        if (doc) doc.status = "analizado";
+      }
+      logActivity({ kind: "import", title: `Analizó ${names.length} documento(s)`, detail: `${nuevas.length} cosas nuevas aprendidas` });
+      renderLearned(); refresh();
+
+      const dudas = [
+        "¿El límite de 100.000 € es solo para transferencias inmediatas, o también para las normales?",
+        "El manual dice 2 días hábiles para desbloquear una orden retenida, pero en otro documento pone 24 horas. ¿Cuál vale?",
+      ];
+      resultNode.replaceChildren(
+        h("div", { class: "card card--lime" },
+          h("p", { class: "ante-title", text: "Listo" }),
+          h("h2", { text: `He aprendido ${nuevas.length} cosas nuevas` }),
+          h("div", { style: { marginTop: "14px" } }, nuevas.map((item) => h("div", { class: "learned" }, h("span", { class: "learned__tick", text: "✓" }), h("span", { text: item })))),
+          h("p", { class: "small", style: { marginTop: "14px" }, text: "Ya puedes preguntarme sobre esto ahí abajo." })),
+        h("div", { class: "card card--canary", style: { marginTop: "16px" } },
+          h("p", { class: "ante-title", text: "Necesito que me lo aclares" }),
+          h("h3", { text: `Tengo ${dudas.length} dudas` }),
+          h("p", { class: "small", style: { margin: "8px 0 14px" }, text: "Son cosas que los documentos dicen de dos maneras distintas. Con tu respuesta me quedo con la buena." }),
+          h("div", { class: "list" }, dudas.map((duda) => {
+            const answer = h("input", { class: "input", placeholder: "Escribe aquí la respuesta correcta…" });
+            const row = h("div", { class: "list-item", style: { flexWrap: "wrap", background: "rgba(255,255,255,.55)" } },
+              h("div", { class: "list-item__main", style: { width: "100%" } }, h("div", { style: { whiteSpace: "normal", fontWeight: 700 }, text: duda })),
+              h("div", { class: "form-row", style: { width: "100%", marginTop: "8px" } }, answer,
+                h("button", { class: "btn btn--sm", text: "Responder", onclick: () => {
+                  if (!answer.value.trim()) { toast("Escribe la respuesta primero.", "error"); return; }
+                  state.learned.push(answer.value.trim());
+                  logActivity({ kind: "chat", title: "Resolvió una duda del análisis", detail: answer.value.trim() });
+                  renderLearned();
+                  row.replaceChildren(h("div", { class: "list-item__main" }, h("div", { class: "list-item__title", text: "Resuelta" }), h("div", { class: "list-item__meta", style: { whiteSpace: "normal" }, text: answer.value.trim() })), h("span", { class: "chip chip--lime", text: "Aprendido" }));
+                  toast("Gracias, lo he apuntado", "ok");
+                } })));
+            return row;
+          }))));
+      toast("Doriath ha aprendido de tus documentos", "ok");
+    }
+  }
+
+  function howItWorksCard() {
+    return h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } },
+      h("div", { class: "card card--sand" },
+        h("p", { class: "ante-title", text: "Cómo funciona" }),
+        h("div", { style: { marginTop: "12px" } },
+          [["Sube documentos", "Manuales, procedimientos, presentaciones… lo que ya tenga tu equipo."],
+           ["Doriath los lee", "Se queda con lo importante y te avisa si dos documentos se contradicen."],
+           ["Pregunta y corrige", "Si una respuesta no te encaja, se lo dices y lo aprende para siempre."]]
+            .map(([title, text], index) => h("div", { class: "step" },
+              h("div", { class: "step__n", text: String(index + 1) }),
+              h("div", {}, h("div", { style: { fontWeight: 700 }, text: title }), h("div", { class: "small muted", text })))))),
+      h("div", { class: "card card--ice" },
+        h("p", { class: "ante-title", text: "Prueba a preguntar" }),
+        h("div", { class: "list", style: { marginTop: "10px" } },
+          ["¿Cuánto puedo enviar en una transferencia inmediata?",
+           "¿Qué pasa si el filtro de sanciones salta?",
+           "¿Qué canales puede usar un cliente corporativo?"].map((text) =>
+            h("div", { class: "list-item is-clickable", style: { background: "rgba(255,255,255,.6)" }, onclick: () => askFromExample(text) },
+              h("div", { class: "list-item__main" }, h("div", { style: { whiteSpace: "normal" }, text })))))));
+  }
+
+  function learnedCard() {
+    return h("div", { class: "card" }, h("p", { class: "ante-title", text: "Lo que Doriath sabe" }), learnedNode);
+  }
+
+  function renderLearned() {
+    learnedNode.replaceChildren(
+      h("p", { class: "small muted", style: { marginBottom: "10px" }, text: `${state.learned.length} cosas aprendidas de tus documentos y de tus correcciones.` }),
+      ...state.learned.slice(-8).reverse().map((item) => h("div", { class: "learned" }, h("span", { class: "learned__tick", text: "✓" }), h("span", { text: item }))));
+  }
+
+  /* ---- Chat: preguntar y, si la respuesta no gusta, corregirla ---- */
+  function askFromExample(text) {
+    const box = chatHost.querySelector("textarea");
+    if (box) { box.value = text; box.focus(); }
+  }
+
+  function mountChat() {
+    if (!state.userChat.length) {
+      state.userChat.push({ role: "assistant", text: "Pregúntame lo que quieras sobre **" + source.name + "**. Si te contesto algo que no es correcto, pulsa «No es así» y lo corrijo." });
+    }
+    chatCardRender();
+  }
+
+  function chatCard() { return chatHost; }
+
+  function chatCardRender() {
+    const thread = h("div", { class: "chat__thread", style: { maxHeight: "460px" } });
+    const textarea = h("textarea", { placeholder: "Escribe tu pregunta…" });
+    const paint = () => {
+      thread.replaceChildren(...state.userChat.map((message, index) => {
+        const bubble = h("div", { class: `msg msg--${message.role}` },
+          h("div", { class: "msg__meta", text: message.role === "user" ? "Tú" : "Doriath" }),
+          message.role === "user" ? h("div", { text: message.text }) : md(message.text));
+        if (message.role === "assistant" && index > 0 && !message.settled) {
+          bubble.append(h("div", { class: "answer-actions" },
+            h("button", { class: "btn btn--outline btn--xs", text: "Es correcto", onclick: () => { message.settled = "ok"; paint(); toast("Gracias, lo doy por bueno"); } }),
+            h("button", { class: "btn btn--danger btn--xs", text: "No es así, corregir", onclick: () => openCorrection(message, bubble, paint) })));
+        }
+        if (message.settled === "ok") bubble.append(h("div", { class: "chips", style: { marginTop: "8px" } }, h("span", { class: "chip chip--lime", text: "Confirmado por ti" })));
+        if (message.settled === "fixed") bubble.append(h("div", { class: "chips", style: { marginTop: "8px" } }, h("span", { class: "chip chip--canary", text: "Corregido por ti" })));
+        return bubble;
+      }));
+      thread.scrollTop = thread.scrollHeight;
+    };
+    const send = async () => {
+      const text = textarea.value.trim();
+      if (!text) return;
+      textarea.value = "";
+      state.userChat.push({ role: "user", text });
+      paint();
+      const typing = h("div", { class: "msg msg--assistant" }, h("div", { class: "msg__meta", text: "Doriath" }), h("div", { class: "typing" }, h("span"), h("span"), h("span")));
+      thread.append(typing); thread.scrollTop = thread.scrollHeight;
+      await sleep(1400);
+      typing.remove();
+      state.userChat.push({ role: "assistant", text: answerFor(text) });
+      paint();
+    };
+    textarea.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); send(); } });
+    chatHost.replaceChildren(h("div", { class: "card" },
+      h("div", { class: "card__header" },
+        h("div", {}, h("p", { class: "ante-title", text: "Paso 2" }), h("h2", { text: "Pregunta a tu base de conocimiento" })),
+        h("span", { class: "chip chip--outline", text: "Corrige lo que no te encaje" })),
+      thread,
+      h("div", { class: "composer", style: { position: "static", boxShadow: "none", border: "1px solid var(--bbva-gray-2)" } },
+        textarea,
+        h("div", { class: "composer__bar" },
+          h("span", { class: "small muted", text: "Enter envía · Shift+Enter salto de línea" }),
+          h("button", { class: "btn", text: "Preguntar", onclick: send })))));
+    paint();
+  }
+
+  function answerFor(question) {
+    const lower = question.toLowerCase();
+    if (/l[íi]mite|cu[áa]nto|importe/.test(lower)) return "En una **transferencia inmediata** puedes enviar hasta **100.000 EUR por operación**, las 24 horas, todos los días del año.\n\nPara transferencias normales manda el límite diario que tengas firmado en el contrato.";
+    if (/sanci|bloque|screening/.test(lower)) return "Si el filtro de sanciones da un acierto, la orden **no se liquida**: queda retenida y la revisa una persona de cumplimiento. El plazo máximo para resolverla es de **2 días hábiles**.";
+    if (/canal|host|net cash/.test(lower)) return "Un cliente corporativo puede enviar por **Host-to-Host** (admite lotes) o por **Net Cash** (de una en una).";
+    return "Por lo que me has enseñado, esto es lo que tengo:\n\n- " + state.learned.slice(-3).join("\n- ") + "\n\nSi te falta algo, sube el documento donde venga y lo aprendo.";
+  }
+
+  function openCorrection(message, bubble, paint) {
+    const input = h("textarea", { class: "textarea", placeholder: "Escribe lo que es correcto. Por ejemplo: «el plazo son 24 horas, no 2 días»." });
+    const panel = h("div", { class: "card card--canary", style: { marginTop: "12px" } },
+      h("p", { class: "ante-title", text: "Corrígeme" }),
+      h("p", { class: "small", style: { marginBottom: "10px" }, text: "Dime qué es lo correcto y lo cambio en tu base de conocimiento. La próxima vez te contestaré con esto." }),
+      input,
+      h("div", { class: "card__actions", style: { marginTop: "12px", justifyContent: "flex-end" } },
+        h("button", { class: "btn btn--outline btn--sm", text: "Cancelar", onclick: () => panel.remove() }),
+        h("button", { class: "btn btn--sm", text: "Guardar la corrección", onclick: () => {
+          const value = input.value.trim();
+          if (!value) { toast("Escribe la corrección primero.", "error"); return; }
+          message.settled = "fixed";
+          state.learned.push(value);
+          // La corrección de un usuario es un cambio real en la base: queda firmado en gobernanza.
+          const target = state.specs.find((spec) => spec.layer === "product") || state.specs[0];
+          target.version = bumpVersion(target.version);
+          target.updatedAt = "ahora";
+          logActivity({ kind: "chat", title: `Corrigió ${target.id} desde el chat`, detail: value });
+          panel.remove();
+          state.userChat.push({ role: "assistant", text: "Hecho, lo he corregido: **" + value + "**\n\nLo tendré en cuenta a partir de ahora.", settled: "ok" });
+          renderLearned(); paint();
+          toast("Base de conocimiento actualizada", "ok");
+        } })));
+    bubble.append(panel);
+    input.focus();
+  }
+}
+
+function bumpVersion(version) {
+  const [major, minor] = String(version || "1.0").split(".").map(Number);
+  return `${major}.${(minor || 0) + 1}`;
+}
+
+/* =====================================================================================
+   01b · Knowledge Bases Studio (rol admin)
+   Aquí sí se habla de specs: panel de salud, catálogo, gobernanza y quién ha tocado qué.
+   ===================================================================================== */
+const STUDIO_TABS = [["dashboard", "Panel"], ["documents", "Documentos"], ["specs", "Specs"], ["governance", "Gobernanza"], ["activity", "Actividad"]];
+const LAYER_PREFIX = { architecture: "ARCH", domain: "DOM", product: "PROD", feature: "FEAT", docs: "DOC", "work-spec": "WSPEC", "work-plan": "WPLAN", "work-task": "WTASK", adr: "ADR", rule: "RULE" };
+
+/** Problemas que impiden que la base esté sana: dependencias rotas, huérfanas y secciones que faltan. */
+function kbIssues() {
+  const ids = new Set(state.specs.map((spec) => spec.id));
+  const issues = [];
+  for (const spec of state.specs) {
+    for (const dep of spec.deps) {
+      if (!ids.has(dep)) issues.push({ level: "error", spec: spec.id, text: `depende de ${dep}, que no existe` });
+    }
+  }
+  for (const spec of state.specs) {
+    if (spec.layer === "product" && spec.status === "draft") issues.push({ level: "warn", spec: spec.id, text: "spec de producto en borrador sin criterios de aceptación" });
+  }
+  const referenced = new Set(state.specs.flatMap((spec) => spec.deps));
+  for (const spec of state.specs) {
+    if (spec.layer === "feature" && !referenced.has(spec.id) && !spec.deps.length) issues.push({ level: "warn", spec: spec.id, text: "sin relaciones: no la usa ninguna otra spec" });
+  }
+  return issues;
+}
+function healthScore(issues) {
+  const penalty = issues.reduce((total, issue) => total + (issue.level === "error" ? 12 : 4), 0);
+  return Math.max(40, 100 - penalty);
+}
+
+function renderStudio(container) {
+  setBreadcrumb("Knowledge Bases Studio");
+  const source = activeSource();
+  if (!source) {
+    container.append(h("div", { class: "card card--electric" }, h("p", { class: "ante-title", text: "Knowledge Bases Studio" }), h("h1", { text: "Selecciona una base de conocimiento" })));
+    return;
+  }
+  const issues = kbIssues();
+  const tabsNode = h("div", { class: "tabs" });
+  const body = h("div", {});
+  container.append(
+    h("div", { class: "card card--electric" },
+      h("div", { class: "card__header" },
+        h("div", {},
+          h("p", { class: "ante-title", text: `Base de conocimiento · ${source.sourceId}` }),
+          h("h1", { text: source.name }),
+          h("p", { class: "small", style: { marginTop: "6px", opacity: .85 }, text: source.path })),
+        h("div", { class: "card__actions" },
+          h("span", { class: `chip ${healthScore(issues) >= 85 ? "chip--lime" : healthScore(issues) >= 65 ? "chip--canary" : "chip--mandarin"}`, text: `Salud ${healthScore(issues)}/100` }),
+          h("button", { class: "btn btn--accent btn--sm", text: "Abrir carpeta", onclick: () => toast("Se abre la carpeta en el Explorador") })))),
+    tabsNode, body);
+
+  const select = (id) => {
+    state.studioTab = id;
+    tabsNode.replaceChildren(...STUDIO_TABS.map(([tid, label]) => h("button", { class: `tab${tid === id ? " is-active" : ""}`, text: label, onclick: () => select(tid) })));
+    body.replaceChildren();
+    ({ dashboard: studioDashboard, documents: studioDocuments, specs: studioSpecs, governance: studioGovernance, activity: studioActivity })[id](body);
+  };
+  select(state.studioTab);
+
+  /* ---------- Panel ---------- */
+  function studioDashboard(node) {
+    const counts = {};
+    for (const spec of state.specs) counts[spec.layer] = (counts[spec.layer] || 0) + 1;
+    const max = Math.max(1, ...Object.values(counts));
+    const openQuestions = state.analyses.flatMap((job) => (job.preview?.questions || []).filter((question) => !question.resolved)).length;
+
+    node.append(
+      h("div", { class: "bento bento--4" },
+        stat(state.specs.length, "specs totales", "card--serene"),
+        stat(state.specs.filter((spec) => spec.status === "active").length, "activas", "card--lime"),
+        stat(state.specs.filter((spec) => spec.status === "draft").length, "borradores", "card--canary"),
+        stat(openQuestions, "preguntas abiertas", "card--ice")),
+      h("div", { class: "bento bento--main-aside", style: { marginTop: "16px" } },
+        h("div", { class: "card" },
+          h("p", { class: "ante-title", text: "Reparto por capa" }),
+          h("h2", { text: "Composición de la base" }),
+          h("div", { style: { marginTop: "16px" } }, Object.keys(LAYER_LABELS).filter((layer) => counts[layer]).map((layer) => h("div", { class: "bar-row" },
+            h("span", { class: "mono", text: LAYER_PREFIX[layer] }),
+            h("div", { class: "bar" }, h("span", { style: { width: `${(counts[layer] / max) * 100}%`, background: LAYER_COLORS[layer] } })),
+            h("b", { text: String(counts[layer]) })))),
+          h("p", { class: "small muted", style: { marginTop: "12px" }, text: "Una base sana tiene base de arquitectura y dominio, y el grueso en producto y features." })),
+        h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } },
+          healthCard(),
+          h("div", { class: "card" },
+            h("p", { class: "ante-title", text: "Responsables" }),
+            h("div", { class: "list", style: { marginTop: "8px" } },
+              [["Arquitectura y ADR", "Marta Gil"], ["Dominio y producto", "Carlos Ruiz"], ["Features y documentación", "Ana López"]].map(([area, person]) =>
+                h("div", { class: "list-item" }, h("div", { class: "list-item__main" }, h("div", { class: "list-item__title", text: area }), h("div", { class: "list-item__meta", text: person })), h("div", { class: "avatar-sm", text: PEOPLE[person] }))))))),
+      h("div", { class: "card", style: { marginTop: "16px" } },
+        h("div", { class: "card__header" },
+          h("div", {}, h("p", { class: "ante-title", text: "Grafo de conocimiento" }), h("h2", { text: `${state.specs.length} specs · ${state.specs.reduce((total, spec) => total + spec.deps.length, 0)} relaciones` })),
+          h("div", { class: "legend" }, Object.keys(LAYER_LABELS).map((layer) => h("span", { style: { "--dot": LAYER_COLORS[layer] }, text: LAYER_LABELS[layer] })))),
+        specGraph(),
+        h("p", { class: "small muted", style: { marginTop: "8px" }, text: "Pulsa un nodo para abrir la spec." })),
+      h("div", { class: "card", style: { marginTop: "16px" } },
+        h("p", { class: "ante-title", text: "Últimos documentos analizados" }),
+        h("table", { class: "table table--compact" },
+          h("thead", {}, h("tr", {}, h("th", { text: "Documento" }), h("th", { text: "Lo incluyó" }), h("th", { text: "Cuándo" }), h("th", { text: "Specs que generó" }))),
+          h("tbody", {}, state.documents.filter((doc) => doc.status === "analizado").map((doc) => h("tr", {},
+            h("td", {}, h("strong", { text: doc.name }), h("div", { class: "small muted", text: `${doc.size} · ${doc.pages} páginas` })),
+            h("td", {}, h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } }, h("div", { class: "avatar-sm", text: PEOPLE[doc.by] || "··" }), doc.by)),
+            h("td", { text: doc.imported }),
+            h("td", {}, doc.specs.length ? h("div", { class: "chips" }, doc.specs.map((id) => h("span", { class: "chip chip--outline mono", style: { cursor: "pointer" }, text: id, onclick: () => { state.selectedSpec = id; select("specs"); } }))) : h("span", { class: "small muted", text: "—" }))))))));
+
+    function stat(value, label, variant) {
+      return h("div", { class: `card ${variant}` }, h("div", { class: "stat" }, h("span", { class: "stat__value", text: String(value) }), h("span", { class: "stat__label", text: label })));
+    }
+    function healthCard() {
+      const score = healthScore(issues);
+      return h("div", { class: "card" },
+        h("p", { class: "ante-title", text: "Salud de la base" }),
+        h("div", { class: "health" }, h("span", { class: "health__score", text: String(score) }), h("span", { class: "muted", text: "/ 100" })),
+        h("div", { class: "chips", style: { margin: "10px 0 14px" } },
+          h("span", { class: "chip chip--mandarin", text: `${issues.filter((issue) => issue.level === "error").length} errores` }),
+          h("span", { class: "chip chip--canary", text: `${issues.filter((issue) => issue.level === "warn").length} avisos` })),
+        issues.length ? h("div", { class: "list" }, issues.slice(0, 5).map((issue) => h("div", { class: "list-item is-clickable", onclick: () => { state.selectedSpec = issue.spec; select("specs"); } },
+          h("div", { class: "list-item__main" }, h("div", { class: "list-item__title mono", text: issue.spec }), h("div", { class: "list-item__meta", style: { whiteSpace: "normal" }, text: issue.text })),
+          h("span", { class: `chip ${issue.level === "error" ? "chip--mandarin" : "chip--canary"}`, text: issue.level === "error" ? "error" : "aviso" })))) : h("div", { class: "empty small", text: "Sin incidencias." }));
+    }
+  }
+
+  function specGraph() {
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("class", "graph");
+    svg.setAttribute("viewBox", "0 0 900 440");
+    const layers = Object.keys(LAYER_LABELS);
+    const positions = new Map();
+    for (const [index, layer] of layers.entries()) {
+      state.specs.filter((spec) => spec.layer === layer).forEach((spec, row) => positions.set(spec.id, { x: 60 + index * 86, y: 60 + row * 70 + (index % 2) * 20 }));
+    }
+    for (const spec of state.specs) {
+      for (const dep of spec.deps) {
+        const from = positions.get(spec.id), to = positions.get(dep);
+        if (!from || !to) continue;
+        const line = document.createElementNS(svgNS, "line");
+        line.setAttribute("x1", from.x); line.setAttribute("y1", from.y);
+        line.setAttribute("x2", to.x); line.setAttribute("y2", to.y);
+        svg.append(line);
+      }
+    }
+    for (const spec of state.specs) {
+      const point = positions.get(spec.id);
+      if (!point) continue;
+      const circle = document.createElementNS(svgNS, "circle");
+      circle.setAttribute("cx", point.x); circle.setAttribute("cy", point.y); circle.setAttribute("r", 12);
+      circle.setAttribute("fill", LAYER_COLORS[spec.layer]);
+      circle.addEventListener("click", () => { state.selectedSpec = spec.id; select("specs"); });
+      const label = document.createElementNS(svgNS, "text");
+      label.setAttribute("x", point.x); label.setAttribute("y", point.y + 24); label.setAttribute("text-anchor", "middle");
+      label.textContent = `${spec.id.split("-").pop()} ${spec.title.slice(0, 14)}`;
+      svg.append(circle, label);
+    }
+    return svg;
+  }
+
+  /* ---------- Documentos: el análisis dice explícitamente qué specs salen ---------- */
+  function studioDocuments(node) {
+    const selected = new Set();
+    const analyzeButton = h("button", { class: "btn btn--lime", text: "Analizar seleccionados", disabled: true, onclick: () => runAnalysis([...selected]) });
+    const tbody = h("tbody", {});
+    const resultNode = h("div", {});
+    const refresh = () => tbody.replaceChildren(...state.documents.map((doc) => h("tr", { class: `is-clickable${selected.has(doc.name) ? " is-selected" : ""}`, onclick: () => { selected.has(doc.name) ? selected.delete(doc.name) : selected.add(doc.name); analyzeButton.disabled = !selected.size; refresh(); } },
+      h("td", {}, h("input", { type: "checkbox", checked: selected.has(doc.name), onclick: (event) => event.stopPropagation() })),
+      h("td", {}, h("strong", { text: doc.name }), h("div", { class: "small muted", text: `${doc.size} · ${doc.pages} páginas` })),
+      h("td", {}, h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } }, h("div", { class: "avatar-sm", text: PEOPLE[doc.by] || "··" }), doc.by)),
+      h("td", { text: doc.imported }),
+      h("td", {}, statusChip(doc.status)),
+      h("td", {}, doc.specs.length ? h("div", { class: "chips" }, doc.specs.map((id) => h("span", { class: "chip chip--outline mono", text: id }))) : h("span", { class: "small muted", text: "—" })))));
+    refresh();
+    node.append(
+      h("div", { class: "bento bento--main-aside" },
+        h("div", { class: "card" },
+          h("div", { class: "card__header" },
+            h("div", {}, h("p", { class: "ante-title", text: "Documentos importados" }), h("h2", { text: "Fuentes de conocimiento" })),
+            h("button", { class: "btn", text: "Importar documentos", onclick: () => toast("Selector de ficheros (simulado)") })),
+          h("table", { class: "table" },
+            h("thead", {}, h("tr", {}, h("th", {}), h("th", { text: "Documento" }), h("th", { text: "Importado por" }), h("th", { text: "Cuándo" }), h("th", { text: "Estado" }), h("th", { text: "Specs generadas" }))),
+            tbody)),
+        h("div", { class: "card card--serene" },
+          h("p", { class: "ante-title", text: "Analizador KDD" }),
+          h("h3", { text: "De documento a specs" }),
+          h("p", { class: "small", style: { margin: "8px 0 12px" }, text: "Dos fases: extracción de átomos de conocimiento y generación de specs por capa, con sus dependencias y sus secciones canónicas. El resultado es un preview: nada se escribe hasta que lo confirmas." }),
+          analyzeButton)),
+      resultNode);
+
+    async function runAnalysis(names) {
+      const job = { id: `job-${Date.now()}`, documents: names, status: "running", phase: 0, log: [], preview: null };
+      state.analyses.unshift(job);
+      const card = h("div", { class: "card", style: { marginTop: "16px" } });
+      resultNode.replaceChildren(card);
+      const paint = () => {
+        card.replaceChildren(
+          h("div", { class: "card__header" },
+            h("div", {}, h("p", { class: "ante-title", text: "Análisis en curso" }), h("h2", { text: names.join(", ") }),
+              h("div", { class: "chips", style: { marginTop: "8px" } }, statusChip(job.status), h("span", { class: "chip chip--outline", text: "gpt-5" }))),
+            h("div", { class: "card__actions" }, h("div", { class: "avatar-sm", text: PEOPLE[ME] }), h("span", { class: "small muted", text: ME }))),
+          h("div", { class: "phase", style: { margin: "12px 0" } }, ["Extracción", "Plan", "Generación", "Preview"].map((label, index) =>
+            h("div", { class: `phase__step${index < job.phase ? " is-done" : index === job.phase && job.status === "running" ? " is-current" : job.status !== "running" ? " is-done" : ""}`, text: label }))),
+          h("div", { class: "log" }, job.log.map((line, index) => h("div", {}, h("span", { class: "log__time", text: `[10:${String(20 + index).padStart(2, "0")}]` }), line)))); 
+        if (job.preview) card.append(previewBlock(job));
+      };
+      paint();
+      for (const [index, line] of [
+        "Extrayendo átomos de conocimiento (Copilot · gpt-5)…",
+        "Planificando specs, capas y dependencias…",
+        "Generando cuerpos con las secciones canónicas…",
+      ].entries()) {
+        job.phase = index; job.log.push(line); paint();
+        await sleep(1300);
+      }
+      job.phase = 3; job.status = "preview";
+      job.preview = {
+        specs: [
+          { id: "FEAT-PAY-S001-005", layer: "feature", title: "Bloqueo por screening de sanciones", action: "create" },
+          { id: "DOM-PAY-S001-004", layer: "domain", title: "Canal de emisión (Host-to-Host, Net Cash)", action: "create" },
+          { id: "FEAT-PAY-S001-002", layer: "feature", title: "Límites por cliente y divisa", action: "update" },
+          { id: "DOC-PAY-S001-002", layer: "docs", title: "Manual operativo de pagos SEPA", action: "create" },
+        ],
+        questions: [
+          { text: "¿El límite de 100.000 EUR aplica también a SCT estándar o solo a SCT Inst?", resolved: false },
+          { text: "El manual dice 2 días hábiles para PENDING_COMPLIANCE; FEAT-PAY-S001-003 dice 24 h. ¿Cuál prevalece?", resolved: false },
+        ],
+      };
+      job.log.push(`Preview listo: ${job.preview.specs.filter((spec) => spec.action === "create").length} specs nuevas, ${job.preview.specs.filter((spec) => spec.action === "update").length} actualizadas, ${job.preview.questions.length} preguntas.`);
+      paint();
+      toast("Preview listo", "ok");
+
+      function previewBlock(currentJob) {
+        const wrapper = h("div", {});
+        const creates = currentJob.preview.specs.filter((spec) => spec.action === "create").length;
+        const updates = currentJob.preview.specs.length - creates;
+        wrapper.append(
+          h("div", { class: "callout callout--info", style: { margin: "16px 0" } },
+            h("strong", { text: `Resultado: ${creates} specs nuevas y ${updates} actualizadas. ` }),
+            "Esto es lo que se escribirá en la base si confirmas."),
+          h("table", { class: "table table--compact" },
+            h("thead", {}, h("tr", {}, h("th", { text: "ID" }), h("th", { text: "Capa" }), h("th", { text: "Título" }), h("th", { text: "Acción" }), h("th", {}))),
+            h("tbody", {}, currentJob.preview.specs.map((spec) => h("tr", {},
+              h("td", {}, h("span", { class: "mono", text: spec.id })),
+              h("td", {}, h("span", { class: "chip chip--outline", text: LAYER_LABELS[spec.layer] })),
+              h("td", { text: spec.title }),
+              h("td", {}, h("span", { class: `chip ${spec.action === "create" ? "chip--lime" : "chip--canary"}`, text: spec.action === "create" ? "nueva" : "actualiza" })),
+              h("td", {}, h("button", { class: "btn btn--outline btn--xs", text: "Revisar", onclick: () => reviewSpec(spec) })))))),
+          h("h3", { style: { margin: "18px 0 8px" }, text: "Preguntas abiertas" }),
+          h("div", { class: "list" }, currentJob.preview.questions.map((question) => {
+            const input = h("input", { class: "input", placeholder: "Respuesta…" });
+            return h("div", { class: "list-item", style: { flexWrap: "wrap" } },
+              h("div", { class: "list-item__main", style: { width: "100%" } }, h("div", { style: { whiteSpace: "normal", fontWeight: 700 }, text: question.text })),
+              h("div", { class: "form-row", style: { width: "100%", marginTop: "8px" } }, input,
+                h("button", { class: "btn btn--outline btn--sm", text: question.resolved ? "Reabrir" : "Marcar resuelta", onclick: () => { question.resolved = !question.resolved; paint(); } })));
+          })),
+          h("div", { class: "card__actions", style: { marginTop: "18px", justifyContent: "flex-end" } },
+            h("button", { class: "btn btn--outline", text: "Descartar", onclick: () => { state.analyses = state.analyses.filter((item) => item !== currentJob); resultNode.replaceChildren(); toast("Análisis descartado"); } }),
+            h("button", { class: "btn btn--lime", text: "Confirmar y persistir", onclick: () => {
+              for (const spec of currentJob.preview.specs) {
+                const existing = state.specs.find((item) => item.id === spec.id);
+                if (existing) { existing.version = bumpVersion(existing.version); existing.updatedAt = "ahora"; existing.owner = ME; }
+                else state.specs.push({ id: spec.id, layer: spec.layer, title: spec.title, status: "draft", version: "0.1", deps: [], owner: ME, updatedAt: "ahora" });
+              }
+              for (const name of currentJob.documents) {
+                const doc = state.documents.find((item) => item.name === name);
+                if (doc) { doc.status = "analizado"; doc.specs = currentJob.preview.specs.map((spec) => spec.id); doc.by = doc.by || ME; }
+              }
+              source.specs = state.specs.length;
+              logActivity({ kind: "import", title: `Analizó ${currentJob.documents.join(", ")}`, detail: `${creates} specs creadas, ${updates} actualizadas` });
+              currentJob.status = "persisted";
+              renderSources();
+              toast(`Persistidas ${currentJob.preview.specs.length} specs`, "ok");
+              select("specs");
+            } })));
+        return wrapper;
+      }
+
+      function reviewSpec(spec) {
+        const { modal, close } = openModal({ wide: true });
+        const body = `---\nid: ${spec.id}\nlayer: ${spec.layer}\nstatus: draft\nversion: 0.1\ndependencies:\n  - id: DOM-PAY-S001-001\n    type: relates_to\n---\n\n## Contexto\n${spec.title}. Extraído del documento analizado.\n\n## Comportamiento\n- Regla principal derivada de la documentación.\n\n## Criterios de aceptación\n1. Escenario feliz verificado.`;
+        modal.append(modalHeader(spec.id, close, `Preview · ${LAYER_LABELS[spec.layer]}`),
+          h("div", { class: "split" },
+            h("textarea", { class: "textarea", style: { fontFamily: "var(--font-mono)", minHeight: "300px", fontSize: "13px" }, text: body }),
+            h("div", { class: "card card--sand" }, h("p", { class: "ante-title", text: "Vista previa" }), md(body.split("---")[2]))),
+          h("div", { class: "card__actions", style: { justifyContent: "flex-end" } }, h("button", { class: "btn", text: "Guardar en el preview", onclick: () => { close(); toast("Spec guardada en el preview", "ok"); } })));
+      }
+    }
+  }
+
+  /* ---------- Specs: catálogo, análisis y modificación ---------- */
+  function studioSpecs(node) {
+    const filters = { q: "", layer: "", status: "" };
+    const tbody = h("tbody", {});
+    const detail = h("div", {});
+    const refresh = () => tbody.replaceChildren(...state.specs
+      .filter((spec) => (!filters.q || `${spec.id} ${spec.title}`.toLowerCase().includes(filters.q.toLowerCase()))
+        && (!filters.layer || spec.layer === filters.layer)
+        && (!filters.status || spec.status === filters.status))
+      .map((spec) => h("tr", { class: `is-clickable${state.selectedSpec === spec.id ? " is-selected" : ""}`, onclick: () => { state.selectedSpec = spec.id; refresh(); showSpec(spec); } },
+        h("td", {}, h("span", { class: "mono", text: spec.id })),
+        h("td", { text: spec.title }),
+        h("td", {}, statusChip(spec.status)),
+        h("td", { text: spec.version }),
+        h("td", {}, h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } }, h("div", { class: "avatar-sm", text: PEOPLE[spec.owner] || "··" }), h("span", { class: "small", text: spec.updatedAt }))))));
+    refresh();
+    node.append(h("div", { class: "bento bento--aside-main" },
+      h("div", { class: "card" },
+        h("div", { class: "card__header" },
+          h("div", {}, h("p", { class: "ante-title", text: "Catálogo" }), h("h2", { text: "Specs" })),
+          h("button", { class: "btn btn--sm", text: "Nueva spec", onclick: () => toast("Formulario de nueva spec (simulado)") })),
+        h("div", { class: "form-row", style: { marginBottom: "12px" } },
+          h("input", { class: "input", placeholder: "Buscar…", oninput: (event) => { filters.q = event.target.value; refresh(); } }),
+          h("select", { class: "select", onchange: (event) => { filters.layer = event.target.value; refresh(); } },
+            h("option", { value: "", text: "Todas las capas" }), Object.entries(LAYER_LABELS).map(([value, label]) => h("option", { value, text: label }))),
+          h("select", { class: "select", onchange: (event) => { filters.status = event.target.value; refresh(); } },
+            h("option", { value: "", text: "Cualquier estado" }), ["draft", "active", "deprecated", "done"].map((value) => h("option", { value, text: value })))),
+        h("div", { class: "scroll", style: { maxHeight: "520px" } },
+          h("table", { class: "table table--compact" },
+            h("thead", {}, h("tr", {}, h("th", { text: "ID" }), h("th", { text: "Título" }), h("th", { text: "Estado" }), h("th", { text: "v" }), h("th", { text: "Último cambio" }))),
+            tbody))),
+      detail));
+    const current = state.specs.find((spec) => spec.id === state.selectedSpec);
+    if (current) showSpec(current);
+    else detail.append(h("div", { class: "empty", text: "Selecciona una spec para analizarla, ver su impacto y modificarla." }));
+
+    function showSpec(spec) {
+      const dependents = state.specs.filter((item) => item.deps.includes(spec.id));
+      const broken = spec.deps.filter((dep) => !state.specs.some((item) => item.id === dep));
+      const sections = { Contexto: true, Comportamiento: true, "Criterios de aceptación": spec.status !== "draft" };
+      detail.replaceChildren(h("div", { class: "card" },
+        h("div", { class: "card__header" },
+          h("div", {},
+            h("p", { class: "ante-title", text: `${LAYER_LABELS[spec.layer]} · versión ${spec.version}` }),
+            h("h2", {}, h("span", { class: "mono", text: spec.id })),
+            h("h3", { style: { marginTop: "4px", fontFamily: "var(--bbva-font-body)", fontWeight: 400 }, text: spec.title })),
+          h("div", { class: "card__actions" },
+            h("button", { class: "btn btn--outline btn--sm", text: "Modificar", onclick: () => editSpec(spec) }),
+            spec.status !== "deprecated" ? h("button", { class: "btn btn--outline btn--sm", text: "Deprecar", onclick: () => {
+              spec.status = "deprecated"; spec.updatedAt = "ahora"; spec.owner = ME;
+              logActivity({ kind: "edit", title: `Deprecó ${spec.id}`, detail: spec.title });
+              refresh(); showSpec(spec); toast(`${spec.id} deprecada`);
+            } }) : null)),
+        h("div", { class: "chips", style: { marginBottom: "14px" } }, statusChip(spec.status),
+          h("span", { class: "chip chip--outline", text: `Responsable: ${spec.owner}` }),
+          h("span", { class: "chip chip--outline", text: `Modificada ${spec.updatedAt}` })),
+        h("div", { class: "callout " + (broken.length ? "callout--error" : "callout--ok"), style: { marginBottom: "14px" } },
+          h("strong", { text: broken.length ? "Análisis: hay que arreglarla. " : "Análisis: correcta. " }),
+          broken.length ? `Depende de ${broken.join(", ")}, que no existe en la base.` : "Dependencias resueltas y secciones canónicas presentes."),
+        h("dl", { class: "kv", style: { marginBottom: "14px" } },
+          h("dt", { text: "Fichero" }), h("dd", { class: "mono", text: `specs/${spec.layer}/${spec.id}.md` }),
+          h("dt", { text: "Depende de" }), h("dd", {}, spec.deps.length ? h("div", { class: "chips" }, spec.deps.map((dep) => h("span", { class: `chip ${state.specs.some((item) => item.id === dep) ? "chip--ice" : "chip--mandarin"} mono`, style: { cursor: "pointer" }, text: dep, onclick: () => { const target = state.specs.find((item) => item.id === dep); if (target) { state.selectedSpec = dep; refresh(); showSpec(target); } } }))) : h("span", { class: "small muted", text: "—" })),
+          h("dt", { text: "Impacto" }), h("dd", { text: `${dependents.length} spec(s) dependen de esta` }),
+          h("dt", { text: "Secciones" }), h("dd", {}, h("div", { class: "chips" }, Object.entries(sections).map(([name, ok]) => h("span", { class: `chip ${ok ? "chip--lime" : "chip--mandarin"}`, text: `${ok ? "✓" : "✗"} ${name}` }))))),
+        md(`## Contexto\n${spec.title} forma parte de ${source.name}.\n\n## Comportamiento\n- Regla principal derivada de la documentación importada.\n\n## Criterios de aceptación\n1. Escenario feliz verificado por pruebas automatizadas.`),
+        h("p", { class: "ante-title", style: { marginTop: "18px" }, text: "Historial de esta spec" }),
+        h("div", { class: "list" }, state.activity.filter((entry) => entry.title.includes(spec.id) || entry.detail.includes(spec.id)).slice(0, 4).map((entry) =>
+          h("div", { class: "list-item" }, h("div", { class: "list-item__main" }, h("div", { class: "list-item__title", text: entry.title }), h("div", { class: "list-item__meta", style: { whiteSpace: "normal" }, text: entry.detail })), h("span", { class: "small muted", text: `${entry.actor} · ${entry.at}` }))).concat(
+          state.activity.some((entry) => entry.title.includes(spec.id) || entry.detail.includes(spec.id)) ? [] : [h("div", { class: "empty small", text: "Sin cambios registrados." })]))));
+    }
+
+    function editSpec(spec) {
+      const { modal, close } = openModal({ wide: true });
+      const title = h("input", { class: "input", value: spec.title });
+      const status = h("select", { class: "select" }, ["draft", "active", "deprecated"].map((value) => h("option", { value, text: value, selected: spec.status === value })));
+      const body = h("textarea", { class: "textarea", style: { fontFamily: "var(--font-mono)", minHeight: "260px", fontSize: "13px" }, text: `## Contexto\n${spec.title}\n\n## Comportamiento\n- Regla principal.\n\n## Criterios de aceptación\n1. Escenario feliz.` });
+      const note = h("input", { class: "input", placeholder: "Motivo del cambio (queda en el registro)" });
+      modal.append(modalHeader(`Modificar ${spec.id}`, close, LAYER_LABELS[spec.layer]),
+        h("div", { class: "form-row" }, h("div", { class: "field" }, h("label", { text: "Título" }), title), h("div", { class: "field" }, h("label", { text: "Estado" }), status)),
+        h("div", { class: "field" }, h("label", { text: "Cuerpo" }), body),
+        h("div", { class: "field" }, h("label", { text: "Motivo" }), note),
+        h("div", { class: "card__actions", style: { justifyContent: "flex-end" } },
+          h("button", { class: "btn btn--outline", text: "Cancelar", onclick: close }),
+          h("button", { class: "btn", text: "Guardar cambios", onclick: () => {
+            spec.title = title.value.trim() || spec.title;
+            spec.status = status.value;
+            spec.version = bumpVersion(spec.version);
+            spec.updatedAt = "ahora";
+            spec.owner = ME;
+            logActivity({ kind: "edit", title: `Modificó ${spec.id}`, detail: note.value.trim() || `Nueva versión ${spec.version}` });
+            close(); refresh(); showSpec(spec); toast(`${spec.id} actualizada a v${spec.version}`, "ok");
+          } })));
+    }
+  }
+
+  /* ---------- Gobernanza ---------- */
+  function studioGovernance(node) {
+    const tbody = h("tbody", {});
+    const refresh = () => tbody.replaceChildren(...state.governance.map((item) => h("tr", {},
+      h("td", {}, h("span", { class: "mono", text: item.id })),
+      h("td", {}, h("span", { class: "chip chip--outline", text: item.kind })),
+      h("td", { text: item.title }),
+      h("td", {}, h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } }, h("div", { class: "avatar-sm", text: PEOPLE[item.owner] || "··" }), item.owner)),
+      h("td", {}, statusChip(item.status)),
+      h("td", { text: item.at }),
+      h("td", {}, item.status === "proposed" || item.status === "discussion"
+        ? h("div", { class: "card__actions" },
+          h("button", { class: "btn btn--lime btn--xs", text: "Aceptar", onclick: () => decide(item, "accepted") }),
+          h("button", { class: "btn btn--danger btn--xs", text: "Rechazar", onclick: () => decide(item, "rejected") }))
+        : h("span", { class: "small muted", text: "—" })))));
+    refresh();
+    node.append(
+      h("div", { class: "bento bento--main-aside" },
+        h("div", { class: "card" },
+          h("div", { class: "card__header" },
+            h("div", {}, h("p", { class: "ante-title", text: "Decisiones y reglas" }), h("h2", { text: "Gobernanza de la base" })),
+            h("button", { class: "btn btn--sm", text: "Nueva decisión", onclick: () => toast("Formulario de ADR/RFC (simulado)") })),
+          h("table", { class: "table table--compact" },
+            h("thead", {}, h("tr", {}, h("th", { text: "ID" }), h("th", { text: "Tipo" }), h("th", { text: "Título" }), h("th", { text: "Responsable" }), h("th", { text: "Estado" }), h("th", { text: "Fecha" }), h("th", {}))),
+            tbody)),
+        h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } },
+          h("div", { class: "card card--serene" },
+            h("p", { class: "ante-title", text: "Reglas activas" }),
+            h("div", { class: "list", style: { marginTop: "10px" } },
+              ["Los IDs siguen TIPO-DOMINIO-S###-NNN", "Toda spec de producto necesita criterios de aceptación", "Una spec activa no puede depender de una deprecada", "Cada capa tiene un responsable asignado"]
+                .map((text) => h("div", { class: "list-item", style: { background: "rgba(255,255,255,.55)" } }, h("div", { class: "list-item__main" }, h("div", { style: { whiteSpace: "normal" }, text })))))),
+          h("div", { class: "card" },
+            h("p", { class: "ante-title", text: "Cumplimiento" }),
+            h("div", { class: "list", style: { marginTop: "10px" } },
+              [["IDs correctos", state.specs.length, state.specs.length],
+               ["Con criterios de aceptación", state.specs.filter((spec) => spec.status !== "draft").length, state.specs.length],
+               ["Dependencias resueltas", state.specs.length - kbIssues().filter((issue) => issue.level === "error").length, state.specs.length]]
+                .map(([label, ok, total]) => h("div", { class: "list-item" },
+                  h("div", { class: "list-item__main" }, h("div", { class: "list-item__title", text: label })),
+                  h("span", { class: `chip ${ok === total ? "chip--lime" : "chip--canary"}`, text: `${ok}/${total}` }))))))));
+
+    function decide(item, status) {
+      item.status = status;
+      item.at = "ahora";
+      logActivity({ kind: "gov", title: `${status === "accepted" ? "Aceptó" : "Rechazó"} ${item.id}`, detail: item.title });
+      refresh();
+      toast(`${item.id} ${status === "accepted" ? "aceptada" : "rechazada"}`, status === "accepted" ? "ok" : "info");
+    }
+  }
+
+  /* ---------- Actividad: quién ha tocado qué y desde dónde ---------- */
+  function studioActivity(node) {
+    const filters = { kind: "", actor: "" };
+    const listNode = h("div", { class: "timeline" });
+    const KIND_LABEL = { import: "Importación", edit: "Edición", chat: "Corrección desde el chat", gov: "Gobernanza" };
+    const refresh = () => {
+      const rows = state.activity.filter((entry) => (!filters.kind || entry.kind === filters.kind) && (!filters.actor || entry.actor === filters.actor));
+      listNode.replaceChildren(...(rows.length ? rows.map((entry, index) => h("div", { class: "tl" },
+        h("div", { class: "tl__rail" }, h("div", { class: `tl__dot is-${entry.kind}` }), index < rows.length - 1 ? h("div", { class: "tl__line" }) : null),
+        h("div", { class: "tl__body" },
+          h("div", { style: { display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" } },
+            h("div", { class: "avatar-sm", text: PEOPLE[entry.actor] || "··" }),
+            h("strong", { text: entry.title }),
+            h("span", { class: "chip chip--outline", text: KIND_LABEL[entry.kind] || entry.kind })),
+          h("div", { class: "tl__meta", style: { marginTop: "4px" }, text: entry.detail }),
+          h("div", { class: "tl__meta", text: `${entry.actor} · ${entry.at}` })))) : [h("div", { class: "empty small", text: "Sin actividad con esos filtros." })]));
+    };
     refresh();
     node.append(h("div", { class: "bento bento--main-aside" },
-      h("div", { class: "card" }, h("div", { class: "card__header" }, h("div", {}, h("p", { class: "ante-title", text: "Documentos importados" }), h("h2", { text: "Fuentes de conocimiento" })), h("button", { class: "btn", text: "Importar documentos", onclick: importDialog })),
-        h("table", { class: "table" }, h("thead", {}, h("tr", {}, h("th"), h("th", { text: "Documento" }), h("th", { text: "Importado" }), h("th", { text: "Estado" }), h("th"))), tbody)),
-      h("div", { class: "card card--serene" }, h("p", { class: "ante-title", text: "Generar specs" }), h("h3", { text: "Analizar documentos" }), h("p", { class: "small", style: { margin: "8px 0 12px" }, text: "El analizador extrae átomos de conocimiento, planifica las specs (arquitectura, dominio, producto, features, docs, work) y genera un preview que puedes revisar antes de persistir." }),
-        h("p", { class: "small", style: { marginBottom: "12px" }, text: "Formatos: PDF, DOCX, PPTX, XLSX, Markdown, TXT, HTML, CSV, JSON." }), analyzeButton)));
-  }
-  function importDialog() {
-    const { modal, close } = openModal();
-    modal.append(modalHeader("Importar documentos", close, "Arrastra o elige ficheros"),
-      h("div", { class: "empty", text: "Arrastra aquí PDF, DOCX, PPTX, XLSX, MD… (simulado)" }),
-      h("div", { class: "card__actions", style: { justifyContent: "flex-end" } }, h("button", { class: "btn btn--ghost", text: "Cancelar", onclick: close }), h("button", { class: "btn", text: "Importar Politica-Sanciones-2026.pdf", onclick: () => { state.documents.push({ name: "Politica-Sanciones-2026.pdf", size: "540 KB", pages: 17, imported: "ahora", status: "pendiente" }); close(); toast("1 documento importado", "ok"); select("documents"); } })));
-  }
-  function showText(doc) {
-    const { modal, close } = openModal({ wide: true });
-    modal.append(modalHeader(doc.name, close, "Texto extraído"), h("pre", { class: "card card--sand", style: { whiteSpace: "pre-wrap", fontSize: "13px" }, text: `1. OBJETO\nEl presente manual describe la operativa de transferencias SEPA (SCT) y transferencias inmediatas (SCT Inst) en la plataforma de pagos de CIB.\n\n2. ALCANCE\nAplica a órdenes emitidas por clientes corporativos a través de los canales Host-to-Host y Net Cash, con divisa EUR y beneficiario en la zona SEPA.\n\n3. VALIDACIONES\n3.1 IBAN: se valida el dígito de control (ISO 13616) y la pertenencia del país a la zona SEPA.\n3.2 BIC: opcional desde SEPA 2016; si se informa debe corresponder al IBAN.\n3.3 Límites: el importe no puede superar el límite diario del contrato ni 100.000 EUR por operación en SCT Inst.\n\n4. SCREENING\nToda orden pasa por el filtro de sanciones antes de la liquidación. Un acierto bloquea la orden en estado PENDING_COMPLIANCE hasta resolución manual (máximo 2 días hábiles).\n…` }));
-  }
-  async function startAnalysis(docs) {
-    const job = { id: `job-${Date.now()}`, documents: docs, status: "running", phase: 0, createdAt: "ahora", log: [], preview: null };
-    state.analyses.unshift(job); toast("Análisis iniciado", "ok"); select("analyses"); openJob(job.id);
-    const steps = [["extract", "Extrayendo átomos de conocimiento (Copilot · gpt-5)…"], ["plan", "Planificando specs y dependencias…"], ["generate", "Generando cuerpos de spec…"]];
-    for (let i = 0; i < steps.length; i += 1) { job.phase = i; job.log.push(steps[i][1]); refreshJob(job); await sleep(1400); }
-    job.phase = 3; job.status = "preview";
-    job.preview = { specs: [
-      { id: "FEAT-PAY-S001-005", layer: "feature", title: "Bloqueo por screening de sanciones (PENDING_COMPLIANCE)", action: "create" },
-      { id: "FEAT-PAY-S001-002", layer: "feature", title: "Límites por cliente y divisa (límite 100.000 EUR en SCT Inst)", action: "update" },
-      { id: "DOM-PAY-S001-004", layer: "domain", title: "Canal de emisión (Host-to-Host, Net Cash)", action: "create" },
-      { id: "DOC-PAY-S001-002", layer: "docs", title: "Manual operativo de pagos SEPA", action: "create" },
-    ], questions: [{ text: "¿El límite de 100.000 EUR por operación aplica también a SCT estándar o solo a SCT Inst?", resolved: false }, { text: "El manual habla de 2 días hábiles para resolver PENDING_COMPLIANCE; la spec FEAT-PAY-S001-003 dice 24 h. ¿Cuál prevalece?", resolved: false }] };
-    job.log.push("Preview listo: 4 specs propuestas, 2 preguntas abiertas."); toast("Preview listo", "ok"); refreshJob(job);
-    const docsSet = new Set(docs); for (const d of state.documents) if (docsSet.has(d.name)) d.status = "analizado";
-  }
-  let jobDetail = null; let openJobId = null; let refreshAnalysesList = null;
-  function refreshJob(job) { if (state.kbTab !== "analyses") return; refreshAnalysesList?.(); if (openJobId === job.id && jobDetail) renderJob(jobDetail, job); }
-  function openJob(id) { openJobId = id; if (state.kbTab === "analyses") select("analyses"); }
-  function renderAnalyses(node) {
-    const listNode = h("div", { class: "list" }); jobDetail = h("div");
-    const refreshList = () => { listNode.replaceChildren(...(state.analyses.length ? state.analyses.map((job) => h("div", { class: `list-item is-clickable${job.id === openJobId ? " is-active" : ""}`, onclick: () => { openJobId = job.id; refreshList(); renderJob(jobDetail, job); } }, h("div", { class: "list-item__main" }, h("div", { class: "list-item__title", text: job.documents.join(", ") }), h("div", { class: "list-item__meta", text: job.createdAt })), statusChip(job.status))) : [h("div", { class: "empty small", text: "Sin análisis. Selecciona documentos en la pestaña Documentos y pulsa Analizar." })])); };
-    refreshAnalysesList = refreshList; refreshList();
-    node.append(h("div", { class: "bento bento--aside-main" }, h("div", { class: "card" }, h("p", { class: "ante-title", text: "Análisis" }), listNode), jobDetail));
-    const job = state.analyses.find((j) => j.id === openJobId) || state.analyses[0];
-    if (job) { openJobId = job.id; refreshList(); renderJob(jobDetail, job); }
-    else jobDetail.append(h("div", { class: "card card--serene" }, h("p", { class: "ante-title", text: "Cómo funciona" }), h("h3", { text: "Análisis en dos fases" }), h("p", { class: "small", style: { marginTop: "8px" }, text: "1) Extracción de átomos y plan de specs. 2) Generación de cuerpos con las secciones canónicas de cada capa. El resultado es un preview: nada se escribe en la base hasta que confirmas." })));
-  }
-  function renderJob(node, job) {
-    node.replaceChildren();
-    const card = h("div", { class: "card" });
-    card.append(h("div", { class: "card__header" }, h("div", {}, h("p", { class: "ante-title", text: `Análisis · ${job.createdAt}` }), h("h2", { text: job.documents.join(", ") }), h("div", { class: "chips", style: { marginTop: "8px" } }, statusChip(job.status), h("span", { class: "chip chip--outline", text: "gpt-5" }))),
-      h("div", { class: "card__actions" }, job.status === "running" ? h("button", { class: "btn btn--danger btn--sm", text: "Cancelar", onclick: () => { job.status = "failed"; job.log.push("Cancelado por el usuario."); renderJob(node, job); } }) : null)));
-    card.append(h("div", { class: "phase", style: { margin: "12px 0" } }, ["Extracción", "Plan", "Generación", "Preview"].map((label, i) => h("div", { class: `phase__step${i < job.phase ? " is-done" : i === job.phase && job.status === "running" ? " is-current" : i === 3 && job.status !== "running" ? " is-done" : ""}`, text: label }))));
-    card.append(h("div", { class: "log" }, job.log.map((line, i) => h("div", {}, h("span", { class: "log__time", text: `[${String(9).padStart(2, "0")}:${String(12 + i).padStart(2, "0")}]` }), line))));
-    if (job.preview) {
-      card.append(h("h3", { style: { margin: "16px 0 8px" }, text: "Specs propuestas" }),
-        h("table", { class: "table table--compact" }, h("thead", {}, h("tr", {}, h("th", { text: "ID" }), h("th", { text: "Capa" }), h("th", { text: "Título" }), h("th", { text: "Acción" }), h("th"))), h("tbody", {}, job.preview.specs.map((s) => h("tr", {}, h("td", {}, h("span", { class: "mono", text: s.id })), h("td", { text: LAYER_LABELS[s.layer] }), h("td", { text: s.title }), h("td", {}, h("span", { class: `chip ${s.action === "create" ? "chip--lime" : "chip--canary"}`, text: s.action === "create" ? "nueva" : "actualiza" })), h("td", {}, h("button", { class: "btn btn--outline btn--xs", text: "Revisar", onclick: () => previewSpec(s) })))))));
-      card.append(h("h3", { style: { margin: "16px 0 8px" }, text: "Preguntas abiertas y conflictos" }), h("div", { class: "list" }, job.preview.questions.map((q) => { const input = h("input", { class: "input", placeholder: "Respuesta…" }); return h("div", { class: "list-item", style: { flexWrap: "wrap" } }, h("div", { class: "list-item__main", style: { width: "100%" } }, h("div", { style: { whiteSpace: "normal", fontWeight: 700 }, text: q.text }), q.answer ? h("div", { class: "list-item__meta", text: `Respuesta: ${q.answer}` }) : null), h("div", { class: "form-row", style: { width: "100%" } }, input, h("button", { class: "btn btn--outline btn--sm", text: q.resolved ? "Reabrir" : "Marcar resuelta", onclick: () => { q.resolved = !q.resolved; if (input.value) q.answer = input.value; renderJob(node, job); } }))); })));
-      card.append(h("div", { class: "card", style: { marginTop: "16px", background: "var(--bbva-sand)", boxShadow: "none" } }, h("p", { class: "ante-title", text: "Chat de resolución" }), h("p", { class: "small muted", text: "Resuelve las preguntas conversando con el asistente; las respuestas se incorporan al preview." }), h("button", { class: "btn btn--outline btn--sm", style: { marginTop: "8px" }, text: "Abrir chat de resolución", onclick: () => resolutionChat(job) })));
-      if (job.status === "preview") card.append(h("div", { class: "card__actions", style: { marginTop: "16px", justifyContent: "flex-end" } },
-        h("button", { class: "btn btn--outline", text: "Descartar análisis", onclick: () => { state.analyses = state.analyses.filter((j) => j !== job); openJobId = null; select("analyses"); toast("Análisis descartado"); } }),
-        h("button", { class: "btn btn--lime", text: "Confirmar y persistir", onclick: () => { for (const s of job.preview.specs) { const existing = state.specs.find((x) => x.id === s.id); if (existing) { existing.title = s.title; existing.version = "1.2"; } else state.specs.push({ id: s.id, layer: s.layer, title: s.title, status: "draft", version: "0.1", deps: [] }); } job.status = "persisted"; source.specs = state.specs.length; renderSources(); toast(`Persistidas ${job.preview.specs.length} specs en ${source.name}`, "ok"); select("specs"); } })));
-      if (job.status === "persisted") card.append(h("div", { class: "callout callout--ok", style: { marginTop: "16px" }, text: "Specs persistidas en la base de conocimiento (specs/ + índice + grafo actualizado)." }));
-    }
-    node.append(card);
-  }
-  function previewSpec(s) {
-    const { modal, close } = openModal({ wide: true });
-    const body = `---\nid: ${s.id}\ntitle: ${s.title}\nlayer: ${s.layer}\nstatus: draft\nversion: 0.1\ndependencies:\n  - id: DOM-PAY-S001-001\n    type: relates_to\n---\n\n## Contexto\nToda orden de pago pasa por el filtro de sanciones antes de la liquidación.\n\n## Comportamiento\n- Un acierto del screening bloquea la orden en estado PENDING_COMPLIANCE.\n- La resolución manual debe producirse en un máximo de 2 días hábiles.\n\n## Criterios de aceptación\n1. Dado un acierto, la orden no se liquida y se notifica al operador.\n2. Dada una resolución "falso positivo", la orden continúa el flujo normal.`;
-    const textarea = h("textarea", { class: "textarea", style: { fontFamily: "var(--font-mono)", minHeight: "320px", fontSize: "13px" }, text: body });
-    modal.append(modalHeader(s.id, close, `Preview · ${LAYER_LABELS[s.layer]}`), h("div", { class: "split" }, textarea, h("div", { class: "card card--sand" }, h("p", { class: "ante-title", text: "Vista previa" }), md(body.split("---")[2]))), h("div", { class: "card__actions", style: { justifyContent: "flex-end" } }, h("button", { class: "btn", text: "Guardar en el preview", onclick: () => { close(); toast("Spec guardada", "ok"); } })));
-  }
-  function resolutionChat(job) {
-    const { modal, close } = openModal({ wide: true });
-    const host = h("div"); modal.append(modalHeader("Chat de resolución", close, job.documents.join(", ")), host);
-    createChat({ host, placeholder: "Responde a las preguntas abiertas…", messages: [{ role: "assistant", text: "He detectado **2 preguntas abiertas**. Empecemos por la primera: ¿el límite de 100.000 EUR por operación aplica también a SCT estándar?" }], onSend: async (text, typing) => { await streamTools(typing, ["kb_search", "kb_get_spec FEAT-PAY-S001-002"]); await sleep(500); job.preview.questions[0].resolved = true; job.preview.questions[0].answer = text; return { text: "Perfecto. Actualizo **FEAT-PAY-S001-002** para que el límite de 100.000 EUR quede restringido a SCT Inst.\n\n```yaml\n#RESOLUTION_ACTIONS\n- question: 1\n  action: update_spec\n  spec: FEAT-PAY-S001-002\n```\n\nSiguiente: el plazo de PENDING_COMPLIANCE, ¿2 días hábiles o 24 h?" }; } });
-  }
-  function renderSpecs(node, openId) {
-    const filters = { q: "", layer: "", status: "" };
-    const tbody = h("tbody"); const detail = h("div");
-    const refreshTable = () => tbody.replaceChildren(...state.specs.filter((s) => (!filters.q || `${s.id} ${s.title}`.toLowerCase().includes(filters.q.toLowerCase())) && (!filters.layer || s.layer === filters.layer) && (!filters.status || s.status === filters.status)).map((s) => h("tr", { class: `is-clickable${state.selectedSpec === s.id ? " is-selected" : ""}`, onclick: () => { state.selectedSpec = s.id; refreshTable(); renderDetail(s); } }, h("td", {}, h("span", { class: "mono", text: s.id })), h("td", { text: s.title }), h("td", { text: LAYER_LABELS[s.layer] }), h("td", {}, statusChip(s.status)), h("td", { text: s.version }))));
-    const renderDetail = (s) => {
-      detail.replaceChildren(h("div", { class: "card" }, h("div", { class: "card__header" }, h("div", {}, h("p", { class: "ante-title", text: `${LAYER_LABELS[s.layer]} · versión ${s.version}` }), h("h2", {}, h("span", { class: "mono", text: s.id })), h("h3", { style: { marginTop: "4px", fontFamily: "var(--bbva-font-body)", fontWeight: 400 }, text: s.title })), h("div", { class: "card__actions" }, h("button", { class: "btn btn--outline btn--sm", text: "Editar", onclick: () => toast("Editor Markdown+YAML (simulado)") }), s.status !== "deprecated" ? h("button", { class: "btn btn--outline btn--sm", text: "Deprecar", onclick: () => { s.status = "deprecated"; refreshTable(); renderDetail(s); toast(`${s.id} deprecada`); } }) : null, h("button", { class: "btn btn--danger btn--sm", text: "Borrar", onclick: () => { state.specs = state.specs.filter((x) => x !== s); detail.replaceChildren(); refreshTable(); toast(`${s.id} borrada`); } }))),
-        h("div", { class: "chips", style: { marginBottom: "12px" } }, statusChip(s.status), ...s.deps.map((d) => h("span", { class: "chip chip--ice", text: `→ ${d}`, style: { cursor: "pointer" }, onclick: () => { const t = state.specs.find((x) => x.id === d); if (t) { state.selectedSpec = t.id; refreshTable(); renderDetail(t); } } }))),
-        h("dl", { class: "kv", style: { marginBottom: "12px" } }, h("dt", { text: "Fichero" }), h("dd", { class: "mono", text: `specs/${s.layer.startsWith("work") ? `work/${s.layer}` : s.layer === "adr" || s.layer === "rule" ? `governance/${s.layer}` : s.layer}/${s.id}.md` }), h("dt", { text: "Impacto" }), h("dd", { text: `${state.specs.filter((x) => x.deps.includes(s.id)).length} specs dependen de esta` })),
-        md(`## Contexto\n${s.title} forma parte de la base ${source.name}. Esta sección describe el porqué y el alcance.\n\n## Comportamiento\n- Regla principal derivada de la documentación importada.\n- Excepciones y estados relacionados (${s.deps.join(", ") || "sin dependencias"}).\n\n## Criterios de aceptación\n1. Escenario feliz verificado por pruebas automatizadas.\n2. Escenario de error con mensaje del catálogo ISO 20022.`)));
-    };
-    refreshTable();
-    node.append(h("div", { class: "bento bento--aside-main" },
-      h("div", { class: "card" }, h("div", { class: "card__header" }, h("div", {}, h("p", { class: "ante-title", text: "Catálogo" }), h("h2", { text: "Specs" })), h("button", { class: "btn btn--sm", text: "Nueva spec", onclick: () => { const id = `FEAT-PAY-S001-00${state.specs.filter((s) => s.layer === "feature").length + 1}`; state.specs.push({ id, layer: "feature", title: "Nueva feature", status: "draft", version: "0.1", deps: [] }); state.selectedSpec = id; refreshTable(); renderDetail(state.specs.at(-1)); toast(`Creada ${id}`, "ok"); } })),
-        h("div", { class: "form-row", style: { marginBottom: "12px" } }, h("input", { class: "input", placeholder: "Buscar por texto…", oninput: (e) => { filters.q = e.target.value; refreshTable(); } }), h("select", { class: "select", onchange: (e) => { filters.layer = e.target.value; refreshTable(); } }, h("option", { value: "", text: "Todas las capas" }), Object.entries(LAYER_LABELS).map(([v, l]) => h("option", { value: v, text: l }))), h("select", { class: "select", onchange: (e) => { filters.status = e.target.value; refreshTable(); } }, h("option", { value: "", text: "Cualquier estado" }), ["draft", "active", "deprecated", "done"].map((v) => h("option", { value: v, text: v })))),
-        h("div", { class: "scroll", style: { maxHeight: "520px", overflow: "auto" } }, h("table", { class: "table table--compact" }, h("thead", {}, h("tr", {}, h("th", { text: "ID" }), h("th", { text: "Título" }), h("th", { text: "Capa" }), h("th", { text: "Estado" }), h("th", { text: "v" }))), tbody))),
-      detail));
-    const current = state.specs.find((s) => s.id === (openId || state.selectedSpec));
-    if (current) renderDetail(current); else detail.append(h("div", { class: "empty", text: "Selecciona una spec para ver su detalle, dependencias e impacto." }));
-  }
-  function renderGraph(node) {
-    const svgNS = "http://www.w3.org/2000/svg";
-    const svg = document.createElementNS(svgNS, "svg"); svg.setAttribute("class", "graph"); svg.setAttribute("viewBox", "0 0 900 440");
-    const layers = ["architecture", "domain", "product", "feature", "docs", "work-spec", "work-plan", "work-task", "adr", "rule"];
-    const positions = new Map();
-    for (const [i, layer] of layers.entries()) { const items = state.specs.filter((s) => s.layer === layer); items.forEach((s, j) => positions.set(s.id, { x: 60 + i * 86, y: 60 + j * 70 + (i % 2) * 20 })); }
-    for (const s of state.specs) for (const d of s.deps) { const a = positions.get(s.id), b = positions.get(d); if (!a || !b) continue; const line = document.createElementNS(svgNS, "line"); line.setAttribute("x1", a.x); line.setAttribute("y1", a.y); line.setAttribute("x2", b.x); line.setAttribute("y2", b.y); svg.append(line); }
-    for (const s of state.specs) { const p = positions.get(s.id); const c = document.createElementNS(svgNS, "circle"); c.setAttribute("cx", p.x); c.setAttribute("cy", p.y); c.setAttribute("r", 12); c.setAttribute("fill", LAYER_COLORS[s.layer]); c.addEventListener("click", () => { state.selectedSpec = s.id; select("specs"); }); const t = document.createElementNS(svgNS, "text"); t.setAttribute("x", p.x); t.setAttribute("y", p.y + 24); t.setAttribute("text-anchor", "middle"); t.textContent = s.id.split("-").slice(-1)[0] + " " + s.title.slice(0, 16); svg.append(c, t); }
-    node.append(h("div", { class: "card" }, h("div", { class: "card__header" }, h("div", {}, h("p", { class: "ante-title", text: "Grafo de conocimiento" }), h("h2", { text: `${state.specs.length} specs · ${state.specs.reduce((n, s) => n + s.deps.length, 0)} relaciones` })), h("div", { class: "legend" }, layers.map((l) => h("span", { style: { "--dot": LAYER_COLORS[l] }, text: LAYER_LABELS[l] })))), svg, h("p", { class: "small muted", style: { marginTop: "8px" }, text: "Pulsa un nodo para abrir la spec." })));
-  }
-  function renderCreate(node) {
-    const host = h("div");
-    const packageNode = h("div", { class: "card" }, h("p", { class: "ante-title", text: "Paquete propuesto" }), h("div", { class: "empty small", text: "Cuando el asistente proponga specs aparecerán aquí para revisarlas y persistirlas." }));
-    node.append(h("div", { class: "bento bento--main-aside" }, h("div", {}, h("div", { class: "card card--serene", style: { marginBottom: "16px" } }, h("p", { class: "ante-title", text: "Entrevista KDD" }), h("h3", { text: "Crear specs con el asistente" }), h("p", { class: "small", style: { marginTop: "8px" }, text: "Describe el conocimiento y el asistente lo estructura en specs con IDs, capas y dependencias correctas." })), host), packageNode));
-    if (needsSession(host, "Crear specs")) return;
-    createChat({ host, placeholder: "Describe el conocimiento que quieres capturar…", messages: [{ role: "assistant", text: "Hola. Cuéntame qué conocimiento quieres añadir a **CIB Payments Platform** y te propondré las specs (con `#CREATION_PHASE` y dependencias)." }], onSend: async (text, typing) => { await streamTools(typing, ["kb_search", "kb_list_specs", "kb_validate_ids"]); await sleep(600);
-      packageNode.replaceChildren(h("p", { class: "ante-title", text: "Paquete propuesto" }), h("div", { class: "list" }, [["FEAT-PAY-S001-006", "feature", "Notificación al beneficiario por webhook"], ["DOM-PAY-S001-005", "domain", "Suscripción de notificaciones"]].map(([id, layer, title]) => h("div", { class: "list-item" }, h("div", { class: "list-item__main" }, h("div", { class: "list-item__title mono", text: id }), h("div", { class: "list-item__meta", text: `${LAYER_LABELS[layer]} · ${title}` })), h("span", { class: "chip chip--lime", text: "nueva" })))), h("div", { class: "card__actions", style: { marginTop: "12px" } }, h("button", { class: "btn btn--lime btn--sm", text: "Persistir 2 specs", onclick: () => { state.specs.push({ id: "FEAT-PAY-S001-006", layer: "feature", title: "Notificación al beneficiario por webhook", status: "draft", version: "0.1", deps: ["DOM-PAY-S001-005"] }, { id: "DOM-PAY-S001-005", layer: "domain", title: "Suscripción de notificaciones", status: "draft", version: "0.1", deps: [] }); toast("Persistidas 2 specs", "ok"); select("specs"); } })));
-      return { text: `He entendido: **${text.slice(0, 60)}${text.length > 60 ? "…" : ""}**.\n\nPropongo dos specs:\n\n| ID | Capa | Título |\n| --- | --- | --- |\n| DOM-PAY-S001-005 | Dominio | Suscripción de notificaciones |\n| FEAT-PAY-S001-006 | Feature | Notificación al beneficiario por webhook |\n\nLa feature depende de la entidad de dominio y de \`PROD-PAY-S001-001\`. ¿Persisto el paquete o ajustamos algo?` }; } });
-  }
-  function renderPending(node) {
-    const pending = state.analyses.flatMap((j) => (j.preview?.questions || []).filter((q) => !q.resolved).map((q) => ({ job: j, q })));
-    const card = h("div", { class: "card" }, h("p", { class: "ante-title", text: "Preguntas pendientes" }), h("h2", { text: `${pending.length} pendientes de análisis anteriores` }));
-    card.append(pending.length ? h("div", { class: "list", style: { marginTop: "12px" } }, pending.map((p) => h("div", { class: "list-item" }, h("div", { class: "list-item__main" }, h("div", { class: "list-item__title", style: { whiteSpace: "normal" }, text: p.q.text }), h("div", { class: "list-item__meta", text: p.job.documents.join(", ") })), h("button", { class: "btn btn--outline btn--xs", text: "Ir al análisis", onclick: () => { openJobId = p.job.id; select("analyses"); } })))) : h("div", { class: "empty small", style: { marginTop: "12px" }, text: "No hay preguntas pendientes." }));
-    node.append(card, h("div", { class: "card", style: { marginTop: "16px" } }, h("p", { class: "ante-title", text: "Incidencias del grafo y de ficheros" }), h("div", { class: "list" }, h("div", { class: "list-item" }, h("div", { class: "list-item__main" }, h("div", { class: "list-item__title", text: "FEAT-PAY-S001-004 depende de PROD-PAY-S001-003 (no existe)" }), h("div", { class: "list-item__meta", text: "specs/features/FEAT-PAY-S001-004.md" })), statusChip("failed")), h("div", { class: "list-item" }, h("div", { class: "list-item__main" }, h("div", { class: "list-item__title", text: "PROD-PAY-S001-002 sin sección «Criterios de aceptación»" }), h("div", { class: "list-item__meta", text: "Sección canónica obligatoria para product" })), statusChip("draft")))));
+      h("div", { class: "card" },
+        h("div", { class: "card__header" },
+          h("div", {}, h("p", { class: "ante-title", text: "Registro" }), h("h2", { text: "Quién ha cambiado qué" })),
+          h("span", { class: "chip chip--outline", text: `${state.activity.length} eventos` })),
+        h("div", { class: "form-row", style: { marginBottom: "16px" } },
+          h("select", { class: "select", onchange: (event) => { filters.kind = event.target.value; refresh(); } },
+            h("option", { value: "", text: "Todo tipo de cambio" }), Object.entries(KIND_LABEL).map(([value, label]) => h("option", { value, text: label }))),
+          h("select", { class: "select", onchange: (event) => { filters.actor = event.target.value; refresh(); } },
+            h("option", { value: "", text: "Todas las personas" }), Object.keys(PEOPLE).map((person) => h("option", { value: person, text: person })))),
+        listNode),
+      h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } },
+        h("div", { class: "card card--canary" },
+          h("p", { class: "ante-title", text: "Por qué importa" }),
+          h("p", { class: "small", style: { marginTop: "8px" }, text: "Cada cambio queda firmado: quién, cuándo y desde dónde. Las correcciones que hace un usuario desde el chat aparecen aquí como cambios en la spec correspondiente, así que el experto puede revisarlas." })),
+        h("div", { class: "card" },
+          h("p", { class: "ante-title", text: "Actividad por persona" }),
+          h("div", { class: "list", style: { marginTop: "10px" } }, Object.keys(PEOPLE).map((person) => h("div", { class: "list-item" },
+            h("div", { class: "list-item__main", style: { flexDirection: "row", alignItems: "center", gap: "10px" } },
+              h("div", { class: "avatar-sm", text: PEOPLE[person] }), h("span", { class: "list-item__title", text: person })),
+            h("span", { class: "chip", text: String(state.activity.filter((entry) => entry.actor === person).length) }))))))));
   }
 }
 
@@ -746,13 +1443,12 @@ function renderWork(container) {
 /* ---------- router ---------- */
 function render() {
   const view = $("view"); view.replaceChildren(); renderNav();
-  ({ knowledge: renderKnowledge, assistant: renderAssistant, work: renderWork })[state.route](view);
+  ({ knowledge: renderUserKnowledge, studio: renderStudio, assistant: renderAssistant, work: renderWork })[state.route](view);
 }
-document.querySelectorAll(".navlink").forEach((link) => link.addEventListener("click", () => { state.route = link.dataset.route; render(); }));
 $("btnManageSources").addEventListener("click", openSourcesManager);
 $("btnSettings").addEventListener("click", openSettings);
 $("modelPicker").addEventListener("change", (e) => toast(`Modelo: ${e.target.value}`));
-renderSources(); renderSession(); render(); renderGate();
+renderRolePicker(); renderSources(); renderSession(); render(); renderGate();
 </script>
 </body>
 </html>
