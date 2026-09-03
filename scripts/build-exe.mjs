@@ -167,6 +167,12 @@ async function brandExecutable(target, name) {
  * enseñando el de Node, el problema es la caché de iconos del Explorador o se está mirando otra copia
  * (la instalada en %LOCALAPPDATA%\Doriath no cambia hasta volver a pasar el instalador).
  */
+/**
+ * Comprueba que el icono llegó al ejecutable y, sobre todo, que los tamaños pequeños van en
+ * formato DIB. Windows solo sabe leer un icono comprimido en PNG a 256x256: si 16, 32 o 48
+ * viajan como PNG, el fichero parece correcto en cualquier visor pero el Explorador dibuja el
+ * icono genérico. Nos pasó, así que aquí se queda la comprobación.
+ */
 async function verifyIcons(files) {
   const ResEdit = requireResedit();
   for (const file of files) {
@@ -174,7 +180,19 @@ async function verifyIcons(files) {
     const groups = ResEdit.Resource.IconGroupEntry.fromEntries(resource.entries);
     const group = groups[0];
     if (!group || group.icons.length < 2) throw new Error(`${path.basename(file)} no lleva el icono de Doriath.`);
-    log(`${path.basename(file)}: icono verificado (grupo ${group.id}, idioma ${group.lang}, ${group.icons.length} resoluciones).`);
+    const bitmaps = new Map(resource.entries.filter((entry) => entry.type === 3).map((entry) => [entry.id, entry.bin]));
+    for (const icon of group.icons) {
+      const bin = bitmaps.get(icon.iconID);
+      if (!bin) throw new Error(`${path.basename(file)}: falta el mapa de bits ${icon.iconID} del icono.`);
+      const head = Buffer.from(bin.slice(0, 8));
+      const isPng = head[0] === 0x89 && head.toString("latin1", 1, 4) === "PNG";
+      const width = icon.width || 256;
+      if (isPng && width < 256) {
+        throw new Error(`${path.basename(file)}: el icono de ${width}px va en PNG y Windows no lo sabe leer; regenera public/brand/doriath.ico con "npm run icon".`);
+      }
+    }
+    const sizes = group.icons.map((icon) => icon.width || 256).join("/");
+    log(`${path.basename(file)}: icono verificado (grupo ${group.id}, idioma ${group.lang}, ${sizes} px).`);
   }
 }
 

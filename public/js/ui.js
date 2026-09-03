@@ -251,9 +251,12 @@ export function cleanPath(value) {
   return text;
 }
 
+/** Los estados se guardan en inglés (es el formato KDD) pero se enseñan en castellano. */
+const STATUS_LABELS = { draft: "borrador", active: "activa", completed: "completada", accepted: "aceptada", deprecated: "obsoleta", archived: "archivada", rejected: "rechazada", proposed: "propuesta", discussion: "en discusión", running: "en marcha", review: "para revisar", committed: "confirmada", failed: "ha fallado", pending: "pendiente", cancelled: "cancelada", "no-changes": "sin cambios", preview: "vista previa", confirmed: "confirmada" };
+
 export function statusChip(status) {
   const map = { draft: "chip--canary", active: "chip--lime", completed: "chip--lime", accepted: "chip--lime", deprecated: "chip--mandarin", archived: "chip--outline", rejected: "chip--mandarin", proposed: "chip--ice", discussion: "chip--ice", running: "chip--canary", review: "chip--serene", committed: "chip--lime", failed: "chip--mandarin", pending: "chip--outline", cancelled: "chip--outline", "no-changes": "chip--outline", preview: "chip--serene", confirmed: "chip--lime" };
-  return h("span", { class: `chip ${map[status] || ""}`, text: status || "—" });
+  return h("span", { class: `chip ${map[status] || ""}`, text: STATUS_LABELS[status] || status || "—" });
 }
 
 export function confidenceChip(confidence) {

@@ -10,7 +10,7 @@ Se ejecuta en el equipo del usuario: un servidor Node en `127.0.0.1` y una pesta
 |---|---|
 | **Knowledge Base Studio** | Importa documentos (PDF, Word, Excel, PowerPoint, Markdown, texto, código) a una base de conocimiento local y genera specs KDD con el analizador en dos fases de KDD Studio (átomos → plan de curación → bodies). Preview con preguntas abiertas y chat de resolución antes de persistir. Catálogo, edición, grafo e impacto. |
 | **BBVA CIB Assistant** | Chat con contexto de todas las bases de conocimiento (herramientas de consulta, no memoria). Genera entregables con la identidad BBVA × NFQ: Word, Excel, PowerPoint, HTML, Markdown, código. |
-| **Knowledge-Driven Development** | Entrevista en 4 fases (entender, clasificar, validar, generar) que produce la iniciativa WRK-SPEC con sus planes y tareas, detecta los repositorios necesarios (carpetas locales con `.git`), y ejecuta cada tarea con Copilot sobre el repositorio: diff revisable, commit, push y pull request. |
+| **Knowledge-Driven Development** | Entrevista en 4 fases (entender, clasificar, validar, generar) que produce una **iniciativa** con sus **features** y sus **historias de usuario**, detecta los repositorios necesarios (carpetas locales con `.git`), y trabaja cada historia con Copilot sobre el repositorio: diff revisable, commit, push y pull request. |
 
 Las bases de conocimiento son carpetas locales con la misma disposición que las fuentes locales de KDD Studio (`specs/<capa>/…`, `docs-tecnicos/`, `.kdd-studio/`), así que son intercambiables.
 
@@ -31,6 +31,20 @@ Doriath enseña dos caras de la misma base de conocimiento, con un conmutador **
 - **Admin · Knowledge Bases Studio** — mantenimiento completo: **Panel** (KPIs, reparto por capa, salud con sus incidencias, últimos cambios y últimos documentos con quién los incluyó y qué specs generaron), Documentos, Análisis, Specs, Grafo, **Gobernanza** (ADR, RFC y reglas con responsable y estado) y **Actividad** (quién ha cambiado qué, cuándo y desde dónde, filtrable).
 
 El registro vive en `.kdd-studio/activity.json` dentro de la propia base, así que viaja con ella y lo ve todo el equipo. Cada cambio se firma con el usuario de la sesión de GitHub.
+
+## El vocabulario de Knowledge-Driven Development
+
+Por debajo, una iniciativa se guarda como `WRK-SPEC` con sus `WRK-PLAN` y sus `WRK-TASK`: es el formato KDD y no cambia. Pero el módulo lo usa gente que no sabe qué es una spec, así que en pantalla se habla en su idioma:
+
+| Se guarda como | Se llama |
+|---|---|
+| `WRK-SPEC` | **Iniciativa** — lo que se quiere conseguir |
+| `WRK-PLAN` | **Feature** — cada bloque de trabajo |
+| `WRK-TASK` | **Historia de usuario** — cada pieza concreta que se ejecuta |
+
+Los identificadores (`WRK-TASK-S001-002`) solo se enseñan en el rol **Admin**; en el rol Usuario no aparecen en ninguna pantalla. El asistente tiene la misma regla en su prompt: no dice «spec», «plan» ni «paquete» en la conversación. Los términos de Git (rama, commit, push, pull request) sí se usan con normalidad, porque el módulo trabaja sobre repositorios de verdad y son el nombre real de lo que pasa.
+
+Una excepción deliberada: el mensaje de commit y el título de la pull request sí llevan el identificador. Es la trazabilidad entre el código y el conocimiento que lo justifica, y vive en el repositorio, no en la interfaz. Los dos campos son editables antes de confirmar.
 
 ## Instalación (usuario final)
 
@@ -53,7 +67,9 @@ Datos existentes en `data/`, `outputs/` y `knowledge-bases/` se conservan al rei
 
 ### Si el ejecutable sigue con el icono de Node
 
-`npm run build` verifica el icono y lo dice al terminar (*"icono verificado (grupo 1, idioma 1033, 7 resoluciones)"*); si no puede ponerlo, el build **falla** en vez de entregar un binario sin icono. Así que si el build termina bien y Windows sigue enseñando el icono de Node:
+Windows solo sabe leer un icono comprimido en PNG dentro de un `.ico` **en el tamaño 256×256**. Los tamaños que dibuja el Explorador en las vistas de lista, detalles e iconos medianos (16, 24, 32 y 48) tienen que ir en el formato clásico DIB. Un `.ico` con todo en PNG se ve correcto en cualquier visor y en la pestaña de Propiedades, pero el Explorador cae al icono genérico. `public/brand/doriath.ico` se genera con `npm run icon` (Node puro, sin dependencias) y ya reparte los formatos como toca.
+
+`npm run build` verifica el icono y lo dice al terminar (*"icono verificado (grupo 1, idioma 1033, 16/24/32/48/64/128/256 px)"*); falla si no puede ponerlo **o si algún tamaño por debajo de 256 viaja en PNG**. Así que si el build termina bien y Windows sigue enseñando el icono de Node:
 
 1. Comprueba **qué fichero estás mirando**. `npm run build` regenera `dist\Doriath\Doriath.exe`, pero el acceso directo del Escritorio apunta a `%LOCALAPPDATA%\Doriath`, que conserva la versión anterior hasta que vuelvas a ejecutar el `Doriath-Setup.exe` recién construido.
 2. Es la **caché de iconos del Explorador**, que guarda el icono por ruta y no se entera de que el fichero ha cambiado. Se limpia con `ie4uinit.exe -show` (o cerrando sesión). Para verlo sin tocar nada: clic derecho sobre el `.exe` → Propiedades, o míralo desde otra carpeta.
@@ -120,11 +136,12 @@ En desarrollo los datos van a `~/.doriath`; instalado, a `<raíz>/data`. La conf
 npm run build:dist   # dist/Doriath: app + node_modules (paquete Copilot win32-x64) + Node portable
 npm run build:exe    # dist/Doriath/Doriath.exe y dist/Doriath-Setup.exe (Node SEA + postject)
 npm run build        # ambos
+npm run icon         # regenera public/brand/doriath.ico desde public/brand/doriath-icon.png
 ```
 
 - `build:dist` copia por defecto el `node_modules` ya probado del checkout (como FENIX) y retira las dependencias de desarrollo con `npm prune --omit=dev`; con `--fresh`, o al construir desde otra plataforma, reinstala desde el registro con el mismo reintento que `npm run setup`. En ambos casos comprueba que el runtime nativo de Copilot (`@github/copilot-win32-x64`) está en el payload y, si npm no lo seleccionó, lo instala explícitamente. También descarga el Node portable indicado en `scripts/launcher/tools.json`.
 - `build:exe` empaqueta `scripts/launcher/launcher.cjs` y `setup.cjs` con esbuild, genera los blobs SEA e inyecta cada uno con `postject` en una copia de `node.exe`. Al construir en Windows el blob se genera con el propio `node.exe` portable (misma versión que ejecutará el launcher); desde otra plataforma se usa el Node del sistema.
-- Después, `resedit` (JavaScript puro, sin binarios que descargar) pone en los dos ejecutables el icono `public/brand/doriath.ico` —siete resoluciones, de 16 a 256 px— y los datos de versión, y de paso descarta la firma que `node.exe` traía y que `postject` deja inservible. Sin esto Windows enseñaría el icono de Node.
+- Después, `resedit` (JavaScript puro, sin binarios que descargar) pone en los dos ejecutables el icono `public/brand/doriath.ico` —siete resoluciones, de 16 a 256 px, las seis pequeñas en DIB y la de 256 en PNG— y los datos de versión, y de paso descarta la firma que `node.exe` traía y que `postject` deja inservible. Al terminar el build relee los dos ejecutables y comprueba que el icono está y que ningún tamaño pequeño va en PNG (ver *Si el ejecutable sigue con el icono de Node*).
 - El payload va **pegado detrás** del instalador con un pie de 32 bytes que dice dónde empieza, como un autoextraíble clásico: incrustarlo como recurso SEA reventaba `postject` a partir de unos cientos de megas.
 - `build:dist` retira del payload los runtimes de Copilot de otras plataformas (cada uno ocupa unos 300 MB), que aparecen al construir el paquete de Windows desde otro sistema.
 - Los ejecutables no van firmados; firma Authenticode aparte si la política lo exige. Con `--platform linux` se generan binarios Linux para validar la mecánica.

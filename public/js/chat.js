@@ -13,7 +13,7 @@ export function phaseBar(phase) {
   return h("div", { class: "phase" }, PHASES.map((step, position) => h("div", { class: `phase__step${position < index ? " is-done" : position === index ? " is-current" : ""}`, text: PHASE_LABELS[step] })));
 }
 
-export function createChatView({ chatId, placeholder = "Escribe tu mensaje…", onState, onFile, onMessage, decorateMessage, showPhase = false, allowAttachments = true }) {
+export function createChatView({ chatId, placeholder = "Escribe tu mensaje…", onState, onFile, onMessage, decorateMessage, showPhase = false, allowAttachments = true, plain = false }) {
   const thread = h("div", { class: "chat__thread" });
   const composerText = h("textarea", { placeholder, rows: 2, oninput: (event) => autoResize(event.target) });
   const fileInput = h("input", { type: "file", multiple: true, hidden: true });
@@ -54,7 +54,7 @@ export function createChatView({ chatId, placeholder = "Escribe tu mensaje…", 
     else if (message.role === "user") node.append(h("div", { class: "md", text: message.content }));
     else node.append(md(message.content || "(sin contenido)"));
     if (message.attachments?.length) node.append(h("div", { class: "msg__attachments" }, message.attachments.map((file) => h("span", { class: "file-chip", text: `${file.name} · ${fmtBytes(file.size)}` }))));
-    if (message.packageId) node.append(h("div", { class: "callout callout--info", style: { marginTop: "10px" }, text: "Se ha propuesto un paquete de specs. Revísalo en el panel de la derecha y confirma para persistirlo." }));
+    if (message.packageId) node.append(h("div", { class: "callout callout--info", style: { marginTop: "10px" }, text: plain ? "Doriath ha preparado una propuesta. Revísala en el panel de la derecha y guárdala cuando te encaje." : "Se ha propuesto un paquete de specs. Revísalo en el panel de la derecha y confirma para persistirlo." }));
     if (message.actionError) node.append(h("div", { class: "callout callout--warn", style: { marginTop: "10px" }, text: `El bloque de acciones no se pudo interpretar: ${message.actionError}` }));
     if (message.applied?.length) node.append(h("div", { class: "callout callout--ok", style: { marginTop: "10px" }, text: `Acciones aplicadas al preview: ${message.applied.map((item) => `${item.type} ${item.id}`).join(", ")}.` }));
     // Gancho para que una vista añada acciones bajo el mensaje (por ejemplo, corregir una respuesta).

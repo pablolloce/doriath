@@ -1,9 +1,21 @@
-/** Knowledge-Driven Development: iniciativas (chat Work), repositorios locales y ejecución con git. */
+/**
+ * Knowledge-Driven Development: iniciativas, repositorios locales y ejecución con git.
+ *
+ * Vocabulario: este módulo lo usa gente que no sabe qué es una spec. Por debajo hay WRK-SPEC,
+ * WRK-PLAN y WRK-TASK, pero aquí se habla de iniciativa, features e historias de usuario, y los
+ * identificadores internos solo se enseñan al rol admin.
+ */
 import { get, post, put, del, subscribe } from "../api.js";
 import { h, md, clear, toast, confirmDialog, promptDialog, pickFolder, fmtDate, statusChip, layerChip, renderDiff, openModal, modalHeader } from "../ui.js";
 import { createChatView } from "../chat.js";
 import { renderPackagePanel } from "../package-panel.js";
-import { setBreadcrumb, activeSource, openSourcesManager, refreshSources, state as appState } from "../app.js";
+import { setBreadcrumb, activeSource, openSourcesManager, refreshSources, isAdmin, state as appState } from "../app.js";
+
+/** El identificador interno solo lo ve quien mantiene la base de conocimiento. */
+const techId = (id) => (isAdmin() ? h("span", { class: "mono", text: id }) : null);
+const plural = (count, one, many) => `${count} ${count === 1 ? one : many}`;
+const KIND_LABELS = { implementation: "Código", document: "Documento", "test-cases": "Casos de prueba", manual: "Manual" };
+const kindLabel = (kind) => KIND_LABELS[kind] || KIND_LABELS.implementation;
 
 const TABS = [["initiatives", "1 · Iniciativa"], ["repositories", "2 · Repositorios"], ["execution", "3 · Ejecución"]];
 
@@ -11,7 +23,7 @@ export async function renderWork({ container, params, state }) {
   const source = activeSource();
   setBreadcrumb("Knowledge-Driven Development", source?.name);
   if (!source) {
-    container.append(h("div", { class: "card card--electric" }, h("p", { class: "ante-title", text: "Knowledge-Driven Development" }), h("h1", { text: "Selecciona una base de conocimiento" }), h("p", { class: "lead", style: { marginTop: "12px" }, text: "El desarrollo parte del conocimiento: elige la caja cuyas specs guiarán la iniciativa." }), h("div", { class: "card__actions", style: { marginTop: "20px" } }, h("button", { class: "btn btn--accent", text: "Gestionar bases de conocimiento", onclick: openSourcesManager }))));
+    container.append(h("div", { class: "card card--electric" }, h("p", { class: "ante-title", text: "Knowledge-Driven Development" }), h("h1", { text: "Selecciona una base de conocimiento" }), h("p", { class: "lead", style: { marginTop: "12px" }, text: "El desarrollo parte del conocimiento: elige la base que va a guiar el trabajo." }), h("div", { class: "card__actions", style: { marginTop: "20px" } }, h("button", { class: "btn btn--accent", text: "Gestionar bases de conocimiento", onclick: openSourcesManager }))));
     return {};
   }
   const layers = state.layers || [];
@@ -19,7 +31,7 @@ export async function renderWork({ container, params, state }) {
   const tabsNode = h("div", { class: "tabs" });
   const body = h("div");
   container.append(
-    h("div", { class: "card card--electric" }, h("p", { class: "ante-title", text: `Knowledge-Driven Development · ${source.sourceId}` }), h("h1", { text: source.name }), h("p", { class: "small", style: { marginTop: "8px", opacity: 0.85 }, text: "Describe el cambio, el asistente detecta el conocimiento y los repositorios necesarios, acordáis un plan con tareas y Doriath ejecuta cada tarea sobre tus repositorios locales con revisión del diff antes de cada commit." })),
+    h("div", { class: "card card--electric" }, h("p", { class: "ante-title", text: `Knowledge-Driven Development · ${source.sourceId}` }), h("h1", { text: source.name }), h("p", { class: "small", style: { marginTop: "8px", opacity: 0.85 }, text: "Cuenta qué necesitas cambiar, en tus palabras. Doriath consulta lo que ya sabe, mira tus repositorios y propone las features con sus historias de usuario. Después trabaja cada historia sobre tu código y te enseña los cambios para que los revises antes de guardarlos." })),
     tabsNode,
     body,
   );
@@ -110,7 +122,7 @@ export async function renderWork({ container, params, state }) {
     let view = null;
     node.append(h("div", { class: "bento", style: { gridTemplateColumns: "280px minmax(0, 1fr) 380px", alignItems: "start" } },
       h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } },
-        h("div", { class: "card card--serene" }, h("p", { class: "ante-title", text: "Paso 1" }), h("h3", { text: "Describe el cambio" }), h("p", { class: "small", style: { margin: "8px 0 12px" }, text: "El asistente entrevista, activa el conocimiento de la caja, detecta los repositorios implicados y propone la iniciativa con su plan y tareas." }), h("button", { class: "btn", text: "Nueva iniciativa", onclick: () => startChat() })),
+        h("div", { class: "card card--serene" }, h("p", { class: "ante-title", text: "Paso 1" }), h("h3", { text: "Describe el cambio" }), h("p", { class: "small", style: { margin: "8px 0 12px" }, text: "Explícalo como se lo contarías a un compañero. Doriath te pregunta lo que le falte, busca en el conocimiento, detecta los repositorios y propone las features con sus historias de usuario." }), h("button", { class: "btn", text: "Nueva iniciativa", onclick: () => startChat() })),
         h("div", { class: "card" }, h("p", { class: "ante-title", text: "Iniciativas en curso" }), listNode)),
       chatHost,
       h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } }, h("div", { class: "card" }, h("div", { class: "card__header" }, h("p", { class: "ante-title", text: "Repositorios de la iniciativa" }), h("button", { class: "btn btn--ghost btn--xs", text: "Gestionar", onclick: () => selectTab("repositories") })), reposNode), packageHost)));
@@ -118,7 +130,7 @@ export async function renderWork({ container, params, state }) {
       const data = await get(`/api/chats?kind=work&sourceId=${source.id}`);
       clear(listNode);
       if (!data.chats.length) listNode.append(h("div", { class: "muted small", text: "Sin iniciativas todavía." }));
-      for (const chat of data.chats) listNode.append(h("div", { class: `list-item is-clickable${chat.id === currentId ? " is-active" : ""}`, onclick: () => openChat(chat.id) }, h("div", { class: "list-item__main" }, h("div", { class: "list-item__title", text: chat.title }), h("div", { class: "list-item__meta", text: `${chat.phase || "inicio"} · ${fmtDate(chat.updatedAt)}` })), chat.hasPackage ? h("span", { class: "chip chip--canary", text: "paquete" }) : null, h("button", { class: "btn btn--ghost btn--xs", text: "×", onclick: async (event) => { event.stopPropagation(); if (await confirmDialog("Eliminar", "Se elimina la conversación (no las specs ya persistidas).", { okLabel: "Eliminar", danger: true })) { await del(`/api/chats/${chat.id}`); refreshList(); if (view?.chat?.id === chat.id) { clear(chatHost); clear(packageHost); } } } })));
+      for (const chat of data.chats) listNode.append(h("div", { class: `list-item is-clickable${chat.id === currentId ? " is-active" : ""}`, onclick: () => openChat(chat.id) }, h("div", { class: "list-item__main" }, h("div", { class: "list-item__title", text: chat.title }), h("div", { class: "list-item__meta", text: `${chat.phase || "inicio"} · ${fmtDate(chat.updatedAt)}` })), chat.hasPackage ? h("span", { class: "chip chip--canary", text: "propuesta" }) : null, h("button", { class: "btn btn--ghost btn--xs", text: "×", onclick: async (event) => { event.stopPropagation(); if (await confirmDialog("Eliminar", "Se elimina la conversación. Lo que ya hayas guardado se conserva.", { okLabel: "Eliminar", danger: true })) { await del(`/api/chats/${chat.id}`); refreshList(); if (view?.chat?.id === chat.id) { clear(chatHost); clear(packageHost); } } } })));
     }
     async function renderRepos(chat) {
       const repos = await loadRepos();
@@ -141,18 +153,18 @@ export async function renderWork({ container, params, state }) {
     async function openChat(id) {
       view?.destroy();
       clear(chatHost);
-      view = createChatView({ chatId: id, showPhase: true, placeholder: "Describe el cambio que necesitas en lenguaje de negocio…", onState: (chat) => { view.setPhase(); renderPackage(chat); renderRepos(chat); } });
+      view = createChatView({ chatId: id, showPhase: true, plain: true, placeholder: "Describe el cambio que necesitas, en lenguaje de negocio…", onState: (chat) => { view.setPhase(); renderPackage(chat); renderRepos(chat); } });
       chatHost.append(h("div", { class: "card" }, view.root));
       await view.load();
       refreshList(id);
     }
     function renderPackage(chat) {
       clear(packageHost);
-      packageHost.append(renderPackagePanel({ chatId: chat.id, pkg: chat.state?.package, layers, onChanged: async (result) => { await view.refresh(); refreshSources(); refreshList(chat.id); if (result) toast("Ve a Ejecución para lanzar las tareas sobre los repositorios.", "ok", 6000); } }));
+      packageHost.append(renderPackagePanel({ chatId: chat.id, pkg: chat.state?.package, layers, plain: true, onChanged: async (result) => { await view.refresh(); refreshSources(); refreshList(chat.id); if (result) toast("Ve a Ejecución para lanzar las historias de usuario sobre tus repositorios.", "ok", 6000); } }));
     }
     await refreshList();
     await renderRepos(null);
-    packageHost.append(renderPackagePanel({ chatId: "", pkg: null, layers }));
+    packageHost.append(renderPackagePanel({ chatId: "", pkg: null, layers, plain: true }));
     return () => view?.destroy();
   }
 
@@ -163,16 +175,16 @@ export async function renderWork({ container, params, state }) {
     const detailNode = h("div");
     let unsubscribe = null;
     node.append(h("div", { class: "bento", style: { gridTemplateColumns: "320px minmax(0, 1fr)", alignItems: "start" } },
-      h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } }, h("div", { class: "card" }, h("p", { class: "ante-title", text: "Iniciativas persistidas" }), treeNode), h("div", { class: "card" }, h("p", { class: "ante-title", text: "Ejecuciones" }), runsNode)),
+      h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } }, h("div", { class: "card" }, h("p", { class: "ante-title", text: "Iniciativas guardadas" }), treeNode), h("div", { class: "card" }, h("p", { class: "ante-title", text: "Ejecuciones" }), runsNode)),
       detailNode));
     async function refreshTree() {
       const data = await get(`/api/sources/${source.id}/work`);
       clear(treeNode);
-      if (!data.tree.length) treeNode.append(h("div", { class: "muted small", text: "No hay iniciativas Work en la base de conocimiento. Créalas en el paso 1." }));
+      if (!data.tree.length) treeNode.append(h("div", { class: "muted small", text: "Todavía no has guardado ninguna iniciativa. Créala en el paso 1." }));
       for (const spec of data.tree) {
         const tasks = spec.plans.flatMap((plan) => plan.tasks);
         treeNode.append(h("div", { class: "list-item", style: { flexDirection: "column", alignItems: "stretch" } },
-          h("div", { style: { display: "flex", justifyContent: "space-between", gap: "8px" } }, h("div", { class: "list-item__main" }, h("div", { class: "list-item__title" }, h("span", { class: "mono", text: spec.id })), h("div", { class: "small", text: spec.title }), h("div", { class: "list-item__meta", text: `${spec.plans.length} plan(es) · ${tasks.length} tarea(s)` })), statusChip(spec.status)),
+          h("div", { style: { display: "flex", justifyContent: "space-between", gap: "8px" } }, h("div", { class: "list-item__main" }, h("div", { class: "list-item__title", text: spec.title }), h("div", { class: "list-item__meta" }, `${plural(spec.plans.length, "feature", "features")} · ${plural(tasks.length, "historia de usuario", "historias de usuario")}`, techId(spec.id) ? " · " : null, techId(spec.id))), statusChip(spec.status)),
           h("button", { class: "btn btn--sm", style: { marginTop: "8px" }, text: "Preparar ejecución", disabled: !tasks.length, onclick: () => prepareRun(spec) })));
       }
     }
@@ -180,24 +192,24 @@ export async function renderWork({ container, params, state }) {
       const data = await get(`/api/runs?sourceId=${source.id}`);
       clear(runsNode);
       if (!data.runs.length) runsNode.append(h("div", { class: "muted small", text: "Sin ejecuciones." }));
-      for (const run of data.runs) runsNode.append(h("div", { class: `list-item is-clickable${run.id === openRunId ? " is-active" : ""}`, onclick: () => openRun(run.id) }, h("div", { class: "list-item__main" }, h("div", { class: "list-item__title", text: run.title }), h("div", { class: "list-item__meta", text: `${run.workSpecId} · ${run.tasks.filter((task) => task.status === "committed").length}/${run.tasks.length} confirmadas · ${fmtDate(run.updatedAt)}` })), statusChip(run.status)));
+      for (const run of data.runs) runsNode.append(h("div", { class: `list-item is-clickable${run.id === openRunId ? " is-active" : ""}`, onclick: () => openRun(run.id) }, h("div", { class: "list-item__main" }, h("div", { class: "list-item__title", text: run.title }), h("div", { class: "list-item__meta", text: `${run.tasks.filter((task) => task.status === "committed").length}/${run.tasks.length} historias confirmadas · ${fmtDate(run.updatedAt)}` })), statusChip(run.status)));
     }
     async function prepareRun(spec) {
       const repos = await loadRepos();
-      if (!repos.length) { toast("Registra primero los repositorios (paso 2).", "error"); return; }
+      if (!repos.length) { toast("Selecciona primero los repositorios (paso 2).", "error"); return; }
       const { close } = openModal([], { wide: true });
       const tasks = spec.plans.flatMap((plan) => plan.tasks.map((task) => ({ ...task, planId: plan.id })));
       const selects = new Map();
       const branch = h("input", { class: "input", value: "", placeholder: "Se generará a partir de la iniciativa" });
       document.querySelector(".modal").append(
-        modalHeader(spec.title, close, `Preparar ejecución · ${spec.id}`),
-        h("p", { class: "muted small", text: "Asigna a cada tarea el repositorio sobre el que se ejecutará. Doriath crea una rama por iniciativa y ejecuta cada tarea con Copilot; después revisas el diff y confirmas el commit." }),
+        modalHeader(spec.title, close, isAdmin() ? `Preparar ejecución · ${spec.id}` : "Preparar ejecución"),
+        h("p", { class: "muted small", text: "Elige en qué repositorio se trabaja cada historia de usuario. Doriath abre una rama para la iniciativa; al terminar cada historia te enseña los cambios para que los revises antes de confirmarlos." }),
         h("div", { class: "field" }, h("label", { text: "Rama de trabajo (opcional)" }), branch),
-        h("table", { class: "table table--compact" }, h("thead", {}, h("tr", {}, h("th", {}), h("th", { text: "Tarea" }), h("th", { text: "Tipo" }), h("th", { text: "Repositorio" }))), h("tbody", {}, tasks.map((task) => {
+        h("table", { class: "table table--compact" }, h("thead", {}, h("tr", {}, h("th", {}), h("th", { text: "Historia de usuario" }), h("th", { text: "Tipo" }), h("th", { text: "Repositorio" }))), h("tbody", {}, tasks.map((task) => {
           const select = h("select", { class: "select" }, h("option", { value: "", text: "— sin repositorio —" }), repos.map((repo) => h("option", { value: repo.id, text: repo.name, selected: task.repositoryHint && repo.name.toLowerCase() === task.repositoryHint.toLowerCase() })));
           const check = h("input", { type: "checkbox", checked: true });
           selects.set(task.id, { select, check });
-          return h("tr", {}, h("td", {}, check), h("td", {}, h("div", { class: "mono", text: task.id }), h("div", { class: "small", text: task.title })), h("td", {}, h("span", { class: "chip chip--outline", text: task.task_kind || "implementation" })), h("td", {}, select));
+          return h("tr", {}, h("td", {}, check), h("td", {}, h("div", { text: task.title }), techId(task.id)), h("td", {}, h("span", { class: "chip chip--outline", text: kindLabel(task.task_kind) })), h("td", {}, select));
         }))),
         h("div", { class: "card__actions", style: { justifyContent: "flex-end" } }, h("button", { class: "btn btn--lime", text: "Crear ejecución", onclick: async () => {
           const taskIds = tasks.filter((task) => selects.get(task.id).check.checked).map((task) => task.id);
@@ -237,7 +249,7 @@ export async function renderWork({ container, params, state }) {
       clear(host);
       const card = h("div", { class: "card" });
       host.append(card);
-      card.append(h("div", { class: "card__header" }, h("div", {}, h("p", { class: "ante-title", text: `Ejecución · ${run.workSpecId}` }), h("h2", { text: run.title }), h("div", { class: "chips", style: { marginTop: "8px" } }, statusChip(run.status), h("span", { class: "chip chip--serene", text: run.branch }))), h("div", { class: "card__actions" }, h("button", { class: "btn btn--outline btn--sm", text: "Cambiar rama", onclick: async () => { const value = await promptDialog("Rama de trabajo", { label: "Rama", value: run.branch }); if (value) { await put(`/api/runs/${run.id}`, { branch: value }); refresh(); } } }))));
+      card.append(h("div", { class: "card__header" }, h("div", {}, h("p", { class: "ante-title", text: isAdmin() ? `Ejecución · ${run.workSpecId}` : "Ejecución" }), h("h2", { text: run.title }), h("div", { class: "chips", style: { marginTop: "8px" } }, statusChip(run.status), h("span", { class: "chip chip--serene", text: run.branch }))), h("div", { class: "card__actions" }, h("button", { class: "btn btn--outline btn--sm", text: "Cambiar rama", onclick: async () => { const value = await promptDialog("Rama de trabajo", { label: "Rama", value: run.branch }); if (value) { await put(`/api/runs/${run.id}`, { branch: value }); refresh(); } } }))));
       // Repositorios y acciones globales
       const repoActions = h("div", { class: "list", style: { margin: "12px 0" } });
       for (const repo of run.repositories.filter((item) => run.tasks.some((task) => task.repositoryId === item.id))) {
@@ -251,13 +263,13 @@ export async function renderWork({ container, params, state }) {
       card.append(h("p", { class: "ante-title", text: "Repositorios" }), repoActions);
       if (run.pullRequests?.length) card.append(h("div", { class: "callout callout--ok small", html: run.pullRequests.map((pr) => `Pull request: <a href="${pr.url}" target="_blank" rel="noopener">${pr.url}</a>`).join("<br>") }));
       // Tareas
-      card.append(h("p", { class: "ante-title", style: { marginTop: "16px" }, text: "Tareas" }));
+      card.append(h("p", { class: "ante-title", style: { marginTop: "16px" }, text: "Historias de usuario" }));
       for (const task of run.tasks) {
         const repo = run.repositories.find((item) => item.id === task.repositoryId);
         const taskCard = h("div", { class: "card card--sand", style: { marginBottom: "12px" } });
         const repoSelect = h("select", { class: "select", style: { maxWidth: "260px" }, disabled: task.status === "running", onchange: async (event) => { await put(`/api/runs/${run.id}`, { assignments: [{ taskId: task.id, repositoryId: event.target.value }] }); refresh(); } }, h("option", { value: "", text: "— repositorio —" }), run.repositories.map((item) => h("option", { value: item.id, text: item.name, selected: item.id === task.repositoryId })));
         taskCard.append(h("div", { class: "card__header" },
-          h("div", {}, h("div", { class: "chips", style: { marginBottom: "6px" } }, h("span", { class: "mono", text: task.id }), statusChip(task.status), h("span", { class: "chip chip--outline", text: task.taskKind })), h("h3", { text: task.title })),
+          h("div", {}, h("div", { class: "chips", style: { marginBottom: "6px" } }, techId(task.id), statusChip(task.status), h("span", { class: "chip chip--outline", text: kindLabel(task.taskKind) })), h("h3", { text: task.title })),
           h("div", { class: "card__actions" }, repoSelect,
             task.status === "running"
               ? h("button", { class: "btn btn--danger btn--sm", text: "Cancelar", onclick: () => post(`/api/runs/${run.id}/tasks/${task.id}/cancel`) })
@@ -266,7 +278,7 @@ export async function renderWork({ container, params, state }) {
           taskCard.append(h("div", { class: "log", dataset: { log: task.id } }, (task.log || []).slice(-40).map((entry) => h("div", { class: "log__line" }, h("span", { class: "log__time", text: new Date(entry.at).toLocaleTimeString("es-ES") }), entry.message))), h("pre", { class: "code small", dataset: { stream: task.id }, style: { marginTop: "8px", maxHeight: "200px", whiteSpace: "pre-wrap" } }));
         } else if (task.status === "review" || task.status === "no-changes" || task.status === "failed" || task.status === "committed" || task.status === "cancelled") {
           if (task.error) taskCard.append(h("div", { class: "callout callout--error small", text: task.error }));
-          if (task.summary) taskCard.append(h("details", { open: task.status === "review" }, h("summary", { class: "small muted", text: "Informe del agente" }), md(task.summary)));
+          if (task.summary) taskCard.append(h("details", { open: task.status === "review" }, h("summary", { class: "small muted", text: "Qué ha hecho Doriath" }), md(task.summary)));
           if (task.commit) taskCard.append(h("div", { class: "callout callout--ok small", text: `Commit ${task.commit.sha}: ${task.commit.message}` }));
           if (task.status === "review") {
             const message = h("input", { class: "input", value: `feat(${task.id}): ${task.title}` });
@@ -297,7 +309,7 @@ export async function renderWork({ container, params, state }) {
     await refreshTree();
     await refreshRuns();
     if (openRunId) openRun(openRunId);
-    else detailNode.append(h("div", { class: "card card--serene" }, h("p", { class: "ante-title", text: "Paso 3" }), h("h3", { text: "Ejecutar las tareas" }), h("p", { class: "small", style: { marginTop: "8px" }, text: "Elige una iniciativa persistida, asigna repositorio a cada tarea y ejecútalas una a una. Cada tarea termina con un diff que revisas antes de confirmar el commit; después puedes hacer push y abrir una pull request." })));
+    else detailNode.append(h("div", { class: "card card--serene" }, h("p", { class: "ante-title", text: "Paso 3" }), h("h3", { text: "Ejecutar las historias de usuario" }), h("p", { class: "small", style: { marginTop: "8px" }, text: "Elige una iniciativa guardada, di en qué repositorio va cada historia de usuario y lánzalas una a una. Cada historia termina enseñándote los cambios; los revisas, los confirmas y después puedes subirlos y abrir una pull request." })));
     return () => unsubscribe?.();
   }
 

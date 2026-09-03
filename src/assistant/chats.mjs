@@ -263,6 +263,7 @@ Doriath ejecutará las tareas de tipo \`implementation\` directamente sobre repo
 ${repoBlock}
 
 Reglas adicionales de Doriath:
+- **Vocabulario con la persona**: quien usa este módulo no sabe qué es una spec y no tiene por qué saberlo. En tu prosa NO digas «spec», «WRK-SPEC», «WRK-PLAN», «WRK-TASK», «paquete», «capa» ni «frontmatter». Di **iniciativa** (lo que se quiere conseguir), **feature** (cada bloque de trabajo) e **historia de usuario** (cada pieza concreta). Los identificadores solo aparecen dentro de los bloques que emites, nunca en la conversación. Los términos de Git (rama, commit, pull request) sí se usan con normalidad.
 - Source ID de la caja activa: **${context.source.sourceId}**. Usa siempre ese código en los identificadores.
 - En cuanto tengas claro qué repositorios toca la iniciativa, emite en una línea propia el marcador \`#REPOSITORIES: <nombre1>, <nombre2>\` con los nombres exactos de la lista anterior (o \`#REPOSITORIES: ninguno\` si no toca código). Si la iniciativa necesita un repositorio que no está en la lista, dilo con claridad y pide al usuario que lo seleccione (ruta local) antes de la fase de plan.
 - Antes de planificar, inspecciona los repositorios con \`repo_tree\`, \`grep_repo\` y \`read_repo_file\` para que el plan cite módulos y ficheros reales.

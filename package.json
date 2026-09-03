@@ -20,7 +20,8 @@
     "test": "node --test tests/*.test.mjs",
     "build:dist": "node scripts/build-dist.mjs",
     "build:exe": "node scripts/build-exe.mjs",
-    "build": "node scripts/build-dist.mjs && node scripts/build-exe.mjs"
+    "build": "node scripts/build-dist.mjs && node scripts/build-exe.mjs",
+    "icon": "node scripts/make-icon.mjs"
   },
   "dependencies": {
     "@github/copilot-sdk": "1.0.11",
