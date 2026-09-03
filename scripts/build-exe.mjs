@@ -8,7 +8,7 @@
  * (runtime/node/node.exe) para que el launcher y el runtime compartan versión. Con --platform linux
  * se generan binarios Linux a partir del node del sistema (útil para validar la mecánica en CI).
  */
-import { mkdir, rm, writeFile, readFile, copyFile, readdir, stat } from "node:fs/promises";
+import { mkdir, rm, writeFile, readFile, copyFile, readdir, stat, appendFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -18,6 +18,7 @@ import { ensureFreeSpace } from "./build-dist.mjs";
 
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const pkgVersion = JSON.parse(await readFile(path.join(root, "package.json"), "utf8")).version;
 const dist = process.env.DORIATH_DIST ? path.resolve(process.env.DORIATH_DIST) : path.join(root, "dist");
 const target = path.join(dist, "Doriath");
 const build = path.join(dist, "build");
@@ -52,7 +53,15 @@ async function zipDirectory(dir, out, { exclude = [] } = {}) {
         zip.folder(rel);
         await walk(full, rel);
       } else {
-        const info = await stat(full);
+        // Un enlace colgado (típico en node_modules/.bin tras podar un paquete) no debe tumbar el
+        // empaquetado: se salta y se avisa.
+        let info;
+        try {
+          info = await stat(full);
+        } catch {
+          log(`Se salta ${rel}: el enlace no apunta a ningún sitio.`);
+          continue;
+        }
         zip.file(rel, await readFile(full), { unixPermissions: info.mode, date: info.mtime });
       }
     }
@@ -97,8 +106,64 @@ async function makeSea({ name, entry, output, assets }) {
   await copyFile(base, output);
   const postject = path.join(root, "node_modules", "postject", "dist", "cli.js");
   run(process.execPath, [postject, output, "NODE_SEA_BLOB", blob, "--sentinel-fuse", "NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2", ...(platform === "darwin" ? ["--macho-segment-name", "NODE_SEA"] : [])]);
+  if (platform === "win32") await brandExecutable(output, name);
   const size = (await stat(output)).size;
   log(`${path.basename(output)} generado (${(size / (1024 * 1024)).toFixed(0)} MB).`);
+}
+
+/**
+ * Pone el icono y los datos de versión en el ejecutable. El SEA es una copia de node.exe, así que sin
+ * esto Windows enseña el icono de Node en el Explorador, en la barra de tareas y en el aviso de
+ * SmartScreen. resedit edita los recursos del PE en JavaScript puro: no descarga binarios, que en la
+ * red corporativa es justo lo que hay que evitar.
+ */
+async function brandExecutable(target, name) {
+  const icon = path.join(root, "public", "brand", "doriath.ico");
+  if (!existsSync(icon)) {
+    log(`Sin ${path.relative(root, icon)}: el ejecutable se queda con el icono de Node.`);
+    return;
+  }
+  try {
+    const ResEdit = require("resedit");
+    // ignoreCert descarta la firma heredada de node.exe, que postject ya deja inservible al inyectar
+    // el blob: mejor sin firma que con una corrupta.
+    const executable = ResEdit.NtExecutable.from(await readFile(target), { ignoreCert: true });
+    const resource = ResEdit.NtExecutableResource.from(executable);
+    const iconFile = ResEdit.Data.IconFile.from(await readFile(icon));
+    ResEdit.Resource.IconGroupEntry.replaceIconsForResource(resource.entries, 1, 1033, iconFile.icons.map((item) => item.data));
+    const version = ResEdit.Resource.VersionInfo.createEmpty();
+    const [major, minor, patch] = String(pkgVersion).split(".").map((part) => Number(part) || 0);
+    version.setFileVersion(major, minor, patch, 0, 1033);
+    version.setProductVersion(major, minor, patch, 0, 1033);
+    version.setStringValues({ lang: 1033, codepage: 1200 }, {
+      ProductName: "Doriath",
+      FileDescription: name === "setup" ? "Instalador de Doriath" : "Doriath — BBVA CIB Knowledge-Driven Development",
+      CompanyName: "BBVA CIB · NFQ",
+      LegalCopyright: "BBVA CIB",
+      OriginalFilename: path.basename(target),
+    });
+    version.outputToResourceEntries(resource.entries);
+    resource.outputResource(executable);
+    await writeFile(target, Buffer.from(executable.generate()));
+    log(`${path.basename(target)}: icono y versión aplicados.`);
+  } catch (error) {
+    log(`No se pudo aplicar el icono a ${path.basename(target)}: ${error.message}`);
+  }
+}
+
+/** Pega el payload detrás del ejecutable con un pie que dice dónde empieza (ver setup.cjs). */
+const PAYLOAD_MAGIC = "DORIATH-PAYLOAD1";
+async function appendPayload(target, payload) {
+  const base = await stat(target);
+  const data = await readFile(payload);
+  const trailer = Buffer.alloc(PAYLOAD_MAGIC.length + 16);
+  trailer.write(PAYLOAD_MAGIC, 0, "latin1");
+  trailer.writeBigUInt64LE(BigInt(base.size), PAYLOAD_MAGIC.length);
+  trailer.writeBigUInt64LE(BigInt(data.length), PAYLOAD_MAGIC.length + 8);
+  await appendFile(target, data);
+  await appendFile(target, trailer);
+  const total = (await stat(target)).size;
+  log(`${path.basename(target)}: payload pegado (${(data.length / (1024 ** 2)).toFixed(0)} MB); total ${(total / (1024 ** 2)).toFixed(0)} MB.`);
 }
 
 async function main() {
@@ -112,8 +177,11 @@ async function main() {
   log("Comprimiendo el payload…");
   const size = await zipDirectory(target, payload, { exclude: ["data", "outputs", "knowledge-bases"] });
   log(`payload.zip: ${(size / (1024 * 1024)).toFixed(0)} MB.`);
-  // 3. Instalador con el payload embebido.
-  await makeSea({ name: "setup", entry: path.join(root, "scripts", "launcher", "setup.cjs"), output: path.join(dist, `Doriath-Setup${exe}`), assets: { "payload.zip": payload } });
+  // 3. Instalador: el ejecutable primero y el payload pegado detrás. Incrustarlo como recurso SEA
+  //    reventaba postject a partir de unos cientos de megas, y el payload ronda el medio giga.
+  const setup = path.join(dist, `Doriath-Setup${exe}`);
+  await makeSea({ name: "setup", entry: path.join(root, "scripts", "launcher", "setup.cjs"), output: setup });
+  await appendPayload(setup, payload);
   // Los intermedios (payload.zip y los blobs SEA) duplican cientos de MB; se retiran salvo que se pidan.
   if (!args.includes("--keep-artifacts")) {
     await rm(payload, { force: true });

@@ -9,7 +9,7 @@
  * Opciones: --fresh (reinstala node_modules desde el registro en vez de copiar el árbol probado),
  *           --skip-node (no descarga Node), --platform linux (payload Linux para pruebas)
  */
-import { cp, mkdir, rm, writeFile, readFile, copyFile, stat } from "node:fs/promises";
+import { cp, mkdir, rm, writeFile, readFile, copyFile, stat, readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -100,8 +100,27 @@ async function installModules(app) {
     }
   }
   log(`Paquete Copilot de plataforma: ${packageName} ${await readInstalledVersion(app, packageName)}.`);
+  await pruneForeignCopilotRuntimes(app);
   await rm(path.join(app, "package-lock.json"), { force: true });
   await rm(path.join(app, ".npmrc"), { force: true });
+}
+
+/**
+ * Cada runtime de Copilot ocupa unos 300 MB. Si el árbol copiado trae los de otras plataformas (pasa
+ * al construir el payload de Windows desde Linux, o al revés), sobran: se van y el instalador
+ * adelgaza otro tanto.
+ */
+async function pruneForeignCopilotRuntimes(app) {
+  const dir = path.join(app, "node_modules", "@github");
+  if (!existsSync(dir)) return;
+  const keep = `copilot-${platform}-x64`;
+  for (const entry of await readdir(dir)) {
+    if (!/^copilot-(win32|linux|linuxmusl|darwin)-/.test(entry) || entry === keep) continue;
+    await rm(path.join(dir, entry), { recursive: true, force: true });
+    // El enlace de node_modules/.bin quedaría colgando y rompe el empaquetado.
+    await rm(path.join(app, "node_modules", ".bin", entry.replace(/^copilot-/, "copilot-")), { force: true });
+    log(`Retirado ${entry}: no es de la plataforma de destino.`);
+  }
 }
 
 async function stageNode() {

@@ -19,16 +19,39 @@ const args = process.argv.slice(2);
 const flag = (name) => { const index = args.indexOf(name); return index >= 0 ? args[index + 1] : undefined; };
 const has = (name) => args.includes(name);
 
+// El payload (medio giga largo) no cabe como recurso incrustado, así que va pegado detrás del
+// ejecutable con un pie de 32 bytes que dice dónde empieza. Es la técnica clásica de los
+// autoextraíbles: el cargador de Windows ignora lo que hay más allá de la imagen PE.
+const PAYLOAD_MAGIC = "DORIATH-PAYLOAD1";
+const TRAILER_SIZE = PAYLOAD_MAGIC.length + 16;
+
+function readAppendedPayload(file) {
+  const handle = fs.openSync(file, "r");
+  try {
+    const size = fs.fstatSync(handle).size;
+    if (size < TRAILER_SIZE) return null;
+    const trailer = Buffer.alloc(TRAILER_SIZE);
+    fs.readSync(handle, trailer, 0, TRAILER_SIZE, size - TRAILER_SIZE);
+    if (trailer.subarray(0, PAYLOAD_MAGIC.length).toString("latin1") !== PAYLOAD_MAGIC) return null;
+    const offset = Number(trailer.readBigUInt64LE(PAYLOAD_MAGIC.length));
+    const length = Number(trailer.readBigUInt64LE(PAYLOAD_MAGIC.length + 8));
+    if (!length || offset + length > size) return null;
+    const payload = Buffer.alloc(length);
+    fs.readSync(handle, payload, 0, length, offset);
+    return payload;
+  } finally {
+    fs.closeSync(handle);
+  }
+}
+
 function readPayload() {
   const local = flag("--payload");
   if (local) return fs.readFileSync(local);
-  try {
-    const sea = require("node:sea");
-    if (sea.isSea()) return Buffer.from(sea.getAsset("payload.zip"));
-  } catch { /* no SEA */ }
+  const appended = readAppendedPayload(process.execPath);
+  if (appended) return appended;
   const fallback = path.resolve(__dirname, "..", "..", "dist", "payload.zip");
   if (fs.existsSync(fallback)) return fs.readFileSync(fallback);
-  throw new Error("No se encuentra el payload de instalación.");
+  throw new Error("No se encuentra el payload de instalación dentro del ejecutable.");
 }
 
 function ask(question, fallback) {
@@ -39,6 +62,10 @@ function ask(question, fallback) {
 
 /** Genera un .ico a partir del isotipo (System.Drawing), como create-shortcut.ps1 de FENIX. */
 function createIcon(root) {
+  // El .ico multirresolución viaja con la aplicación: se usa tal cual para los accesos directos, sin
+  // depender de PowerShell ni perder resoluciones por el camino.
+  const shipped = path.join(root, "app", "public", "brand", "doriath.ico");
+  if (isWindows && fs.existsSync(shipped)) return shipped;
   const png = path.join(root, "app", "public", "brand", "doriath-icon.png");
   const ico = path.join(root, "data", "doriath.ico");
   if (!isWindows || !fs.existsSync(png)) return "";

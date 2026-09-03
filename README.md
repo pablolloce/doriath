@@ -23,7 +23,18 @@ Las bases de conocimiento son carpetas locales con la misma disposición que las
 
 No hace falta Node instalado: el instalador incluye un Node portable.
 
+## Los dos roles
+
+Doriath enseña dos caras de la misma base de conocimiento, con un conmutador **Usuario / Admin** en la cabecera (se recuerda en el navegador):
+
+- **Usuario · My Knowledge Bases** — para quien aporta conocimiento pero no lo mantiene. No se nombra ninguna spec, ni capas, ni identificadores: sube documentos, pulsa *Aprender de estos documentos* y ve el progreso y el resultado en lenguaje llano. En el chat, cada respuesta lleva **Es correcto** y **No es así, corregir**; la corrección se anota como evidencia sobre la spec afectada y sube su versión menor. Si no se identifica a cuál afecta, queda como *corrección sin asignar* para que la coloque quien mantiene la base.
+- **Admin · Knowledge Bases Studio** — mantenimiento completo: **Panel** (KPIs, reparto por capa, salud con sus incidencias, últimos cambios y últimos documentos con quién los incluyó y qué specs generaron), Documentos, Análisis, Specs, Grafo, **Gobernanza** (ADR, RFC y reglas con responsable y estado) y **Actividad** (quién ha cambiado qué, cuándo y desde dónde, filtrable).
+
+El registro vive en `.kdd-studio/activity.json` dentro de la propia base, así que viaja con ella y lo ve todo el equipo. Cada cambio se firma con el usuario de la sesión de GitHub.
+
 ## Instalación (usuario final)
+
+`Doriath-Setup.exe` es autosuficiente: lleva dentro la aplicación, sus dependencias (incluido el runtime nativo de Copilot) y Node.js portable. Compartiendo ese único fichero (~390 MB) no hace falta nada más — ni `npm install`, ni instalar Node. Dos matices: como no va firmado, Windows enseña el aviso de SmartScreen (*Más información → Ejecutar de todos modos*), y si el equipo no tiene `gh` o `git`, el primer arranque se los descarga (necesita salida a internet, además de la que ya exige GitHub y Copilot).
 
 1. Ejecuta `Doriath-Setup.exe`. Pide la carpeta de instalación (por defecto `%LOCALAPPDATA%\Doriath`) y crea:
    ```
@@ -98,7 +109,10 @@ npm run build        # ambos
 ```
 
 - `build:dist` copia por defecto el `node_modules` ya probado del checkout (como FENIX) y retira las dependencias de desarrollo con `npm prune --omit=dev`; con `--fresh`, o al construir desde otra plataforma, reinstala desde el registro con el mismo reintento que `npm run setup`. En ambos casos comprueba que el runtime nativo de Copilot (`@github/copilot-win32-x64`) está en el payload y, si npm no lo seleccionó, lo instala explícitamente. También descarga el Node portable indicado en `scripts/launcher/tools.json`.
-- `build:exe` empaqueta `scripts/launcher/launcher.cjs` y `setup.cjs` con esbuild, genera los blobs SEA e inyecta cada uno con `postject` en una copia de `node.exe`. Al construir en Windows el blob se genera con el propio `node.exe` portable (misma versión que ejecutará el launcher); desde otra plataforma se usa el Node del sistema. El instalador lleva `dist/payload.zip` como asset embebido.
+- `build:exe` empaqueta `scripts/launcher/launcher.cjs` y `setup.cjs` con esbuild, genera los blobs SEA e inyecta cada uno con `postject` en una copia de `node.exe`. Al construir en Windows el blob se genera con el propio `node.exe` portable (misma versión que ejecutará el launcher); desde otra plataforma se usa el Node del sistema.
+- Después, `resedit` (JavaScript puro, sin binarios que descargar) pone en los dos ejecutables el icono `public/brand/doriath.ico` —siete resoluciones, de 16 a 256 px— y los datos de versión, y de paso descarta la firma que `node.exe` traía y que `postject` deja inservible. Sin esto Windows enseñaría el icono de Node.
+- El payload va **pegado detrás** del instalador con un pie de 32 bytes que dice dónde empieza, como un autoextraíble clásico: incrustarlo como recurso SEA reventaba `postject` a partir de unos cientos de megas.
+- `build:dist` retira del payload los runtimes de Copilot de otras plataformas (cada uno ocupa unos 300 MB), que aparecen al construir el paquete de Windows desde otro sistema.
 - Los ejecutables no van firmados; firma Authenticode aparte si la política lo exige. Con `--platform linux` se generan binarios Linux para validar la mecánica.
 - **Espacio en disco**: el build necesita unos 3 GB libres (payload ~600 MB, instalador ~750 MB entre zip y exe, más la caché de npm con el runtime de Copilot, ~300 MB). Los scripts lo comprueban antes de empezar y retiran los intermedios al terminar. Si la unidad del repositorio va justa, construye en otra con `DORIATH_DIST=D:\doriath-dist npm run build`. Con el disco lleno, npm descarta en silencio el runtime de Copilot por ser una dependencia opcional.
 
