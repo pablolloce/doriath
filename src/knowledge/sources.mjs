@@ -1,7 +1,7 @@
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { readdir } from "node:fs/promises";
-import { readJson, writeJson, pathExists, ensureDir, writeText, slugify, isPathWithin } from "../util/fs.mjs";
+import { readdir, stat } from "node:fs/promises";
+import { readJson, writeJson, pathExists, ensureDir, writeText, slugify, isPathWithin, normalizeUserPath } from "../util/fs.mjs";
 import { paths } from "../paths.mjs";
 import { SOURCE_META_FILE, allLayerFolders, documentsDir } from "../kdd/layout.mjs";
 import { getSpecStore, dropSpecStore } from "../kdd/store.mjs";
@@ -14,6 +14,14 @@ import { listRegisteredRepositories } from "../work/repos.mjs";
  * apunta a una carpeta KDD. El fichero `kdd-source.json` dentro de la carpeta guarda su identidad
  * (nombre, Source ID) para que la caja sea portable entre equipos.
  */
+async function isDirectory(target) {
+  try {
+    return (await stat(target)).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
 async function readRegistry() {
   const data = await readJson(paths.sourcesFile, { sources: [] });
   return Array.isArray(data?.sources) ? data.sources : [];
@@ -116,8 +124,11 @@ async function looksLikeKddFolder(dir) {
 
 /** Registra una carpeta existente (creada por Doriath, KDD Studio o a mano). */
 export async function addExistingSource(dir, { name, description } = {}) {
-  const resolved = path.resolve(String(dir || "").trim());
-  if (!resolved || !(await pathExists(resolved))) throw Object.assign(new Error(`La carpeta no existe: ${resolved}`), { status: 400 });
+  const clean = normalizeUserPath(dir);
+  if (!clean) throw Object.assign(new Error("Indica la carpeta de la base de conocimiento."), { status: 400 });
+  const resolved = path.resolve(clean);
+  if (!(await pathExists(resolved))) throw Object.assign(new Error(`La carpeta no existe: ${resolved}`), { status: 400 });
+  if (!(await isDirectory(resolved))) throw Object.assign(new Error(`${resolved} es un fichero, no una carpeta. Indica la carpeta que contiene la base de conocimiento.`), { status: 400 });
   const sources = await readRegistry();
   const duplicate = sources.find((item) => path.resolve(item.path).toLowerCase() === resolved.toLowerCase());
   if (duplicate) return { source: duplicate, created: false };
@@ -146,7 +157,7 @@ export async function addExistingSource(dir, { name, description } = {}) {
 export async function createSource({ name, description = "", parentDir, sourceId }) {
   const cleanName = String(name || "").trim();
   if (!cleanName) throw Object.assign(new Error("Indica un nombre para la base de conocimiento."), { status: 400 });
-  const base = parentDir ? path.resolve(parentDir) : getConfig().paths.knowledgeBases;
+  const base = parentDir ? path.resolve(normalizeUserPath(parentDir)) : getConfig().paths.knowledgeBases;
   const dir = path.join(base, slugify(cleanName, 40));
   await assertSourcePathIsSeparate(dir);
   if (await pathExists(dir) && (await readdir(dir)).length) {

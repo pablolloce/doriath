@@ -205,7 +205,7 @@ export async function openSourcesManager() {
     h("div", { class: "card__actions" },
       h("button", { class: "btn", text: "Añadir carpeta existente", onclick: addExisting }),
       h("button", { class: "btn btn--accent", text: "Crear nueva", onclick: createNew }),
-      h("button", { class: "btn btn--outline", text: "Escribir ruta a mano", onclick: async () => { const value = await promptDialog("Ruta de la carpeta", { label: "Ruta", placeholder: "C:\\\\Proyectos\\\\kb-riesgos" }); if (value) { try { const result = await post("/api/sources/add", { path: value }); await refreshSources(); if (result.created) setActiveSource(result.source.id); render(); } catch (error) { toast(error.message, "error"); } } } })),
+      h("button", { class: "btn btn--outline", text: "Escribir ruta a mano", onclick: async () => { const value = await promptDialog("Ruta de la carpeta", { label: "Ruta", placeholder: "C:\\Proyectos\\kb-riesgos" }); if (!value) return; try { const result = await post("/api/sources/add", { path: value }); toast(result.created ? `Base de conocimiento añadida: ${result.source.name}` : "Esa carpeta ya estaba registrada.", "ok"); await refreshSources(); if (result.created) setActiveSource(result.source.id); render(); } catch (error) { toast(error.message, "error", 7000); } } })),
     body,
   );
   render();

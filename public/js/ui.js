@@ -186,28 +186,37 @@ export function promptDialog(title, { label = "Valor", value = "", placeholder =
 }
 
 /**
- * Selección de carpeta: intenta el diálogo nativo del sistema (Windows/macOS) y, si no está disponible,
- * muestra un explorador de carpetas servido por Doriath.
+ * Selección de carpeta. El explorador propio de Doriath es el camino principal porque funciona
+ * siempre: el diálogo nativo de Windows depende de PowerShell y de que la ventana llegue a primer
+ * plano, y en equipos con la política restringida no llega a aparecer, dejando al usuario delante de
+ * un botón que no hace nada. Queda como atajo opcional dentro del propio explorador.
  */
-export async function pickFolder({ title = "Selecciona una carpeta", initial = "" } = {}) {
-  try {
-    const native = await post("/api/dialog/folder", { title, initial });
-    if (native.supported) return native.path || null;
-  } catch (error) {
-    console.warn("Diálogo nativo no disponible", error);
-  }
+export function pickFolder({ title = "Selecciona una carpeta", initial = "" } = {}) {
   return browseFolder({ title, initial });
 }
 
 export function browseFolder({ title = "Selecciona una carpeta", initial = "" } = {}) {
   return new Promise((resolve) => {
     const { close } = openModal([], { onClose: () => resolve(null) });
-    const current = h("input", { class: "input mono", value: initial });
+    const current = h("input", { class: "input mono", value: initial, placeholder: "C:\\Doriath\\knowledge-bases\\mi-base" });
     const list = h("div", { class: "dir-browser" });
+    const nativeButton = h("button", { class: "btn btn--outline btn--sm", text: "Selector de Windows", title: "Abre el diálogo del sistema. Si no aparece, búscalo en la barra de tareas.", onclick: async () => {
+      nativeButton.disabled = true;
+      nativeButton.textContent = "Abriendo…";
+      try {
+        const native = await post("/api/dialog/folder", { title, initial: current.value });
+        if (!native.supported) toast("El selector del sistema no está disponible en este equipo; usa el explorador de aquí abajo.", "info", 6000);
+        else if (native.path) { current.value = native.path; load(native.path); }
+      } catch (error) {
+        toast(error.message, "error");
+      }
+      nativeButton.disabled = false;
+      nativeButton.textContent = "Selector de Windows";
+    } });
     const load = async (target) => {
       list.replaceChildren(h("div", { class: "muted small", text: "Cargando…" }));
       try {
-        const data = await get(`/api/fs/list?path=${encodeURIComponent(target || "")}`);
+        const data = await get(`/api/fs/list?path=${encodeURIComponent(cleanPath(target) || "")}`);
         current.value = data.path || "";
         list.replaceChildren(
           data.parent ? h("div", { class: "dir-browser__item", text: "⬑ Subir un nivel", onclick: () => load(data.parent) }) : null,
@@ -219,14 +228,27 @@ export function browseFolder({ title = "Selecciona una carpeta", initial = "" } 
     };
     const node = h("div", {},
       modalHeader(title, () => { close(); resolve(null); }, "Explorador de carpetas"),
-      h("div", { class: "field" }, h("label", { text: "Ruta" }), h("div", { class: "form-row" }, current, h("button", { class: "btn btn--outline btn--sm", text: "Ir", onclick: () => load(current.value) }))),
+      h("p", { class: "small muted", text: "Navega hasta la carpeta, o pega la ruta y pulsa Ir. Puedes pegarla tal cual la copies de Windows, con comillas incluidas." }),
+      h("div", { class: "field" }, h("label", { text: "Ruta" }), h("div", { class: "form-row" }, current,
+        h("button", { class: "btn btn--outline btn--sm", text: "Ir", onclick: () => load(current.value) }),
+        nativeButton)),
       list,
       h("div", { class: "card__actions", style: { justifyContent: "flex-end", marginTop: "16px" } },
         h("button", { class: "btn btn--outline", text: "Cancelar", onclick: () => { close(); resolve(null); } }),
-        h("button", { class: "btn", text: "Usar esta carpeta", onclick: () => { resolve(current.value); close(); } })));
+        h("button", { class: "btn", text: "Usar esta carpeta", onclick: () => { resolve(cleanPath(current.value)); close(); } })));
     document.querySelector(".modal").append(node);
     load(initial);
   });
+}
+
+/** Misma limpieza que en el servidor: comillas de "Copiar como ruta de acceso", espacios y barra final. */
+export function cleanPath(value) {
+  let text = String(value ?? "").trim();
+  if (!text) return "";
+  text = text.replace(/^file:\/\//i, "").replace(/^\/([A-Za-z]:)/, "$1");
+  if ((text.startsWith('"') && text.endsWith('"')) || (text.startsWith("'") && text.endsWith("'"))) text = text.slice(1, -1).trim();
+  if (text.length > 3 && /[\\/]$/.test(text) && !/^[A-Za-z]:[\\/]$/.test(text)) text = text.replace(/[\\/]+$/, "");
+  return text;
 }
 
 export function statusChip(status) {

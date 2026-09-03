@@ -4,7 +4,7 @@ import { getSource, listSources } from "../knowledge/sources.mjs";
 import { getSpecStore } from "../kdd/store.mjs";
 import { scanForRepositories, listRegisteredRepositories, registerRepositories, unregisterRepository, refreshRepositories, inspectRepository } from "../work/repos.mjs";
 import { workTree, createRun, loadRun, listRuns, updateRun, executeTask, cancelTask, refreshTaskDiff, commitTask, discardTaskChanges, pushRun, openPullRequest, runRepositoryCommand, markTaskStatus, repositoryLog, suggestRepositoryAssignments } from "../work/runs.mjs";
-import { pathExists, isPathWithin } from "../util/fs.mjs";
+import { pathExists, isPathWithin, normalizeUserPath } from "../util/fs.mjs";
 import { getConfig } from "../config.mjs";
 
 export function registerWorkRoutes(router) {
@@ -20,7 +20,7 @@ export function registerWorkRoutes(router) {
   });
 
   router.post("/api/repositories/scan", async ({ body }) => {
-    const roots = Array.isArray(body?.paths) ? body.paths : [body?.path].filter(Boolean);
+    const roots = (Array.isArray(body?.paths) ? body.paths : [body?.path]).map(normalizeUserPath).filter(Boolean);
     if (!roots.length) throw new HttpError(400, "Indica al menos una carpeta.");
     for (const root of roots) if (!(await pathExists(root))) throw new HttpError(400, `La carpeta no existe: ${root}`);
     return { repositories: await scanForRepositories(roots, { maxDepth: Number(body?.depth) || 3 }) };

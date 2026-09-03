@@ -162,6 +162,22 @@ async function brandExecutable(target, name) {
   }
 }
 
+/**
+ * Relee el icono de los ejecutables ya terminados. Si el build dice que están y Windows sigue
+ * enseñando el de Node, el problema es la caché de iconos del Explorador o se está mirando otra copia
+ * (la instalada en %LOCALAPPDATA%\Doriath no cambia hasta volver a pasar el instalador).
+ */
+async function verifyIcons(files) {
+  const ResEdit = requireResedit();
+  for (const file of files) {
+    const resource = ResEdit.NtExecutableResource.from(ResEdit.NtExecutable.from(await readFile(file), { ignoreCert: true }));
+    const groups = ResEdit.Resource.IconGroupEntry.fromEntries(resource.entries);
+    const group = groups[0];
+    if (!group || group.icons.length < 2) throw new Error(`${path.basename(file)} no lleva el icono de Doriath.`);
+    log(`${path.basename(file)}: icono verificado (grupo ${group.id}, idioma ${group.lang}, ${group.icons.length} resoluciones).`);
+  }
+}
+
 /** Pega el payload detrás del ejecutable con un pie que dice dónde empieza (ver setup.cjs). */
 const PAYLOAD_MAGIC = "DORIATH-PAYLOAD1";
 async function appendPayload(target, payload) {
@@ -195,6 +211,7 @@ async function main() {
   await makeSea({ name: "setup", entry: path.join(root, "scripts", "launcher", "setup.cjs"), output: setup });
   await appendPayload(setup, payload);
   // Los intermedios (payload.zip y los blobs SEA) duplican cientos de MB; se retiran salvo que se pidan.
+  if (platform === "win32") await verifyIcons([path.join(target, `Doriath${exe}`), setup]);
   if (!args.includes("--keep-artifacts")) {
     await rm(payload, { force: true });
     await rm(build, { recursive: true, force: true });

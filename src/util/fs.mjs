@@ -39,6 +39,25 @@ export async function writeText(file, text) {
 }
 
 /**
+ * Limpia una ruta escrita o pegada a mano. "Copiar como ruta de acceso" de Windows la envuelve en
+ * comillas, y esas comillas acababan formando parte del nombre de la carpeta: la ruta existía y
+ * Doriath decía que no. También se quitan espacios, el prefijo file:// y las barras sobrantes.
+ */
+export function normalizeUserPath(value) {
+  let text = String(value ?? "").trim();
+  if (!text) return "";
+  // file:///C:/Doriath -> C:/Doriath, pero file:///home/ana -> /home/ana (la barra inicial es la raíz).
+  text = text.replace(/^file:\/\//i, "").replace(/^\/([A-Za-z]:)/, "$1");
+  if ((text.startsWith('"') && text.endsWith('"')) || (text.startsWith("'") && text.endsWith("'"))) {
+    text = text.slice(1, -1).trim();
+  }
+  text = text.replace(/^[\u200e\u200f\u202a-\u202e]+|[\u200e\u200f\u202a-\u202e]+$/g, "");
+  // Una barra final sobra, salvo en la raíz de una unidad ("C:\") o del sistema de ficheros.
+  if (text.length > 3 && /[\\/]$/.test(text) && !/^[A-Za-z]:[\\/]$/.test(text)) text = text.replace(/[\\/]+$/, "");
+  return text;
+}
+
+/**
  * true si `child` es la misma carpeta que `parent` o está dentro de ella. Comparación insensible a
  * mayúsculas (como el sistema de ficheros de Windows, la plataforma de destino de Doriath).
  */

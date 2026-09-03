@@ -14,7 +14,7 @@ const { buildGraph, impact, validateGraph, activationBundle, detectCycles } = aw
 const { buildSpecIndex, tokenize } = await import("../src/kdd/search.mjs");
 const { getSpecStore } = await import("../src/kdd/store.mjs");
 const { createSource, addExistingSource, listSources } = await import("../src/knowledge/sources.mjs");
-const { isPathWithin } = await import("../src/util/fs.mjs");
+const { isPathWithin, normalizeUserPath } = await import("../src/util/fs.mjs");
 const { updateConfig } = await import("../src/config.mjs");
 const { registerRepositories } = await import("../src/work/repos.mjs");
 
@@ -108,6 +108,19 @@ test("util/fs: isPathWithin detecta contención insensible a mayúsculas", () =>
   assert.equal(isPathWithin("/data/reposaster", "/data/repos"), false, "prefijo de texto sin ser subcarpeta real");
   assert.equal(isPathWithin("/data", "/data/repos"), false);
   assert.equal(isPathWithin("/other/place", "/data/repos"), false);
+});
+
+test("util/fs: normalizeUserPath limpia lo que pega una persona desde Windows", () => {
+  // "Copiar como ruta de acceso" envuelve la ruta en comillas: sin limpiarlas, la carpeta "no existe".
+  assert.equal(normalizeUserPath('"C:\\Doriath\\kb"'), "C:\\Doriath\\kb");
+  assert.equal(normalizeUserPath("  C:\\Doriath\\kb  "), "C:\\Doriath\\kb");
+  assert.equal(normalizeUserPath("C:\\Doriath\\kb\\"), "C:\\Doriath\\kb");
+  assert.equal(normalizeUserPath("'/home/ana/kb/'"), "/home/ana/kb");
+  assert.equal(normalizeUserPath("file:///home/ana/kb"), "/home/ana/kb");
+  assert.equal(normalizeUserPath("file:///C:/Doriath/kb"), "C:/Doriath/kb");
+  assert.equal(normalizeUserPath("C:\\"), "C:\\", "la raíz de una unidad conserva su barra");
+  assert.equal(normalizeUserPath(""), "");
+  assert.equal(normalizeUserPath(null), "");
 });
 
 test("sources: una base de conocimiento no puede vivir en la carpeta de salidas ni dentro de un repositorio", async () => {

@@ -51,6 +51,13 @@ El registro vive en `.kdd-studio/activity.json` dentro de la propia base, así q
 
 Datos existentes en `data/`, `outputs/` y `knowledge-bases/` se conservan al reinstalar.
 
+### Si el ejecutable sigue con el icono de Node
+
+`npm run build` verifica el icono y lo dice al terminar (*"icono verificado (grupo 1, idioma 1033, 7 resoluciones)"*); si no puede ponerlo, el build **falla** en vez de entregar un binario sin icono. Así que si el build termina bien y Windows sigue enseñando el icono de Node:
+
+1. Comprueba **qué fichero estás mirando**. `npm run build` regenera `dist\Doriath\Doriath.exe`, pero el acceso directo del Escritorio apunta a `%LOCALAPPDATA%\Doriath`, que conserva la versión anterior hasta que vuelvas a ejecutar el `Doriath-Setup.exe` recién construido.
+2. Es la **caché de iconos del Explorador**, que guarda el icono por ruta y no se entera de que el fichero ha cambiado. Se limpia con `ie4uinit.exe -show` (o cerrando sesión). Para verlo sin tocar nada: clic derecho sobre el `.exe` → Propiedades, o míralo desde otra carpeta.
+
 ### Si Doriath no detecta tu sesión de GitHub
 
 La sesión sale de la CLI `gh`. Si ya has hecho login y Doriath sigue pidiéndolo:
@@ -61,6 +68,12 @@ La sesión sale de la CLI `gh`. Si ya has hecho login y Doriath sigue pidiéndol
 4. Comprueba que estás ejecutando lo que acabas de construir: **Ajustes** muestra la ruta de instalación, la versión, el commit y la fecha de construcción. `npm run build` regenera `dist\Doriath`, pero el acceso directo del Escritorio apunta a la carpeta donde instalaste (`%LOCALAPPDATA%\Doriath`), que sigue con la versión anterior hasta que vuelvas a ejecutar el `Doriath-Setup.exe` nuevo.
 
 Doriath no depende solo del código de salida de `gh auth status`: esa comprobación valida el token contra la API y en la red corporativa puede fallar por el proxy, los certificados o el SSO aunque la sesión sea válida. Cuando eso pasa, Doriath pide el token con `gh auth token` y, si existe, entra igualmente avisando de que no pudo validarlo. También busca `gh` fuera del PATH (la copia portable de `runtime/gh`, `%LOCALAPPDATA%\GitHubCLI` y `Program Files`), por si se instaló con Doriath ya abierto.
+
+### Al seleccionar carpetas
+
+El botón de elegir carpeta abre el **explorador de carpetas de Doriath**, no el diálogo de Windows: aquel depende de PowerShell y de que la ventana llegue a primer plano, y en equipos con la política restringida no llega a aparecer, dejando un botón que parece no hacer nada. El diálogo del sistema sigue disponible como atajo (*Selector de Windows*) dentro del propio explorador.
+
+Las rutas se pueden pegar tal cual las copie Windows: *Copiar como ruta de acceso* las envuelve en comillas, y Doriath las quita (igual que los espacios sobrantes, la barra final y el prefijo `file://`).
 
 ### Si la ventana de Doriath.exe se cierra sola
 
