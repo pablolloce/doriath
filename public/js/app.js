@@ -2,6 +2,7 @@
 import { get, post, put, del } from "./api.js";
 import { h, clear, toast, openModal, modalHeader, confirmDialog, promptDialog, pickFolder, fmtDate } from "./ui.js";
 import { renderKnowledge } from "./views/knowledge.js";
+import { renderMyKnowledge } from "./views/my-knowledge.js";
 import { renderAssistant } from "./views/assistant.js";
 import { renderWork } from "./views/work.js";
 
@@ -15,6 +16,8 @@ export const state = {
   routeParams: {},
   gateOpen: false,
   gateDismissed: false,
+  // "user": quien aporta documentos y pregunta. "admin": quien mantiene la base de conocimiento.
+  role: localStorage.getItem("doriath.role") === "admin" ? "admin" : "user",
 };
 
 const listeners = new Set();
@@ -52,6 +55,81 @@ export function setActiveSource(id) {
   renderRoute();
 }
 
+/* ---------- Rol y navegación ---------- */
+// Cada rol ve su propio menú: el usuario no entra en el mantenimiento de la base.
+const ROUTES = {
+  user: [
+    { id: "knowledge", label: "My Knowledge Bases", hint: "Tus documentos y tus respuestas" },
+    { id: "assistant", label: "BBVA CIB Assistant", hint: "Conversación y entregables" },
+    { id: "work", label: "Knowledge-Driven Development", hint: "Iniciativas, repositorios y cambios" },
+  ],
+  admin: [
+    { id: "knowledge", label: "Knowledge Bases Studio", hint: "Specs, gobernanza y salud" },
+    { id: "assistant", label: "BBVA CIB Assistant", hint: "Conversación y entregables" },
+    { id: "work", label: "Knowledge-Driven Development", hint: "Iniciativas, repositorios y cambios" },
+  ],
+};
+
+export function isAdmin() {
+  return state.role === "admin";
+}
+
+function renderNav() {
+  const nav = document.getElementById("nav");
+  clear(nav);
+  ROUTES[state.role].forEach((route, index) => {
+    nav.append(h("a", { class: `navlink${route.id === state.route ? " is-active" : ""}`, href: `#/${route.id}`, dataset: { route: route.id } },
+      h("span", { class: "navlink__index", text: String(index + 1).padStart(2, "0") }),
+      h("span", { class: "navlink__label", text: route.label }),
+      h("span", { class: "navlink__hint", text: route.hint })));
+  });
+}
+
+function renderRolePicker() {
+  const picker = document.getElementById("rolePicker");
+  clear(picker);
+  for (const [id, label] of [["user", "Usuario"], ["admin", "Admin"]]) {
+    picker.append(h("button", { class: state.role === id ? "is-active" : "", text: label, onclick: () => setRole(id) }));
+  }
+}
+
+function setRole(role) {
+  if (state.role === role) return;
+  state.role = role;
+  localStorage.setItem("doriath.role", role);
+  renderRolePicker();
+  renderNav();
+  renderSourceMenu();
+  toast(role === "admin" ? "Modo administrador: mantenimiento de la base de conocimiento." : "Modo usuario: importar documentos y preguntar.");
+  // La pantalla de conocimiento cambia por completo entre roles; el resto se repinta igual.
+  renderRoute();
+}
+
+/**
+ * Selector de base de conocimiento para encabezar las vistas: primero eliges sobre cuál trabajas y
+ * después viene el menú de la propia vista.
+ */
+export function kbPicker({ expert = false, label = "Elige tu base de conocimiento" } = {}) {
+  const wrapper = h("div", { style: { marginBottom: "var(--space-3)" } },
+    h("p", { class: "kb-picker__label", text: label }),
+    h("div", { class: "kb-picker" },
+      ...state.sources.map((source) => h("button", {
+        class: `kb-chip${source.id === state.activeSourceId ? " is-active" : ""}${source.exists ? "" : " is-missing"}`,
+        title: source.path,
+        onclick: () => {
+          if (!source.exists) { toast("Esa carpeta no está disponible en este equipo.", "error"); return; }
+          if (source.id === state.activeSourceId) return;
+          setActiveSource(source.id);
+        },
+      },
+      h("span", { class: "kb-chip__name" }, h("span", { class: "kb-chip__dot" }), source.name),
+      h("span", { class: "kb-chip__meta", text: !source.exists ? "carpeta no disponible"
+        : expert ? `${source.sourceId} · ${source.stats?.specs ?? 0} specs · ${source.stats?.documents ?? 0} docs`
+          : `${source.stats?.documents ?? 0} documento${(source.stats?.documents ?? 0) === 1 ? "" : "s"}` }))),
+      h("button", { class: "kb-chip kb-chip--add", text: "+ Añadir otra", onclick: openSourcesManager })));
+  return wrapper;
+}
+
 function renderSourceMenu() {
   const menu = document.getElementById("sourceMenu");
   clear(menu);
@@ -69,7 +147,9 @@ function renderSourceMenu() {
     h("span", { class: "source-item__dot" }),
     h("div", { style: { minWidth: 0 } },
       h("div", { class: "source-item__name", text: source.name }),
-      h("div", { class: "source-item__meta", text: source.exists ? `${source.sourceId} · ${specs} specs · ${source.stats?.documents ?? 0} docs` : "carpeta no disponible" }))));
+      h("div", { class: "source-item__meta", text: !source.exists ? "carpeta no disponible"
+        : isAdmin() ? `${source.sourceId} · ${specs} specs · ${source.stats?.documents ?? 0} docs`
+          : `${source.stats?.documents ?? 0} documento${(source.stats?.documents ?? 0) === 1 ? "" : "s"}` }))));
   }
 }
 
@@ -291,6 +371,7 @@ async function openSettings() {
 
 /* ---------- Router ---------- */
 const VIEWS = { knowledge: renderKnowledge, assistant: renderAssistant, work: renderWork };
+const viewFor = (route) => (route === "knowledge" && !isAdmin() ? renderMyKnowledge : VIEWS[route]);
 let currentView = null;
 
 function parseHash() {
@@ -314,12 +395,12 @@ async function renderRoute() {
   const { route, params } = parseHash();
   state.route = route;
   state.routeParams = params;
-  document.querySelectorAll(".navlink").forEach((link) => link.classList.toggle("is-active", link.dataset.route === route));
+  renderNav();
   const view = document.getElementById("view");
   currentView?.destroy?.();
   clear(view);
   try {
-    currentView = await VIEWS[route]({ container: view, params, state });
+    currentView = await viewFor(route)({ container: view, params, state });
   } catch (error) {
     console.error(error);
     view.append(h("div", { class: "callout callout--error", text: `No se pudo cargar la vista: ${error.message}` }));
@@ -331,6 +412,8 @@ window.addEventListener("hashchange", renderRoute);
 async function boot() {
   document.getElementById("btnManageSources").addEventListener("click", openSourcesManager);
   document.getElementById("btnSettings").addEventListener("click", openSettings);
+  renderRolePicker();
+  renderNav();
   await refreshSources().catch((error) => toast(error.message, "error"));
   await refreshStatus({ copilot: false }).catch((error) => toast(error.message, "error"));
   await renderRoute();

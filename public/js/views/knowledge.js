@@ -3,22 +3,26 @@ import { get, post, put, del, subscribe, readFileAsBase64 } from "../api.js";
 import { h, md, clear, toast, confirmDialog, promptDialog, fmtDate, fmtBytes, statusChip, confidenceChip, layerChip, openModal, modalHeader } from "../ui.js";
 import { createChatView } from "../chat.js";
 import { renderPackagePanel } from "../package-panel.js";
-import { setBreadcrumb, activeSource, refreshSources, openSourcesManager, state as appState } from "../app.js";
+import { setBreadcrumb, activeSource, refreshSources, openSourcesManager, kbPicker, state as appState } from "../app.js";
 
-const TABS = [["documents", "Documentos"], ["analyses", "Análisis"], ["specs", "Specs"], ["graph", "Grafo"], ["create", "Crear specs"], ["pending", "Pendientes"]];
+const TABS = [["dashboard", "Panel"], ["documents", "Documentos"], ["analyses", "Análisis"], ["specs", "Specs"], ["graph", "Grafo"], ["governance", "Gobernanza"], ["activity", "Actividad"], ["create", "Crear specs"], ["pending", "Pendientes"]];
+const GOVERNANCE_LAYERS = ["adr", "rfc", "rule"];
+const ACTIVITY_LABELS = { import: "Importación", analysis: "Análisis", edit: "Edición", chat: "Corrección desde el chat", governance: "Gobernanza" };
+const initials = (name) => String(name || "?").split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
 
 export async function renderKnowledge({ container, params, state }) {
   const source = activeSource();
-  setBreadcrumb("Knowledge Base Studio", source?.name);
+  setBreadcrumb("Knowledge Bases Studio", source?.name);
+  container.append(kbPicker({ expert: true, label: "Base de conocimiento sobre la que trabajas" }));
   if (!source) {
     container.append(h("div", { class: "card card--electric" },
-      h("p", { class: "ante-title", text: "Knowledge Base Studio" }),
+      h("p", { class: "ante-title", text: "Knowledge Bases Studio" }),
       h("h1", { text: "Empieza con una base de conocimiento" }),
       h("p", { class: "lead", style: { marginTop: "12px" }, text: "Añade una carpeta KDD existente o crea una nueva. Cada base de conocimiento guarda documentos importados y las specs que se generan a partir de ellos." }),
       h("div", { class: "card__actions", style: { marginTop: "20px" } }, h("button", { class: "btn btn--accent", text: "Gestionar bases de conocimiento", onclick: openSourcesManager }))));
     return {};
   }
-  let tab = params[0] || localStorage.getItem("doriath.kbTab") || "documents";
+  let tab = params[0] || localStorage.getItem("doriath.kbTab") || "dashboard";
   const layers = state.layers || [];
   const labelFor = (layer) => layers.find((item) => item.id === layer)?.label || layer;
   const overviewNode = h("div", { class: "bento bento--4" });
@@ -59,12 +63,200 @@ export async function renderKnowledge({ container, params, state }) {
     cleanup?.();
     cleanup = null;
     clear(body);
-    const renderers = { documents: renderDocuments, analyses: renderAnalyses, specs: renderSpecs, graph: renderGraph, create: renderCreate, pending: renderPending };
+    const renderers = { dashboard: renderDashboard, documents: renderDocuments, analyses: renderAnalyses, specs: renderSpecs, graph: renderGraph, governance: renderGovernance, activity: renderActivity, create: renderCreate, pending: renderPending };
     try {
       cleanup = await renderers[id](body, extra);
     } catch (error) {
       body.append(h("div", { class: "callout callout--error", text: error.message }));
     }
+  }
+
+  /* ---------- Panel: salud, reparto por capa y últimos documentos ---------- */
+  async function renderDashboard(node) {
+    const [overview, graph, activity, documents] = await Promise.all([
+      get(`/api/sources/${source.id}/overview`),
+      get(`/api/sources/${source.id}/graph`),
+      get(`/api/sources/${source.id}/activity?limit=6`).catch(() => ({ entries: [] })),
+      get(`/api/sources/${source.id}/documents`).catch(() => ({ documents: [] })),
+    ]);
+    const specs = await get(`/api/sources/${source.id}/specs`).then((data) => data.specs).catch(() => []);
+    const counts = {};
+    for (const spec of specs) counts[spec.layer] = (counts[spec.layer] || 0) + 1;
+    const max = Math.max(1, ...Object.values(counts));
+    const issues = [...(overview.issues || []), ...(overview.problems || []).map((problem) => ({ level: "error", id: problem.file || "", message: problem.error || String(problem) }))];
+    const errors = issues.filter((issue) => issue.level === "error" || issue.severity === "error").length;
+    const warnings = issues.length - errors;
+    const score = Math.max(40, 100 - errors * 12 - warnings * 4);
+
+    node.append(
+      h("div", { class: "bento bento--4" },
+        statCard(overview.stats.specs, "specs totales", "card--serene"),
+        statCard(specs.filter((spec) => spec.status === "active").length, "activas", "card--lime"),
+        statCard(specs.filter((spec) => spec.status === "draft").length, "borradores", "card--canary"),
+        statCard(overview.pending, "preguntas pendientes", "card--ice")),
+      h("div", { class: "bento bento--main-aside", style: { marginTop: "16px" } },
+        h("div", { class: "card" },
+          h("p", { class: "ante-title", text: "Reparto por capa" }),
+          h("h2", { text: "Composición de la base" }),
+          h("div", { style: { marginTop: "16px" } }, Object.keys(counts).sort().map((layer) => h("div", { class: "bar-row" },
+            h("span", { class: "mono", text: (state.layers?.find((item) => item.id === layer)?.prefix) || layer.toUpperCase().slice(0, 5) }),
+            h("div", { class: "bar" }, h("span", { style: { width: `${(counts[layer] / max) * 100}%`, background: layerColor(layer) } })),
+            h("b", { text: String(counts[layer]) })))),
+          overview.stats.relations ? h("p", { class: "small muted", style: { marginTop: "12px" }, text: `${overview.stats.relations} relaciones entre specs. Abre la pestaña Grafo para verlas.` }) : null),
+        h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } },
+          h("div", { class: "card" },
+            h("p", { class: "ante-title", text: "Salud de la base" }),
+            h("div", { class: "health" }, h("span", { class: "health__score", text: String(score) }), h("span", { class: "muted", text: "/ 100" })),
+            h("div", { class: "chips", style: { margin: "10px 0 14px" } },
+              h("span", { class: "chip chip--mandarin", text: `${errors} errores` }),
+              h("span", { class: "chip chip--canary", text: `${warnings} avisos` })),
+            issues.length
+              ? h("div", { class: "list" }, issues.slice(0, 5).map((issue) => h("div", { class: "list-item is-clickable", onclick: () => issue.id && selectTab("specs", issue.id) },
+                h("div", { class: "list-item__main" }, h("div", { class: "list-item__title mono", text: issue.id || "—" }), h("div", { class: "list-item__meta", style: { whiteSpace: "normal" }, text: issue.message || issue.text || "" })),
+                h("span", { class: `chip ${issue.level === "error" || issue.severity === "error" ? "chip--mandarin" : "chip--canary"}`, text: issue.level === "error" || issue.severity === "error" ? "error" : "aviso" }))))
+              : h("div", { class: "empty small", text: "Sin incidencias." })),
+          h("div", { class: "card" },
+            h("div", { class: "card__header" }, h("p", { class: "ante-title", style: { marginBottom: 0 }, text: "Últimos cambios" }), h("button", { class: "btn btn--ghost btn--xs", text: "Ver todo", onclick: () => selectTab("activity") })),
+            activity.entries.length
+              ? h("div", { class: "list" }, activity.entries.slice(0, 5).map((entry) => h("div", { class: "list-item" },
+                h("div", { class: "list-item__main" }, h("div", { class: "list-item__title", text: entry.title }), h("div", { class: "list-item__meta", text: `${entry.actor} · ${fmtDate(entry.at)}` })),
+                h("span", { class: "chip chip--outline", text: ACTIVITY_LABELS[entry.kind] || entry.kind }))))
+              : h("div", { class: "empty small", text: "Sin actividad registrada todavía." })))),
+      h("div", { class: "card", style: { marginTop: "16px" } },
+        h("p", { class: "ante-title", text: "Últimos documentos analizados" }),
+        documents.documents.length
+          ? h("table", { class: "table table--compact" },
+            h("thead", {}, h("tr", {}, h("th", { text: "Documento" }), h("th", { text: "Lo incluyó" }), h("th", { text: "Cuándo" }), h("th", { text: "Specs que generó" }))),
+            h("tbody", {}, documents.documents.slice(0, 8).map((document) => h("tr", {},
+              h("td", {}, h("strong", { text: document.name }), h("div", { class: "small muted", text: fmtBytes(document.size) })),
+              h("td", {}, document.importedBy
+                ? h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } }, h("div", { class: "avatar-sm", text: initials(document.importedBy) }), document.importedBy)
+                : h("span", { class: "small muted", text: "—" })),
+              h("td", { text: document.importedAt ? fmtDate(document.importedAt) : fmtDate(document.modified) }),
+              h("td", {}, document.specs?.length
+                ? h("div", { class: "chips" }, document.specs.map((id) => h("span", { class: "chip chip--outline mono", style: { cursor: "pointer" }, text: id, onclick: () => selectTab("specs", id) })))
+                : h("span", { class: "small muted", text: "—" }))))))
+          : h("div", { class: "empty small", text: "Todavía no hay documentos importados." })));
+
+    function statCard(value, label, variant) {
+      return h("div", { class: `card ${variant}` }, h("div", { class: "stat" }, h("span", { class: "stat__value", text: String(value ?? 0) }), h("span", { class: "stat__label", text: label })));
+    }
+    function layerColor(layer) {
+      const palette = { architecture: "#001391", domain: "#85C8FF", product: "#88E783", feature: "#FFE761", doc: "#8BE1E9", "work-spec": "#9694FF", "work-plan": "#9694FF", "work-task": "#9694FF", adr: "#FFB56B", rfc: "#FFB56B", rule: "#FFB56B" };
+      return palette[layer] || "#46536D";
+    }
+  }
+
+  /* ---------- Gobernanza: ADR, RFC y reglas ---------- */
+  async function renderGovernance(node) {
+    const data = await get(`/api/sources/${source.id}/specs`);
+    const items = data.specs.filter((spec) => GOVERNANCE_LAYERS.includes(spec.layer));
+    const tbody = h("tbody");
+    const refresh = async () => {
+      const fresh = await get(`/api/sources/${source.id}/specs`);
+      clear(tbody);
+      paint(fresh.specs.filter((spec) => GOVERNANCE_LAYERS.includes(spec.layer)));
+    };
+    const paint = (rows) => tbody.append(...(rows.length ? rows.map((spec) => h("tr", {},
+      h("td", {}, h("span", { class: "mono", text: spec.id })),
+      h("td", {}, layerChip(spec.layer, labelFor(spec.layer))),
+      h("td", { text: spec.title }),
+      h("td", {}, spec.owner ? h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } }, h("div", { class: "avatar-sm", text: initials(spec.owner) }), spec.owner) : h("span", { class: "small muted", text: "sin responsable" })),
+      h("td", {}, statusChip(spec.status)),
+      h("td", { text: spec.updated || "" }),
+      h("td", {}, h("div", { class: "card__actions" },
+        h("button", { class: "btn btn--outline btn--xs", text: "Abrir", onclick: () => selectTab("specs", spec.id) }),
+        ["proposed", "discussion", "draft"].includes(spec.status)
+          ? h("button", { class: "btn btn--lime btn--xs", text: "Aceptar", onclick: () => decide(spec, "accepted") })
+          : null,
+        ["proposed", "discussion", "draft"].includes(spec.status)
+          ? h("button", { class: "btn btn--danger btn--xs", text: "Rechazar", onclick: () => decide(spec, "rejected") })
+          : null)))) : [h("tr", {}, h("td", { colspan: "7" }, h("div", { class: "empty small", text: "Todavía no hay decisiones ni reglas. Créalas como specs de tipo ADR, RFC o Regla." })))]));
+    paint(items);
+
+    node.append(h("div", { class: "bento bento--main-aside" },
+      h("div", { class: "card" },
+        h("div", { class: "card__header" },
+          h("div", {}, h("p", { class: "ante-title", text: "Decisiones y reglas" }), h("h2", { text: "Gobernanza de la base" })),
+          h("button", { class: "btn btn--sm", text: "Nueva decisión", onclick: () => selectTab("specs") })),
+        h("table", { class: "table table--compact" },
+          h("thead", {}, h("tr", {}, h("th", { text: "ID" }), h("th", { text: "Tipo" }), h("th", { text: "Título" }), h("th", { text: "Responsable" }), h("th", { text: "Estado" }), h("th", { text: "Actualizada" }), h("th"))),
+          tbody)),
+      h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } },
+        h("div", { class: "card card--serene" },
+          h("p", { class: "ante-title", text: "Qué vive aquí" }),
+          h("p", { class: "small", style: { marginTop: "8px" }, text: "Los ADR recogen decisiones de arquitectura, los RFC propuestas en discusión y las reglas lo que toda spec debe cumplir. Aceptar o rechazar queda firmado en el registro de actividad." })),
+        h("div", { class: "card" },
+          h("p", { class: "ante-title", text: "Cumplimiento" }),
+          h("div", { class: "list", style: { marginTop: "10px" } },
+            [["Decisiones aceptadas", items.filter((spec) => spec.status === "accepted").length, items.filter((spec) => spec.layer === "adr").length],
+              ["Reglas activas", items.filter((spec) => spec.layer === "rule" && spec.status === "active").length, items.filter((spec) => spec.layer === "rule").length],
+              ["Con responsable", items.filter((spec) => spec.owner).length, items.length]]
+              .map(([label, ok, total]) => h("div", { class: "list-item" },
+                h("div", { class: "list-item__main" }, h("div", { class: "list-item__title", text: label })),
+                h("span", { class: `chip ${total && ok === total ? "chip--lime" : "chip--canary"}`, text: `${ok}/${total}` }))))))));
+
+    async function decide(spec, status) {
+      try {
+        await post(`/api/sources/${source.id}/specs/${spec.id}/status`, { status });
+        toast(`${spec.id} → ${status}`, "ok");
+        await refresh();
+      } catch (error) {
+        toast(error.message, "error");
+      }
+    }
+  }
+
+  /* ---------- Actividad: quién ha cambiado qué ---------- */
+  async function renderActivity(node) {
+    const filters = { kind: "", actor: "" };
+    const listNode = h("div", { class: "timeline" });
+    const summaryNode = h("div", { class: "list", style: { marginTop: "10px" } });
+    const load = async () => {
+      clear(listNode);
+      clear(summaryNode);
+      const query = new URLSearchParams({ limit: "150", ...(filters.kind ? { kind: filters.kind } : {}), ...(filters.actor ? { actor: filters.actor } : {}) });
+      const data = await get(`/api/sources/${source.id}/activity?${query}`);
+      if (!data.entries.length) {
+        listNode.append(h("div", { class: "empty small", text: "Sin actividad con esos filtros." }));
+      } else {
+        data.entries.forEach((entry, index) => listNode.append(h("div", { class: "tl" },
+          h("div", { class: "tl__rail" }, h("div", { class: `tl__dot is-${entry.kind}` }), index < data.entries.length - 1 ? h("div", { class: "tl__line" }) : null),
+          h("div", { class: "tl__body" },
+            h("div", { style: { display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" } },
+              h("div", { class: "avatar-sm", text: initials(entry.actor) }),
+              h("strong", { text: entry.title }),
+              h("span", { class: "chip chip--outline", text: ACTIVITY_LABELS[entry.kind] || entry.kind })),
+            entry.detail ? h("div", { class: "tl__meta", style: { marginTop: "4px" }, text: entry.detail }) : null,
+            h("div", { class: "tl__meta", text: `${entry.actor} · ${fmtDate(entry.at)}` }),
+            entry.specs?.length ? h("div", { class: "chips", style: { marginTop: "6px" } }, entry.specs.map((id) => h("span", { class: "chip chip--outline mono", style: { cursor: "pointer" }, text: id, onclick: () => selectTab("specs", id) }))) : null))));
+      }
+      for (const actor of data.actors) {
+        summaryNode.append(h("div", { class: "list-item" },
+          h("div", { class: "list-item__main", style: { flexDirection: "row", alignItems: "center", gap: "10px" } }, h("div", { class: "avatar-sm", text: initials(actor) }), h("span", { class: "list-item__title", text: actor })),
+          h("button", { class: "btn btn--ghost btn--xs", text: "Filtrar", onclick: () => { filters.actor = filters.actor === actor ? "" : actor; load(); } })));
+      }
+      countChip.textContent = `${data.total} eventos`;
+    };
+    const countChip = h("span", { class: "chip chip--outline", text: "…" });
+
+    node.append(h("div", { class: "bento bento--main-aside" },
+      h("div", { class: "card" },
+        h("div", { class: "card__header" },
+          h("div", {}, h("p", { class: "ante-title", text: "Registro" }), h("h2", { text: "Quién ha cambiado qué" })),
+          countChip),
+        h("div", { class: "form-row", style: { marginBottom: "16px" } },
+          h("select", { class: "select", onchange: (event) => { filters.kind = event.target.value; load(); } },
+            h("option", { value: "", text: "Todo tipo de cambio" }),
+            ...Object.entries(ACTIVITY_LABELS).map(([value, label]) => h("option", { value, text: label }))),
+          h("button", { class: "btn btn--outline btn--sm", text: "Quitar filtros", onclick: () => { filters.kind = ""; filters.actor = ""; load(); } })),
+        listNode),
+      h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } },
+        h("div", { class: "card card--canary" },
+          h("p", { class: "ante-title", text: "Por qué importa" }),
+          h("p", { class: "small", style: { marginTop: "8px" }, text: "Cada cambio queda firmado con el usuario de GitHub: quién, cuándo y desde dónde. Las correcciones que hace alguien desde el chat aparecen aquí sobre la spec afectada, para que puedas revisarlas." })),
+        h("div", { class: "card" }, h("p", { class: "ante-title", text: "Personas" }), summaryNode))));
+    await load();
   }
 
   /* ---------- Documentos ---------- */

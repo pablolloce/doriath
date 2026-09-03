@@ -14,12 +14,11 @@ export async function renderAssistant({ container, params, state }) {
   let current = params[0] || localStorage.getItem("doriath.assistantChat") || "";
 
   const aside = h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } },
-    h("div", { class: "card card--electric" },
-      h("p", { class: "ante-title", text: "Asistente" }),
-      h("h2", { text: "Conversaciones" }),
-      h("p", { class: "small", style: { marginTop: "8px", opacity: 0.85 }, text: "El asistente consulta las specs de las bases de conocimiento y genera ficheros con la identidad BBVA." }),
-      h("div", { class: "card__actions", style: { marginTop: "16px" } }, h("button", { class: "btn btn--accent", text: "Nueva conversación", onclick: () => createConversation() }))),
-    h("div", { class: "card" }, h("p", { class: "ante-title", text: "Historial" }), listNode),
+    h("div", { class: "card" },
+      h("div", { class: "card__header", style: { marginBottom: "12px", alignItems: "center" } },
+        h("p", { class: "ante-title", style: { marginBottom: 0 }, text: "Conversaciones" }),
+        h("button", { class: "btn btn--outline btn--xs", text: "+ Nueva", onclick: () => createConversation() })),
+      listNode),
   );
   const rightPanel = h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } },
     h("div", { class: "card" }, h("p", { class: "ante-title", text: "Bases de conocimiento en contexto" }), scopeNode),

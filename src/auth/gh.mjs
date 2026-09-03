@@ -134,6 +134,7 @@ export async function getAuthStatus(host, { refresh = false } = {}) {
 export function invalidateAuthCache() {
   statusCache.clear();
   tokenCache.clear();
+  actorCache = { at: 0, host: "", name: "" };
   ghPath = "";
 }
 
@@ -157,6 +158,20 @@ export async function resolveGitHubToken(host) {
     if (tokenCache.get(hostname) === entry) tokenCache.delete(hostname);
     throw error;
   }
+}
+
+/**
+ * Nombre con el que firmar los cambios en el registro de la base de conocimiento: el de la sesión de
+ * GitHub. Se cachea un minuto porque cada consulta lanza `gh api user`.
+ */
+let actorCache = { at: 0, host: "", name: "" };
+export async function currentActor(host) {
+  const hostname = normalizeHostname(host);
+  if (actorCache.host === hostname && Date.now() - actorCache.at < 60_000 && actorCache.name) return actorCache.name;
+  const user = await getAuthenticatedUser(hostname).catch(() => null);
+  const name = user?.name || user?.login || "usuario local";
+  actorCache = { at: Date.now(), host: hostname, name };
+  return name;
 }
 
 export async function getAuthenticatedUser(host) {
