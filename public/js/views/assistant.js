@@ -73,7 +73,7 @@ export async function renderAssistant({ container, params, state }) {
     }
   }
 
-  async function openConversation(id) {
+  async function openConversation(id, { silentIfMissing = false } = {}) {
     current = id;
     localStorage.setItem("doriath.assistantChat", id);
     view?.destroy();
@@ -96,15 +96,23 @@ export async function renderAssistant({ container, params, state }) {
       renderFiles(chat);
       await refreshList();
     } catch (error) {
-      toast(error.message, "error");
       current = "";
+      localStorage.removeItem("doriath.assistantChat");
       clear(chatHost);
+      // 404 al restaurar la última conversación abierta (se borró, o viene de otra instalación): no es un
+      // fallo que el usuario haya provocado, así que se resuelve en silencio en vez de enseñar el error técnico.
+      if (error.status === 404 && silentIfMissing) chatHost.append(emptyState());
+      else toast(error.message, "error");
     }
   }
 
+  function emptyState() {
+    return h("div", { class: "card card--serene" }, h("p", { class: "ante-title", text: "Empieza" }), h("h2", { text: "Crea una conversación" }), h("p", { class: "lead", style: { marginTop: "8px" }, text: "El asistente responde con el conocimiento de las bases seleccionadas y puede producir documentos Word, presentaciones, hojas Excel, informes HTML o ficheros de código, todos con la identidad BBVA." }), h("div", { class: "card__actions", style: { marginTop: "16px" } }, h("button", { class: "btn", text: "Nueva conversación", onclick: createConversation })));
+  }
+
   await refreshList();
-  if (current) await openConversation(current);
-  else chatHost.append(h("div", { class: "card card--serene" }, h("p", { class: "ante-title", text: "Empieza" }), h("h2", { text: "Crea una conversación" }), h("p", { class: "lead", style: { marginTop: "8px" }, text: "El asistente responde con el conocimiento de las bases seleccionadas y puede producir documentos Word, presentaciones, hojas Excel, informes HTML o ficheros de código, todos con la identidad BBVA." }), h("div", { class: "card__actions", style: { marginTop: "16px" } }, h("button", { class: "btn", text: "Nueva conversación", onclick: createConversation }))));
+  if (current) await openConversation(current, { silentIfMissing: !params[0] });
+  else chatHost.append(emptyState());
 
   return { destroy: () => view?.destroy() };
 }
