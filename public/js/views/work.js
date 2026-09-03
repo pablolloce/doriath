@@ -154,7 +154,7 @@ export async function renderWork({ container, params, state }) {
       view?.destroy();
       clear(chatHost);
       view = createChatView({ chatId: id, showPhase: true, plain: true, placeholder: "Describe el cambio que necesitas, en lenguaje de negocio…", onState: (chat) => { view.setPhase(); renderPackage(chat); renderRepos(chat); } });
-      chatHost.append(h("div", { class: "card" }, view.root));
+      chatHost.append(h("div", { class: "card card--chat" }, view.root));
       await view.load();
       refreshList(id);
     }

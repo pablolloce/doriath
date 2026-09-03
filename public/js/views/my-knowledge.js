@@ -272,7 +272,7 @@ export async function renderMyKnowledge({ container }) {
   /* ---------- Preguntar y corregir ---------- */
   async function mountChat() {
     clear(chatHost);
-    const card = h("div", { class: "card" },
+    const card = h("div", { class: "card card--chat" },
       h("div", { class: "card__header" },
         h("div", {}, h("p", { class: "ante-title", text: "Paso 2" }), h("h2", { text: "Pregunta a tu base de conocimiento" })),
         h("span", { class: "chip chip--outline", text: "Corrige lo que no te encaje" })));

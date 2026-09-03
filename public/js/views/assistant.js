@@ -88,7 +88,7 @@ export async function renderAssistant({ container, params, state }) {
       h("div", {}, h("p", { class: "ante-title", text: "Conversación" }), h("h2", { id: "chatTitle" })),
       h("div", { class: "card__actions" },
         h("button", { class: "btn btn--outline btn--xs", text: "Renombrar", onclick: async () => { const title = await promptDialog("Renombrar", { label: "Título", value: view.chat.title }); if (title) { await put(`/api/chats/${id}`, { title }); view.chat.title = title; header.querySelector("#chatTitle").textContent = title; refreshList(); } } })));
-    chatHost.append(h("div", { class: "card" }, header, view.root));
+    chatHost.append(h("div", { class: "card card--chat" }, header, view.root));
     try {
       const chat = await view.load();
       header.querySelector("#chatTitle").textContent = chat.title;
