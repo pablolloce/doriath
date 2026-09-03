@@ -1,5 +1,8 @@
 import process from "node:process";
+import path from "node:path";
+import { existsSync } from "node:fs";
 import { runCommand, spawnDetached } from "../util/process.mjs";
+import { paths } from "../paths.mjs";
 import { log } from "../util/log.mjs";
 
 /**
@@ -8,7 +11,61 @@ import { log } from "../util/log.mjs";
  */
 const TOKEN_TTL_MS = 30_000;
 const tokenCache = new Map();
-let statusCache = { at: 0, value: null };
+const statusCache = new Map();
+
+/**
+ * Localiza `gh`. Normalmente basta con el PATH, pero el servidor lo hereda del proceso que lo lanzó:
+ * si el usuario instala la CLI (o la añade al PATH de usuario) con Doriath ya abierto, ese PATH se
+ * queda antiguo y `gh` deja de encontrarse. Se prueban también la copia portable de Doriath y las
+ * rutas de instalación habituales en Windows, incluida la que usa FENIX.
+ */
+let ghPath = "";
+async function ghCommand() {
+  if (ghPath && (ghPath === "gh" || existsSync(ghPath))) return ghPath;
+  const probe = await runCommand("gh", ["--version"], { timeoutMs: 15000 });
+  if (probe.ok) {
+    ghPath = "gh";
+    return ghPath;
+  }
+  if (process.platform === "win32") {
+    const candidates = [
+      paths.runtimeDir ? path.join(paths.runtimeDir, "gh", "bin", "gh.exe") : "",
+      process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, "GitHubCLI", "bin", "gh.exe") : "",
+      process.env.ProgramFiles ? path.join(process.env.ProgramFiles, "GitHub CLI", "bin", "gh.exe") : "",
+      process.env["ProgramFiles(x86)"] ? path.join(process.env["ProgramFiles(x86)"], "GitHub CLI", "bin", "gh.exe") : "",
+    ].filter(Boolean);
+    for (const candidate of candidates) {
+      if (!existsSync(candidate)) continue;
+      log.info("auth", `GitHub CLI encontrada fuera del PATH: ${candidate}`);
+      ghPath = candidate;
+      return ghPath;
+    }
+  }
+  ghPath = "";
+  return "gh";
+}
+
+/** Ejecuta gh resolviendo antes dónde está. */
+async function gh(args, options = {}) {
+  return runCommand(await ghCommand(), args, { timeoutMs: 20000, ...options });
+}
+
+function parseLogin(output) {
+  return /Logged in to \S+ account (\S+)/i.exec(output)?.[1]
+    || /Logged in to \S+ as (\S+)/i.exec(output)?.[1]
+    || /account ([A-Za-z0-9-]+) \(/i.exec(output)?.[1]
+    || "";
+}
+
+/** Hosts con sesión, para poder avisar de "tienes sesión, pero en otro host". */
+async function authenticatedHosts() {
+  const all = await gh(["auth", "status"]);
+  const output = `${all.stdout}\n${all.stderr}`;
+  const hosts = new Set();
+  for (const match of output.matchAll(/Logged in to (\S+?)[\s:]/gi)) hosts.add(match[1].toLowerCase());
+  for (const match of output.matchAll(/^([A-Za-z0-9.-]+\.[A-Za-z]{2,})\s*$/gm)) hosts.add(match[1].toLowerCase());
+  return [...hosts];
+}
 
 export function normalizeHostname(host) {
   return String(host || "").replace(/^https?:\/\//i, "").replace(/\/+$/, "").toLowerCase();
@@ -23,36 +80,61 @@ export function githubApiBase(host, type) {
 }
 
 export async function inspectGitHubCli(host) {
-  const version = await runCommand("gh", ["--version"], { timeoutMs: 15000 });
+  const version = await gh(["--version"], { timeoutMs: 15000 });
   if (!version.ok) {
-    return { installed: false, authenticated: false, error: version.error || "GitHub CLI no está instalado." };
+    return { installed: false, authenticated: false, error: version.error || "GitHub CLI no está instalado.", authOutput: "", warning: "", otherHosts: [] };
   }
   const hostname = normalizeHostname(host);
-  const auth = await runCommand("gh", ["auth", "status", "--hostname", hostname], { timeoutMs: 20000 });
-  const output = `${auth.stdout}\n${auth.stderr}`;
-  const login = /Logged in to [^ ]+ account ([^ ]+)/i.exec(output)?.[1]
-    || /account ([A-Za-z0-9-]+) \(/i.exec(output)?.[1]
-    || "";
+  const auth = await gh(["auth", "status", "--hostname", hostname]);
+  const output = `${auth.stdout}\n${auth.stderr}`.trim();
+  let authenticated = auth.ok;
+  let warning = "";
+
+  // `gh auth status` valida el token contra la API. En la red corporativa esa llamada puede fallar
+  // (proxy, certificados, SSO caducado) aunque la sesión exista y sea utilizable, y entonces gh
+  // devuelve un código distinto de cero. Lo que Doriath necesita de verdad es el token, así que se
+  // pregunta directamente: si gh lo entrega, hay sesión.
+  if (!authenticated) {
+    const token = await gh(["auth", "token", "--hostname", hostname], { timeoutMs: 15000 });
+    if (token.ok && token.stdout.trim()) {
+      authenticated = true;
+      warning = `Hay una sesión de gh para ${hostname}, pero "gh auth status" no ha podido validarla (proxy, certificados o SSO). Doriath usa el token igualmente; si Copilot falla, revisa la salida de gh.`;
+      log.warn("auth", `gh auth status falló para ${hostname} pero hay token disponible.`);
+    }
+  }
+
+  // Sin sesión en el host configurado: mirar si la hay en otro (confusión típica entre
+  // github.com y el GitHub Enterprise corporativo).
+  let otherHosts = [];
+  if (!authenticated) {
+    otherHosts = (await authenticatedHosts()).filter((item) => item !== hostname);
+  }
+
   return {
     installed: true,
     version: version.stdout.split(/\r?\n/)[0],
-    authenticated: auth.ok,
+    authenticated,
     host: hostname,
-    login,
-    authOutput: output.trim(),
+    login: parseLogin(output),
+    warning,
+    otherHosts,
+    authOutput: output,
   };
 }
 
 export async function getAuthStatus(host, { refresh = false } = {}) {
-  if (!refresh && statusCache.value && Date.now() - statusCache.at < 10_000) return statusCache.value;
+  const key = normalizeHostname(host);
+  const cached = statusCache.get(key);
+  if (!refresh && cached && Date.now() - cached.at < 10_000) return cached.value;
   const value = await inspectGitHubCli(host);
-  statusCache = { at: Date.now(), value };
+  statusCache.set(key, { at: Date.now(), value });
   return value;
 }
 
 export function invalidateAuthCache() {
-  statusCache = { at: 0, value: null };
+  statusCache.clear();
   tokenCache.clear();
+  ghPath = "";
 }
 
 export async function resolveGitHubToken(host) {
@@ -61,7 +143,7 @@ export async function resolveGitHubToken(host) {
   if (cached?.expiresAt > Date.now()) return cached.promise;
   const entry = {
     expiresAt: Date.now() + TOKEN_TTL_MS,
-    promise: runCommand("gh", ["auth", "token", "--hostname", hostname], { timeoutMs: 15000 }).then((result) => {
+    promise: gh(["auth", "token", "--hostname", hostname], { timeoutMs: 15000 }).then((result) => {
       if (!result.ok || !result.stdout) {
         throw new Error(`No hay sesión activa de GitHub CLI para ${hostname}. Inicia sesión desde Doriath o ejecuta "gh auth login --hostname ${hostname}".`);
       }
@@ -79,7 +161,7 @@ export async function resolveGitHubToken(host) {
 
 export async function getAuthenticatedUser(host) {
   const hostname = normalizeHostname(host);
-  const result = await runCommand("gh", ["api", "user", "--hostname", hostname], { timeoutMs: 20000 });
+  const result = await gh(["api", "user", "--hostname", hostname]);
   if (!result.ok) return null;
   try {
     const user = JSON.parse(result.stdout);
@@ -97,15 +179,19 @@ export async function startGitHubLogin(host) {
   const hostname = normalizeHostname(host);
   const loginArgs = ["auth", "login", "--hostname", hostname, "--web", "--git-protocol", "https"];
   const setupArgs = ["auth", "setup-git", "--hostname", hostname];
+  // Se resuelve gh antes de vaciar la caché: la consola que se abre debe usar el mismo ejecutable
+  // que encontró Doriath, no confiar en que esté en el PATH de esa consola.
+  const executable = await ghCommand();
+  const quoted = /\s/.test(executable) ? `"${executable}"` : executable;
   invalidateAuthCache();
 
   if (process.platform === "win32") {
-    const script = `gh ${loginArgs.join(" ")} && gh ${setupArgs.join(" ")} && echo. && echo Sesion iniciada. Puedes cerrar esta ventana y volver a Doriath. && timeout /t 8`;
+    const script = `${quoted} ${loginArgs.join(" ")} && ${quoted} ${setupArgs.join(" ")} && echo. && echo Sesion iniciada. Puedes cerrar esta ventana y volver a Doriath. && timeout /t 8`;
     spawnDetached("cmd.exe", ["/c", "start", "Doriath - Inicio de sesion en GitHub", "cmd.exe", "/c", script]);
     return { started: true, mode: "console", message: "Se ha abierto una consola con el inicio de sesión de GitHub. Completa el flujo en el navegador con tu correo de BBVA." };
   }
 
-  const command = `gh ${loginArgs.join(" ")} && gh ${setupArgs.join(" ")}`;
+  const command = `${quoted} ${loginArgs.join(" ")} && ${quoted} ${setupArgs.join(" ")}`;
   if (process.platform === "darwin") {
     spawnDetached("osascript", ["-e", `tell application "Terminal" to do script "${command.replace(/"/g, '\\"')}"`]);
     return { started: true, mode: "terminal", message: "Se ha abierto Terminal con el inicio de sesión de GitHub." };
@@ -127,13 +213,13 @@ export async function startGitHubLogin(host) {
   return {
     started: false,
     mode: "manual",
-    message: `Ejecuta en una terminal: gh ${loginArgs.join(" ")} && gh ${setupArgs.join(" ")}`,
+    message: `Ejecuta en una terminal: ${command}`,
   };
 }
 
 export async function logoutGitHub(host) {
   const hostname = normalizeHostname(host);
-  const result = await runCommand("gh", ["auth", "logout", "--hostname", hostname], { timeoutMs: 20000, input: "y\n" });
+  const result = await gh(["auth", "logout", "--hostname", hostname], { input: "y\n" });
   invalidateAuthCache();
   return { ok: result.ok, output: result.stdout || result.stderr };
 }

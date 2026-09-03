@@ -40,6 +40,16 @@ No hace falta Node instalado: el instalador incluye un Node portable.
 
 Datos existentes en `data/`, `outputs/` y `knowledge-bases/` se conservan al reinstalar.
 
+### Si Doriath no detecta tu sesión de GitHub
+
+La sesión sale de la CLI `gh`. Si ya has hecho login y Doriath sigue pidiéndolo:
+
+1. En la propia pantalla de inicio de sesión, despliega **"Qué ve Doriath al comprobar la sesión"**: ahí aparece la salida literal de `gh` y, si la sesión está en otro host (por ejemplo `github.com` en vez de `bbva.ghe.com`), se avisa explícitamente.
+2. `npm run doctor` (o `Doriath.cmd doctor`) imprime lo mismo desde la consola, incluido el host configurado.
+3. Si el host no es el correcto, cámbialo en **Ajustes → Host de GitHub Enterprise**.
+
+Doriath no depende solo del código de salida de `gh auth status`: esa comprobación valida el token contra la API y en la red corporativa puede fallar por el proxy, los certificados o el SSO aunque la sesión sea válida. Cuando eso pasa, Doriath pide el token con `gh auth token` y, si existe, entra igualmente avisando de que no pudo validarlo. También busca `gh` fuera del PATH (la copia portable de `runtime/gh`, `%LOCALAPPDATA%\GitHubCLI` y `Program Files`), por si se instaló con Doriath ya abierto.
+
 ### Si la ventana de Doriath.exe se cierra sola
 
 `Doriath.exe` es una aplicación de consola: la ventana muestra los registros y, ante cualquier fallo, se queda abierta con "Pulsa una tecla para cerrar" (como FENIX). Si aun así se cierra sin mostrar nada:

@@ -14,6 +14,7 @@ export const state = {
   route: "knowledge",
   routeParams: {},
   gateOpen: false,
+  gateDismissed: false,
 };
 
 const listeners = new Set();
@@ -131,8 +132,8 @@ export async function openSourcesManager() {
 }
 
 /* ---------- Sesión y estado ---------- */
-export async function refreshStatus({ copilot = true } = {}) {
-  state.status = await get(`/api/status?copilot=${copilot ? "1" : "0"}`);
+export async function refreshStatus({ copilot = true, refresh = false } = {}) {
+  state.status = await get(`/api/status?copilot=${copilot ? "1" : "0"}${refresh ? "&refresh=1" : ""}`);
   renderSession();
   renderGate();
   return state.status;
@@ -181,30 +182,42 @@ function pollAuth() {
       if (auth?.authenticated) {
         toast(`Sesión iniciada como ${auth.user?.name || auth.login}`, "ok");
         await post("/api/auth/refresh").catch(() => undefined);
-        await refreshStatus();
+        await refreshStatus({ refresh: true });
         await loadModels();
       }
     }
   }, 4000);
 }
 
+function closeGate() {
+  document.getElementById("gate")?.remove();
+  const overlay = document.getElementById("overlay");
+  if (overlay && !overlay.querySelector(".modal")) {
+    overlay.hidden = true;
+    overlay.replaceChildren();
+  }
+  state.gateOpen = false;
+}
+
 function renderGate() {
   const github = state.status?.github;
   const needsGate = github && (!github.installed || !github.authenticated);
-  const existing = document.getElementById("gate");
   if (!needsGate) {
-    if (existing) {
-      existing.remove();
-      document.getElementById("overlay").hidden = true;
-      state.gateOpen = false;
-    }
+    if (document.getElementById("gate")) closeGate();
+    state.gateDismissed = false;
     return;
   }
-  if (existing) return;
+  // Si el usuario ya la ha cerrado con "Continuar sin sesión", no se le vuelve a poner delante en
+  // cada refresco: se queda el botón de iniciar sesión en la barra lateral.
+  if (state.gateDismissed || document.getElementById("gate")) return;
   state.gateOpen = true;
   const overlay = document.getElementById("overlay");
   overlay.hidden = false;
   overlay.onclick = null;
+  const detail = [
+    github.otherHosts?.length ? `Hay sesión de gh en: ${github.otherHosts.join(", ")}. Doriath está configurado para ${github.host} (cámbialo en Ajustes si no es el correcto).` : "",
+    github.authOutput || github.error || "",
+  ].filter(Boolean).join("\n\n");
   overlay.replaceChildren(h("div", { class: "gate", id: "gate" },
     h("img", { src: "/brand/doriath-mark-white.png", alt: "", class: "gate__mark" }),
     h("div", {}, h("p", { class: "ante-title", text: "Doriath · BBVA CIB" }), h("h1", { text: github.installed ? "Inicia sesión en GitHub" : "Falta GitHub CLI" })),
@@ -213,8 +226,11 @@ function renderGate() {
       : "No se ha encontrado la CLI de GitHub (gh). Instálala o vuelve a ejecutar el instalador de Doriath, y después pulsa Reintentar." }),
     h("div", { class: "card__actions" },
       github.installed ? h("button", { class: "btn btn--accent", text: "Iniciar sesión en GitHub", onclick: startLogin }) : null,
-      h("button", { class: "btn btn--outline", style: { color: "#F7F8F8", borderColor: "#85C8FF" }, text: "Reintentar", onclick: () => refreshStatus() }),
-      h("button", { class: "btn btn--ghost", style: { color: "#85C8FF" }, text: "Continuar sin sesión", onclick: () => { existing?.remove(); document.getElementById("gate")?.remove(); overlay.hidden = true; state.gateOpen = false; } })),
+      h("button", { class: "btn btn--outline", style: { color: "#F7F8F8", borderColor: "#85C8FF" }, text: "Reintentar", onclick: async () => { try { await refreshStatus({ refresh: true }); } catch (error) { toast(error.message, "error"); } } }),
+      h("button", { class: "btn btn--ghost", style: { color: "#85C8FF" }, text: "Continuar sin sesión", onclick: () => { state.gateDismissed = true; closeGate(); } })),
+    detail ? h("details", { class: "gate__detail" },
+      h("summary", { text: "Qué ve Doriath al comprobar la sesión" }),
+      h("pre", { class: "gate__output", text: detail })) : null,
     h("p", { class: "small", style: { opacity: 0.8 }, text: `También puedes ejecutarlo a mano: gh auth login --hostname ${github.host} --web --git-protocol https` }),
   ));
 }

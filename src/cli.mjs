@@ -35,6 +35,9 @@ async function main() {
     console.log(`Git:              ${git.ok ? git.stdout : "NO DISPONIBLE"}`);
     console.log(`GitHub CLI:       ${gh.installed ? gh.version : "NO DISPONIBLE"}`);
     console.log(`Sesión gh:        ${gh.authenticated ? `OK (${gh.login || "usuario"})` : "NO INICIADA"}`);
+    if (gh.warning) console.log(`Aviso:            ${gh.warning}`);
+    if (gh.otherHosts?.length) console.log(`Sesión en otros:  ${gh.otherHosts.join(", ")}`);
+    if (!gh.authenticated && gh.authOutput) console.log(`Salida de gh:\n${gh.authOutput.split(/\r?\n/).map((line) => `  ${line}`).join("\n")}`);
     if (gh.authenticated) {
       const { copilotStatus } = await import("./ai/copilot.mjs");
       const status = await copilotStatus(config);

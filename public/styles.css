@@ -271,6 +271,9 @@ pre.code { background: var(--bbva-sand); border: 1px solid var(--bbva-gray-2); b
 .gate { width: min(640px, 100%); background: var(--bbva-electric-blue); color: var(--bbva-sand); border-radius: var(--radius-lg); padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-3); }
 .gate h1 { color: var(--bbva-sand); font-size: 36px; }
 .gate__mark { width: 72px; height: 72px; }
+.gate__detail { font-size: 13px; }
+.gate__detail summary { cursor: pointer; color: var(--bbva-serene-blue); font-weight: 700; }
+.gate__output { margin: 8px 0 0; padding: 12px 14px; border-radius: var(--radius-sm); background: rgba(0, 5, 25, 0.45); color: var(--bbva-sand); font-family: var(--font-mono); font-size: 12px; white-space: pre-wrap; word-break: break-word; max-height: 220px; overflow: auto; }
 .gate .ante-title { color: var(--bbva-serene-blue); }
 .toasts { position: fixed; right: var(--space-3); bottom: var(--space-3); display: flex; flex-direction: column; gap: 8px; z-index: 60; }
 .toast { padding: 12px 16px; border-radius: var(--radius-md); background: var(--bbva-midnight); color: var(--bbva-sand); font-size: 14px; box-shadow: var(--shadow-card); max-width: 420px; }
