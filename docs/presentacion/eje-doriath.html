@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eje Doriath</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Lato:wght@300;400;700&display=swap">
+<style>
+/* ===========================================================
+   Eje Doriath — identidad BBVA (docs/identidad-bbva/tokens.css)
+   =========================================================== */
+:root{
+  --electric:#001391; --serene:#85C8FF; --midnight:#070E46; --deep:#000519;
+  --sand:#F7F8F8; --white:#FFFFFF;
+  --g2:#E2E6EA; --g3:#CAD1D8; --g4:#ADB8C2; --g5:#46536D;
+  --lime:#88E783; --mandarin:#FFB56B; --canary:#FFE761; --aqua:#8BE1E9; --purple:#9694FF;
+
+  --ink:var(--midnight); --ink2:#2B3557; --mute:var(--g5); --mute2:#7C88A3;
+  --line:rgba(0,19,145,.14); --line2:rgba(0,19,145,.07);
+  --bg:var(--sand);
+
+  --display:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --body:"Lato","Helvetica Neue",Arial,sans-serif;
+  --mono:Consolas,"Cascadia Mono","SF Mono",Menlo,monospace;
+
+  /* acentos oscuros para texto sobre fondo claro */
+  --lime-ink:#1F6B33; --mandarin-ink:#8A4B0B; --canary-ink:#7A5B00; --aqua-ink:#0F6470; --purple-ink:#3F3CB0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:
+    radial-gradient(1100px 620px at 92% -10%,rgba(133,200,255,.30),transparent 60%),
+    radial-gradient(820px 500px at -8% 108%,rgba(0,19,145,.09),transparent 58%),
+    var(--bg);
+  font-family:var(--body);color:var(--ink);-webkit-font-smoothing:antialiased;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+
+/* ── cabecera ── */
+.topbar{flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:12px 28px;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.topbar .bbva-mark{height:17px;width:auto;color:var(--electric);display:block;flex:0 0 auto}
+.topbar .vdiv{width:1px;height:19px;background:var(--line)}
+.topbar .t{font-family:var(--display);font-size:17px;font-weight:700;letter-spacing:-.01em;color:var(--electric)}
+.topbar .s{font-size:12.5px;color:var(--mute)}
+.topbar .sp{flex:1}
+.topbar .hint{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--mute2);border:1px solid var(--line);border-radius:999px;padding:5px 12px;white-space:nowrap}
+
+/* ── filtros ── */
+.filters{flex:0 0 auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  padding:10px 28px;background:rgba(255,255,255,.6);border-bottom:1px solid var(--line2)}
+.filters .lb{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--mute2);margin-right:4px}
+.fbtn{font-family:inherit;font-size:12.5px;font-weight:700;color:var(--ink2);background:var(--white);
+  border:1px solid var(--line);border-radius:999px;padding:6px 13px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;transition:border-color .16s,color .16s,background .16s}
+.fbtn:hover{border-color:var(--electric);color:var(--electric)}
+.fbtn:focus-visible{outline:2px solid var(--electric);outline-offset:2px}
+.fbtn.on{background:var(--electric);border-color:var(--electric);color:var(--white)}
+.fbtn .sw{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
+.fbtn[data-f="all"] .sw{background:var(--g4)}
+.fbtn[data-f="tuyo"] .sw{background:var(--lime)}
+.fbtn[data-f="doriath"] .sw{background:var(--electric)}
+.fbtn[data-f="humano"] .sw{background:var(--mandarin)}
+.fbtn[data-f="local"] .sw{background:var(--purple)}
+.fbtn[data-f="abierto"] .sw{border:1.6px dashed var(--mute2);background:transparent;border-radius:2px}
+
+/* ── cuerpo ── */
+.main{flex:1 1 auto;display:grid;grid-template-columns:1fr 392px;min-height:0}
+@media(max-width:1280px){.main{grid-template-columns:1fr 336px}}
+
+.canvas{position:relative;min-width:0;min-height:0;display:flex;align-items:center;
+  justify-content:center;padding:12px 18px 6px}
+svg.dg{width:100%;height:100%;display:block;font-family:var(--body)}
+
+/* ── SVG ── */
+.dg .colhead{font-size:19px;font-weight:700;letter-spacing:.06em;fill:var(--electric);font-family:var(--body)}
+.dg .colsub{font-size:10px;font-weight:700;letter-spacing:.14em;fill:var(--mute2)}
+.dg .colrole{font-size:11.5px;font-weight:400;fill:var(--mute);letter-spacing:.01em}
+.dg .sep{stroke:var(--line);stroke-width:1.2}
+.dg .box{fill:var(--white);stroke:var(--electric);stroke-width:2.2}
+.dg .pill{fill:var(--white);stroke:var(--electric);stroke-width:1.8}
+.dg .pill-soft{fill:var(--white);stroke:var(--g3);stroke-width:1.6}
+.dg .pill-ext{fill:none;stroke:var(--mute2);stroke-width:1.8;stroke-dasharray:7 6}
+.dg .lbl{font-size:19px;font-weight:700;fill:var(--electric)}
+.dg .lbl-sm{font-size:12.5px;font-weight:700;fill:var(--ink);letter-spacing:.05em}
+.dg .lbl-xs{font-size:12.5px;font-weight:700;fill:var(--ink2)}
+.dg .wire{stroke:var(--electric);stroke-width:2;fill:none;stroke-linecap:round}
+.dg .wire-soft{stroke:var(--serene);stroke-width:2.4;fill:none;stroke-linecap:round}
+.dg .wire-d{stroke:var(--mute2);stroke-width:1.8;fill:none;stroke-dasharray:8 7;stroke-linecap:round}
+.dg .hmark{stroke:var(--mandarin);stroke-width:4.6;stroke-linecap:round}
+.dg .underline{stroke:var(--lime);stroke-width:3.4;stroke-linecap:round}
+.dg .note{font-size:11px;fill:var(--mute);font-weight:400}
+.dg .note-b{font-size:11px;fill:var(--mute);font-weight:700}
+.dg .note-m{font-size:10.5px;fill:var(--mandarin-ink);font-weight:700}
+.dg .barlbl{font-size:11px;font-weight:700;letter-spacing:.14em}
+.dg .hnum{font-size:10px;font-weight:700;fill:var(--mandarin-ink);font-family:var(--mono)}
+
+.dg .node{cursor:pointer}
+.dg .hitbox{fill:transparent}
+.dg .node:hover .box,.dg .node:hover .pill,.dg .node:hover .pill-soft,.dg .node:hover .pill-ext{
+  stroke:var(--electric);filter:drop-shadow(0 4px 11px rgba(0,19,145,.26))}
+.dg .node.sel .box,.dg .node.sel .pill,.dg .node.sel .pill-soft,.dg .node.sel .pill-ext{
+  stroke:var(--electric);stroke-width:2.6;fill:#E7ECFB}
+.dg .colgroup{cursor:pointer}
+.dg .colgroup:hover .colhead,.dg .colgroup.sel .colhead{fill:#1B3FD8}
+
+.dg .dimmable{transition:opacity .25s}
+svg.dg[data-filter="tuyo"]    .dimmable:not(.s-tuyo){opacity:.08}
+svg.dg[data-filter="doriath"] .dimmable:not(.s-doriath){opacity:.08}
+svg.dg[data-filter="humano"]  .dimmable:not(.s-humano){opacity:.08}
+svg.dg[data-filter="local"]   .dimmable:not(.s-local){opacity:.08}
+svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
+
+/* ── panel ── */
+.panel{border-left:1px solid var(--line);background:rgba(255,255,255,.82);
+  backdrop-filter:blur(10px);overflow-y:auto;padding:22px 24px 28px;min-height:0}
+.panel::-webkit-scrollbar{width:8px}
+.panel::-webkit-scrollbar-thumb{background:rgba(0,19,145,.18);border-radius:8px}
+.dp-k{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--mute2)}
+.dp-h{font-family:var(--display);font-size:27px;font-weight:700;color:var(--electric);
+  margin-top:7px;line-height:1.12;letter-spacing:-.015em;text-wrap:balance}
+.dp-role{font-size:13px;font-weight:700;color:var(--ink2);margin-top:6px}
+.dp-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tag{font-size:10px;font-weight:700;letter-spacing:.05em;padding:4px 10px;border-radius:999px;white-space:nowrap;text-transform:uppercase}
+.tag.tuyo{background:rgba(136,231,131,.34);color:var(--lime-ink)}
+.tag.doriath{background:rgba(0,19,145,.09);color:var(--electric)}
+.tag.humano{background:rgba(255,181,107,.36);color:var(--mandarin-ink)}
+.tag.local{background:rgba(150,148,255,.28);color:var(--purple-ink)}
+.tag.abierto{background:rgba(0,19,145,.06);color:var(--ink2)}
+.dp-d{font-size:14px;color:var(--ink2);margin-top:14px;line-height:1.65;max-width:62ch}
+.dp-d b{color:var(--ink);font-weight:700}
+.dp-d em{color:var(--electric);font-style:normal;font-weight:700}
+.dp-d code{font-family:var(--mono);font-size:12.5px;background:rgba(0,19,145,.06);
+  padding:1px 5px;border-radius:4px;color:var(--electric)}
+
+.dp-block{margin-top:15px;padding-top:13px;border-top:1px solid var(--line2)}
+.dp-block .bt{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--mute2)}
+.dp-block ul{list-style:none;margin-top:9px;display:flex;flex-direction:column;gap:7px}
+.dp-block li{font-size:13.2px;color:var(--ink2);line-height:1.5;padding-left:16px;position:relative}
+.dp-block li b{color:var(--ink)}
+.dp-block li code{font-family:var(--mono);font-size:11.8px;color:var(--electric)}
+.dp-block li::before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:50%;
+  background:var(--electric)}
+.dp-block.tuyo li::before{background:var(--lime)}
+.dp-block.humano li::before{background:var(--mandarin)}
+.dp-block.local li::before{background:var(--purple)}
+.dp-block.stop li::before{background:var(--canary)}
+
+.dp-call{margin-top:16px;padding:13px 15px;border-radius:12px;font-size:13px;line-height:1.6;
+  color:var(--ink2);background:rgba(133,200,255,.20);
+  border:1px solid var(--line);border-left:3px solid var(--electric)}
+.dp-call.warn{background:rgba(255,231,97,.30);border-left-color:var(--canary)}
+.dp-call.stop{background:rgba(255,181,107,.26);border-left-color:var(--mandarin)}
+.dp-call.ok{background:rgba(136,231,131,.26);border-left-color:var(--lime)}
+.dp-call b{color:var(--ink)}
+.dp-call code{font-family:var(--mono);font-size:12px}
+.dp-call .ct{display:block;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--electric);margin-bottom:6px}
+.dp-call.warn .ct{color:var(--canary-ink)}
+.dp-call.stop .ct{color:var(--mandarin-ink)}
+.dp-call.ok .ct{color:var(--lime-ink)}
+
+.dp-hint{font-size:12px;color:var(--mute2);margin-top:18px;line-height:1.5}
+
+/* ── leyenda ── */
+.legend{flex:0 0 auto;display:flex;flex-wrap:wrap;gap:8px 22px;padding:10px 28px;
+  background:rgba(255,255,255,.92);border-top:1px solid var(--line)}
+.lg{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--ink2)}
+.lg b{color:var(--ink)}
+.lg i{display:block;flex:0 0 auto}
+.lg .i-lime{width:22px;height:3.4px;border-radius:2px;background:var(--lime)}
+.lg .i-mand{width:4px;height:15px;border-radius:2px;background:var(--mandarin)}
+.lg .i-dash{width:22px;height:0;border-top:2px dashed var(--mute2)}
+.lg .i-can{width:13px;height:13px;border-radius:4px;background:rgba(255,231,97,.55);border:1.5px solid var(--canary)}
+.lg .i-aqua{width:13px;height:13px;border-radius:4px;background:rgba(139,225,233,.5);border:1.5px solid var(--aqua)}
+.lg .i-purple{width:13px;height:13px;border-radius:4px;background:rgba(150,148,255,.35);border:1.5px solid var(--purple)}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <svg class="bbva-mark" viewBox="0 0 600 179.8" xmlns="http://www.w3.org/2000/svg" aria-label="BBVA"><g fill="currentColor"><path d="M432.2,24.4l-51.6,98.2c-1.1,2.1-4.3,2.1-5.4,0l-51.6-98.2c-0.5-1-1.5-1.6-2.6-1.6h-25c-1.7,0-2.8,1.8-2,3.3l81.3,152.2c1.1,2.1,4.1,2.1,5.3,0l81.3-152.2c0.8-1.5-0.3-3.3-2-3.3h-25C433.7,22.8,432.7,23.4,432.2,24.4z"/><path d="M461.5,155.5l51.6-98.2c1.1-2.1,4.3-2.1,5.4,0l51.6,98.2c0.5,1,1.5,1.6,2.6,1.6h25c1.7,0,2.8-1.8,2-3.3L518.4,1.6c-1.1-2.1-4.1-2.1-5.3,0l-81.3,152.2c-0.8,1.5,0.3,3.3,2,3.3h25C459.9,157,461,156.4,461.5,155.5z"/><path d="M108.8,95.2c10.8-5.4,17.5-17.1,17.5-31.4c0-24.5-19.1-41.1-46-41.1H3c-1.7,0-3,1.3-3,3v151.1c0,1.7,1.3,3,3,3h74c37,0,56.5-15.9,56.5-47.1C133.5,102.3,108.8,95.2,108.8,95.2z M29,45.5h45.9c16.9,0,25.5,7.2,25.5,20.6c0,13.4-8.6,20.6-25.5,20.6H29c-1.6,0-3-1.3-3-3V48.5C26,46.8,27.3,45.5,29,45.5z M75.5,157l-46.5,0c-1.7,0-3-1.3-3-3l0-41.7c0-1.6,1.3-3,3-3h46.5c22.2,0,32.1,6.3,32.1,23.8C107.5,150.8,97.9,157,75.5,157z"/><path d="M267.5,95.2c10.8-5.4,17.5-17.1,17.5-31.4c0-24.5-19.1-41.1-46-41.1h-77.4c-1.7,0-3,1.3-3,3v151.1c0,1.7,1.3,3,3,3h74c37,0,56.5-15.9,56.5-47.1C292.2,102.3,267.5,95.2,267.5,95.2z M187.7,45.5h45.9c16.9,0,25.5,7.2,25.5,20.6c0,13.4-8.6,20.6-25.5,20.6h-45.9c-1.7,0-3-1.3-3-3V48.5C184.7,46.8,186,45.5,187.7,45.5z M234.1,157l-46.5,0c-1.6,0-3-1.3-3-3v-41.7c0-1.6,1.3-3,3-3h46.5c22.2,0,32.1,6.3,32.1,23.8C266.2,150.8,256.5,157,234.1,157z"/></g></svg>
+  <span class="vdiv"></span>
+  <span class="t">Eje Doriath</span>
+  <span class="s">De tus documentos al código, sin perder la trazabilidad</span>
+  <span class="sp"></span>
+  <span class="hint">Pasa el cursor o haz clic en cualquier elemento</span>
+</div>
+
+<div class="filters">
+  <span class="lb">Resaltar</span>
+  <button class="fbtn on" data-f="all"><span class="sw"></span>Todo</button>
+  <button class="fbtn" data-f="tuyo"><span class="sw"></span>Lo que aporta tu equipo</button>
+  <button class="fbtn" data-f="doriath"><span class="sw"></span>Lo que fija Doriath</button>
+  <button class="fbtn" data-f="humano"><span class="sw"></span>Donde decides tú</button>
+  <button class="fbtn" data-f="local"><span class="sw"></span>No sale de tu equipo</button>
+  <button class="fbtn" data-f="abierto"><span class="sw"></span>Lo que crece</button>
+</div>
+
+<div class="main">
+  <div class="canvas">
+    <svg class="dg" id="dg" viewBox="0 0 1640 720" preserveAspectRatio="xMidYMid meet"
+         role="img" aria-label="Diagrama del eje de Doriath: documentos, Studio, base de conocimiento, Asistente y KDD, herramientas, límites y verificación">
+      <defs>
+        <marker id="arw" markerWidth="11" markerHeight="11" refX="8.6" refY="4" orient="auto">
+          <path d="M0,0 L9,4 L0,8 z" fill="#001391"/>
+        </marker>
+        <marker id="arws" markerWidth="11" markerHeight="11" refX="8.6" refY="4" orient="auto">
+          <path d="M0,0 L9,4 L0,8 z" fill="#85C8FF"/>
+        </marker>
+        <marker id="arwd" markerWidth="12" markerHeight="12" refX="9" refY="4.5" orient="auto">
+          <path d="M0,0 L10,4.5 L0,9 z" fill="#7C88A3"/>
+        </marker>
+        <linearGradient id="gstudio" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="rgba(133,200,255,.26)"/>
+          <stop offset="100%" stop-color="rgba(133,200,255,.06)"/>
+        </linearGradient>
+        <linearGradient id="glim" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="rgba(255,231,97,.40)"/>
+          <stop offset="100%" stop-color="rgba(255,231,97,.12)"/>
+        </linearGradient>
+        <linearGradient id="gver" x1="1" y1="0" x2="0" y2="0">
+          <stop offset="0%" stop-color="rgba(139,225,233,.42)"/>
+          <stop offset="100%" stop-color="rgba(139,225,233,.10)"/>
+        </linearGradient>
+      </defs>
+
+      <!-- separadores de columna -->
+      <line class="sep" x1="340" y1="14" x2="340" y2="562"/>
+      <line class="sep" x1="600" y1="14" x2="600" y2="562"/>
+      <line class="sep" x1="930" y1="14" x2="930" y2="562"/>
+      <line class="sep" x1="1190" y1="14" x2="1190" y2="562"/>
+      <line class="sep" x1="1410" y1="14" x2="1410" y2="562"/>
+
+      <!-- ══════════ CABECERAS ══════════ -->
+      <g class="colgroup dimmable s-doriath" data-key="studio">
+        <rect class="hitbox" x="30" y="14" width="300" height="82"/>
+        <text class="colhead" x="182" y="42" text-anchor="middle">STUDIO</text>
+        <text class="colsub" x="182" y="59" text-anchor="middle">CONSTRUYE Y MANTIENE</text>
+        <text class="colrole" x="182" y="80" text-anchor="middle">De documentos a conocimiento</text>
+      </g>
+      <g class="colgroup dimmable s-tuyo s-local" data-key="kb">
+        <rect class="hitbox" x="348" y="14" width="244" height="82"/>
+        <text class="colhead" x="470" y="42" text-anchor="middle">KB</text>
+        <line class="underline" x1="430" y1="53" x2="510" y2="53"/>
+        <text class="colrole" x="470" y="80" text-anchor="middle">Qué sabe · una por aplicación</text>
+      </g>
+      <g class="colgroup dimmable s-doriath s-humano" data-key="modulos">
+        <rect class="hitbox" x="608" y="14" width="314" height="82"/>
+        <text class="colhead" x="764" y="42" text-anchor="middle">MÓDULOS</text>
+        <text class="colsub" x="764" y="59" text-anchor="middle">LO QUE ABRE LA PERSONA</text>
+        <text class="colrole" x="764" y="80" text-anchor="middle">Asistente · KDD</text>
+      </g>
+      <g class="colgroup dimmable s-doriath s-abierto" data-key="herramientas">
+        <rect class="hitbox" x="938" y="14" width="244" height="82"/>
+        <text class="colhead" x="1060" y="42" text-anchor="middle">HERRAMIENTAS</text>
+        <text class="colsub" x="1060" y="59" text-anchor="middle">CATÁLOGO ABIERTO</text>
+        <text class="colrole" x="1060" y="80" text-anchor="middle">Qué saben hacer</text>
+      </g>
+      <g class="colgroup dimmable s-doriath" data-key="limites">
+        <rect class="hitbox" x="1198" y="14" width="204" height="82"/>
+        <text class="colhead" x="1300" y="42" text-anchor="middle">LÍMITES</text>
+        <text class="colsub" x="1300" y="59" text-anchor="middle">LO QUE NO HACE</text>
+        <text class="colrole" x="1300" y="80" text-anchor="middle">Antes de actuar</text>
+      </g>
+      <g class="colgroup dimmable s-doriath" data-key="verificacion">
+        <rect class="hitbox" x="1418" y="14" width="196" height="82"/>
+        <text class="colhead" x="1516" y="42" text-anchor="middle">VERIFICACIÓN</text>
+        <text class="colsub" x="1516" y="59" text-anchor="middle">LO QUE SÍ COMPRUEBA</text>
+        <text class="colrole" x="1516" y="80" text-anchor="middle">Después de actuar</text>
+      </g>
+
+      <!-- ══════════ 1 · STUDIO ══════════ -->
+      <g class="node dimmable s-tuyo s-local" data-key="documentos">
+        <rect class="pill" x="52" y="116" width="260" height="52" rx="10"/>
+        <text class="lbl-sm" x="182" y="139" text-anchor="middle">DOCUMENTOS</text>
+        <text class="note" x="182" y="157" text-anchor="middle">PDF · Word · Excel · PPT · Markdown · código</text>
+        <rect class="hitbox" x="48" y="112" width="268" height="60"/>
+      </g>
+      <path class="wire dimmable s-doriath" d="M182,168 V188" marker-end="url(#arw)"/>
+
+      <g class="node dimmable s-doriath" data-key="analizador">
+        <rect x="52" y="192" width="260" height="252" rx="14" fill="url(#gstudio)" stroke="#001391"
+              stroke-width="1.6" stroke-opacity=".45"/>
+        <text class="barlbl" x="182" y="216" text-anchor="middle" fill="#001391">ANALIZADOR · DOS FASES</text>
+        <rect class="hitbox" x="48" y="188" width="268" height="34"/>
+      </g>
+      <g class="node dimmable s-doriath" data-key="an1">
+        <rect class="pill-soft" x="70" y="228" width="224" height="38" rx="8"/>
+        <text class="lbl-xs" x="182" y="252" text-anchor="middle">1 · Extracción de átomos</text>
+        <rect class="hitbox" x="66" y="224" width="232" height="46"/>
+      </g>
+      <g class="node dimmable s-doriath" data-key="an2">
+        <rect class="pill-soft" x="70" y="274" width="224" height="38" rx="8"/>
+        <text class="lbl-xs" x="182" y="298" text-anchor="middle">2 · Plan de curación</text>
+        <rect class="hitbox" x="66" y="270" width="232" height="46"/>
+      </g>
+      <g class="node dimmable s-doriath" data-key="an3">
+        <rect class="pill-soft" x="70" y="320" width="224" height="38" rx="8"/>
+        <text class="lbl-xs" x="182" y="344" text-anchor="middle">3 · Generación de specs</text>
+        <rect class="hitbox" x="66" y="316" width="232" height="46"/>
+      </g>
+      <g class="node dimmable s-humano" data-key="an4">
+        <rect x="70" y="366" width="224" height="42" rx="8" fill="#fff" stroke="#FFB56B" stroke-width="2.2"/>
+        <text class="lbl-xs" x="190" y="392" text-anchor="middle">4 · Preview · lo confirmas tú</text>
+        <line class="hmark" x1="80" y1="376" x2="80" y2="398"/>
+        <rect class="hitbox" x="66" y="362" width="232" height="50"/>
+      </g>
+      <text class="note-b dimmable s-humano" x="182" y="430" text-anchor="middle">Nada entra en la base sin tu visto bueno</text>
+
+      <g class="node dimmable s-humano" data-key="gobernanza">
+        <rect class="pill" x="52" y="462" width="260" height="46" rx="10"/>
+        <text class="lbl-sm" x="192" y="483" text-anchor="middle">GOBERNANZA</text>
+        <text class="note" x="192" y="499" text-anchor="middle">ADR · RFC · Reglas — aceptas o rechazas</text>
+        <line class="hmark" x1="66" y1="474" x2="66" y2="496"/>
+        <rect class="hitbox" x="48" y="458" width="268" height="54"/>
+      </g>
+      <g class="node dimmable s-doriath" data-key="actividad">
+        <rect class="pill" x="52" y="518" width="260" height="46" rx="10"/>
+        <text class="lbl-sm" x="182" y="539" text-anchor="middle">ACTIVIDAD</text>
+        <text class="note" x="182" y="555" text-anchor="middle">quién cambió qué, cuándo y desde dónde</text>
+        <rect class="hitbox" x="48" y="514" width="268" height="54"/>
+      </g>
+
+      <!-- Studio → KB -->
+      <path class="wire dimmable s-doriath" d="M312,387 H352 V218 H392" marker-end="url(#arw)"/>
+
+      <!-- ══════════ 2 · KB ══════════ -->
+      <g class="node dimmable s-tuyo s-local" data-key="kb">
+        <polygon class="box" points="401,216 435,158 505,158 539,216 505,274 435,274"/>
+        <text class="lbl" x="470" y="224" text-anchor="middle">KB</text>
+        <rect class="hitbox" x="396" y="154" width="148" height="124"/>
+      </g>
+      <g class="node dimmable s-tuyo" data-key="capas-k">
+        <rect class="pill-soft" x="372" y="306" width="196" height="54" rx="10"/>
+        <text class="lbl-sm" x="470" y="328" text-anchor="middle">CONOCIMIENTO</text>
+        <text class="note" x="470" y="346" text-anchor="middle">ARCH · DOM · PROD · FEAT · DOC</text>
+        <rect class="hitbox" x="368" y="302" width="204" height="62"/>
+      </g>
+      <g class="node dimmable s-tuyo" data-key="capas-w">
+        <rect class="pill-soft" x="372" y="370" width="196" height="54" rx="10"/>
+        <text class="lbl-sm" x="470" y="392" text-anchor="middle">TRABAJO</text>
+        <text class="note" x="470" y="410" text-anchor="middle">Iniciativa · Feature · Historia</text>
+        <rect class="hitbox" x="368" y="366" width="204" height="62"/>
+      </g>
+      <g class="node dimmable s-tuyo" data-key="capas-g">
+        <rect class="pill-soft" x="372" y="434" width="196" height="54" rx="10"/>
+        <text class="lbl-sm" x="470" y="456" text-anchor="middle">GOBERNANZA</text>
+        <text class="note" x="470" y="474" text-anchor="middle">ADR · RFC · Regla</text>
+        <rect class="hitbox" x="368" y="430" width="204" height="62"/>
+      </g>
+      <text class="note-b dimmable s-local" x="470" y="518" text-anchor="middle">Una carpeta en tu equipo</text>
+      <text class="note dimmable s-local" x="470" y="535" text-anchor="middle">specs/ · docs-tecnicos/ · .kdd-studio/</text>
+      <text class="note dimmable s-local" x="470" y="551" text-anchor="middle">No sale de ahí</text>
+
+      <!-- KB → los dos módulos -->
+      <g class="dimmable s-doriath">
+        <path class="wire-soft" d="M539,216 H578"/>
+        <path class="wire-soft" d="M578,158 V404"/>
+        <path class="wire-soft" d="M578,158 H638" marker-end="url(#arws)"/>
+        <path class="wire-soft" d="M578,404 H638" marker-end="url(#arws)"/>
+      </g>
+
+      <!-- ══════════ 3 · MÓDULOS ══════════ -->
+      <g class="node dimmable s-doriath" data-key="asistente">
+        <rect class="box" x="644" y="120" width="240" height="76" rx="6"/>
+        <text class="lbl" x="764" y="153" text-anchor="middle">ASISTENTE</text>
+        <text class="note" x="764" y="176" text-anchor="middle">pregunta · genera entregables</text>
+        <rect class="hitbox" x="640" y="116" width="248" height="84"/>
+      </g>
+
+      <g class="node dimmable s-humano" data-key="h-corregir">
+        <line class="hmark" x1="764" y1="214" x2="764" y2="232"/>
+        <text class="hnum" x="778" y="228">corriges</text>
+        <rect class="hitbox" x="750" y="208" width="90" height="30"/>
+      </g>
+      <path class="wire dimmable s-doriath" d="M764,240 V206" marker-end="url(#arw)"/>
+
+      <g class="node dimmable s-humano" data-key="usuario">
+        <circle cx="764" cy="262" r="15" fill="none" stroke="#001391" stroke-width="2.2"/>
+        <path d="M740,304 a24,24 0 0 1 48,0" fill="none" stroke="#001391" stroke-width="2.2"/>
+        <text class="lbl-sm" x="734" y="272" text-anchor="end">TÚ</text>
+        <rect class="hitbox" x="722" y="242" width="80" height="68"/>
+      </g>
+
+      <path class="wire dimmable s-doriath" d="M764,314 V358" marker-end="url(#arw)"/>
+      <g class="node dimmable s-humano" data-key="h-guardar">
+        <line class="hmark" x1="764" y1="324" x2="764" y2="344"/>
+        <text class="hnum" x="778" y="340">guardas</text>
+        <rect class="hitbox" x="750" y="318" width="90" height="32"/>
+      </g>
+
+      <g class="node dimmable s-doriath" data-key="kdd">
+        <rect class="box" x="644" y="366" width="240" height="76" rx="6"/>
+        <text class="lbl" x="764" y="399" text-anchor="middle">KDD</text>
+        <text class="note" x="764" y="422" text-anchor="middle">iniciativa · features · historias</text>
+        <rect class="hitbox" x="640" y="362" width="248" height="84"/>
+      </g>
+
+      <g class="node dimmable s-humano" data-key="roles">
+        <rect class="pill" x="644" y="466" width="240" height="46" rx="10"/>
+        <text class="lbl-sm" x="764" y="487" text-anchor="middle">DOS ROLES</text>
+        <text class="note" x="764" y="503" text-anchor="middle">Usuario para aportar · Admin para mantener</text>
+        <rect class="hitbox" x="640" y="462" width="248" height="54"/>
+      </g>
+      <text class="note-b dimmable s-doriath" x="764" y="540" text-anchor="middle">Los dos leen la misma base.</text>
+      <text class="note dimmable s-doriath" x="764" y="556" text-anchor="middle">No se hablan entre ellos: no hace falta.</text>
+
+      <!-- módulos → herramientas -->
+      <path class="wire dimmable s-doriath" d="M884,158 H938" marker-end="url(#arw)"/>
+      <path class="wire dimmable s-doriath" d="M884,404 H938" marker-end="url(#arw)"/>
+
+      <!-- ══════════ 4 · HERRAMIENTAS ══════════ -->
+      <g class="node dimmable s-doriath" data-key="t-consulta">
+        <rect class="pill" x="944" y="132" width="232" height="52" rx="10"/>
+        <text class="lbl-sm" x="1060" y="153" text-anchor="middle">CONSULTAR LA BASE</text>
+        <text class="note" x="1060" y="171" text-anchor="middle">buscar · leer · validar · impacto — 9</text>
+        <rect class="hitbox" x="940" y="128" width="240" height="60"/>
+      </g>
+      <g class="node dimmable s-doriath" data-key="t-docs">
+        <rect class="pill" x="944" y="194" width="232" height="52" rx="10"/>
+        <text class="lbl-sm" x="1060" y="215" text-anchor="middle">LEER LOS DOCUMENTOS</text>
+        <text class="note" x="1060" y="233" text-anchor="middle">listar · buscar · sección · grep — 4</text>
+        <rect class="hitbox" x="940" y="190" width="240" height="60"/>
+      </g>
+      <g class="node dimmable s-doriath" data-key="t-gen">
+        <rect class="pill" x="944" y="256" width="232" height="52" rx="10"/>
+        <text class="lbl-sm" x="1060" y="277" text-anchor="middle">GENERAR ENTREGABLES</text>
+        <text class="note" x="1060" y="295" text-anchor="middle">Word · Excel · PPT · HTML · texto — 5</text>
+        <rect class="hitbox" x="940" y="252" width="240" height="60"/>
+      </g>
+
+      <g class="node dimmable s-tuyo s-local" data-key="t-repo">
+        <rect class="pill" x="944" y="326" width="232" height="48" rx="10"/>
+        <text class="lbl-sm" x="1060" y="345" text-anchor="middle">LEER TUS REPOSITORIOS</text>
+        <text class="note" x="1060" y="362" text-anchor="middle">carpetas locales con .git — 4</text>
+        <rect class="hitbox" x="940" y="322" width="240" height="56"/>
+      </g>
+      <g class="node dimmable s-humano" data-key="t-git">
+        <rect x="944" y="382" width="232" height="52" rx="10" fill="#fff" stroke="#FFB56B" stroke-width="2.2"/>
+        <text class="lbl-sm" x="1072" y="403" text-anchor="middle">TRABAJAR EL CÓDIGO</text>
+        <text class="note" x="1072" y="421" text-anchor="middle">rama · diff · commit · push · PR</text>
+        <line class="hmark" x1="956" y1="392" x2="956" y2="414"/>
+        <rect class="hitbox" x="940" y="378" width="240" height="60"/>
+      </g>
+      <g class="node dimmable s-abierto" data-key="t-mas">
+        <rect class="pill-ext" x="944" y="448" width="232" height="40" rx="20"/>
+        <text class="lbl-xs" x="1060" y="473" text-anchor="middle">+ n herramientas</text>
+        <rect class="hitbox" x="940" y="444" width="240" height="48"/>
+      </g>
+      <text class="note-b dimmable s-doriath" x="1060" y="522" text-anchor="middle">Doriath no recuerda:</text>
+      <text class="note dimmable s-doriath" x="1060" y="538" text-anchor="middle">consulta antes de afirmar, y cita</text>
+      <text class="note dimmable s-doriath" x="1060" y="554" text-anchor="middle">en qué se apoya.</text>
+
+      <!-- herramientas → límites -->
+      <g class="dimmable s-doriath">
+        <path d="M1176,158 C1194,158 1194,182 1206,182" fill="none" stroke="#FFB56B" stroke-width="1.6" stroke-opacity=".6"/>
+        <path d="M1176,282 C1194,282 1194,250 1206,250" fill="none" stroke="#FFB56B" stroke-width="1.6" stroke-opacity=".6"/>
+        <path d="M1176,350 C1194,350 1194,318 1206,318" fill="none" stroke="#FFB56B" stroke-width="1.6" stroke-opacity=".6"/>
+        <path d="M1176,408 C1194,408 1194,386 1206,386" fill="none" stroke="#FFB56B" stroke-width="1.6" stroke-opacity=".6"/>
+      </g>
+
+      <!-- ══════════ 5 · LÍMITES ══════════ -->
+      <g class="node dimmable s-doriath" data-key="limites">
+        <rect x="1206" y="112" width="190" height="420" rx="16" fill="url(#glim)" stroke="#FFB56B" stroke-width="1.8"/>
+        <text class="barlbl" x="1301" y="140" text-anchor="middle" fill="#8A4B0B">NUNCA</text>
+        <rect class="hitbox" x="1202" y="108" width="198" height="44"/>
+      </g>
+      <g class="node dimmable s-doriath s-humano" data-key="l-commit">
+        <rect x="1222" y="156" width="158" height="52" rx="10" fill="#fff" stroke="#FFB56B" stroke-width="1.6"/>
+        <text class="lbl-sm" x="1301" y="178" text-anchor="middle">COMMIT</text>
+        <text class="note" x="1301" y="195" text-anchor="middle">sin que revises el diff</text>
+        <rect class="hitbox" x="1218" y="152" width="166" height="60"/>
+      </g>
+      <g class="node dimmable s-doriath" data-key="l-rama">
+        <rect x="1222" y="224" width="158" height="52" rx="10" fill="#fff" stroke="#FFB56B" stroke-width="1.6"/>
+        <text class="lbl-sm" x="1301" y="246" text-anchor="middle">RAMA BASE</text>
+        <text class="note" x="1301" y="263" text-anchor="middle">una rama por iniciativa</text>
+        <rect class="hitbox" x="1218" y="220" width="166" height="60"/>
+      </g>
+      <g class="node dimmable s-doriath" data-key="l-fuera">
+        <rect x="1222" y="292" width="158" height="52" rx="10" fill="#fff" stroke="#FFB56B" stroke-width="1.6"/>
+        <text class="lbl-sm" x="1301" y="314" text-anchor="middle">TU SISTEMA</text>
+        <text class="note" x="1301" y="331" text-anchor="middle">solo toca el repositorio</text>
+        <rect class="hitbox" x="1218" y="288" width="166" height="60"/>
+      </g>
+      <g class="node dimmable s-doriath" data-key="l-mezcla">
+        <rect x="1222" y="360" width="158" height="52" rx="10" fill="#fff" stroke="#FFB56B" stroke-width="1.6"/>
+        <text class="lbl-sm" x="1301" y="382" text-anchor="middle">SIN MEZCLAR</text>
+        <text class="note" x="1301" y="399" text-anchor="middle">salidas fuera de repos y KB</text>
+        <rect class="hitbox" x="1218" y="356" width="166" height="60"/>
+      </g>
+      <g class="node dimmable s-local" data-key="l-nube">
+        <rect x="1222" y="428" width="158" height="52" rx="10" fill="#fff" stroke="#9694FF" stroke-width="1.8"/>
+        <text class="lbl-sm" x="1301" y="450" text-anchor="middle">LA NUBE</text>
+        <text class="note" x="1301" y="467" text-anchor="middle">todo se queda en tu equipo</text>
+        <rect class="hitbox" x="1218" y="424" width="166" height="60"/>
+      </g>
+      <text class="note-b dimmable s-doriath" x="1301" y="508" text-anchor="middle">El agente propone.</text>
+      <text class="note dimmable s-doriath" x="1301" y="524" text-anchor="middle">Doriath ejecuta cuando tú dices.</text>
+
+      <!-- ══════════ 6 · VERIFICACIÓN ══════════ -->
+      <g class="node dimmable s-doriath" data-key="verificacion">
+        <rect x="1426" y="112" width="184" height="352" rx="16" fill="url(#gver)" stroke="#001391"
+              stroke-width="1.6" stroke-opacity=".5"/>
+        <text class="barlbl" x="1518" y="140" text-anchor="middle" fill="#0F6470">SIEMPRE</text>
+        <rect class="hitbox" x="1422" y="108" width="192" height="44"/>
+      </g>
+      <g class="node dimmable s-doriath" data-key="v-estructura">
+        <rect x="1442" y="156" width="152" height="52" rx="10" fill="#fff" stroke="#8BE1E9" stroke-width="1.8"/>
+        <text class="lbl-sm" x="1518" y="178" text-anchor="middle">ESTRUCTURA</text>
+        <text class="note" x="1518" y="195" text-anchor="middle">secciones obligatorias</text>
+        <rect class="hitbox" x="1438" y="152" width="160" height="60"/>
+      </g>
+      <g class="node dimmable s-doriath" data-key="v-criterios">
+        <rect x="1442" y="224" width="152" height="52" rx="10" fill="#fff" stroke="#8BE1E9" stroke-width="1.8"/>
+        <text class="lbl-sm" x="1518" y="246" text-anchor="middle">CRITERIOS</text>
+        <text class="note" x="1518" y="263" text-anchor="middle">verificables, no deseos</text>
+        <rect class="hitbox" x="1438" y="220" width="160" height="60"/>
+      </g>
+      <g class="node dimmable s-doriath" data-key="v-grafo">
+        <rect x="1442" y="292" width="152" height="52" rx="10" fill="#fff" stroke="#8BE1E9" stroke-width="1.8"/>
+        <text class="lbl-sm" x="1518" y="314" text-anchor="middle">GRAFO</text>
+        <text class="note" x="1518" y="331" text-anchor="middle">sin referencias rotas</text>
+        <rect class="hitbox" x="1438" y="288" width="160" height="60"/>
+      </g>
+      <g class="node dimmable s-doriath" data-key="v-salud">
+        <rect x="1442" y="360" width="152" height="52" rx="10" fill="#fff" stroke="#8BE1E9" stroke-width="1.8"/>
+        <text class="lbl-sm" x="1518" y="382" text-anchor="middle">SALUD</text>
+        <text class="note" x="1518" y="399" text-anchor="middle">puntuación e incidencias</text>
+        <rect class="hitbox" x="1438" y="356" width="160" height="60"/>
+      </g>
+      <text class="note-b dimmable s-doriath" x="1518" y="440" text-anchor="middle">Un bloqueante rechaza</text>
+      <text class="note dimmable s-doriath" x="1518" y="456" text-anchor="middle">el paquete entero.</text>
+
+      <!-- ══════════ LO QUE SALE ══════════ -->
+      <text class="colsub" x="60" y="600" text-anchor="start">LO QUE SALE</text>
+      <g class="node dimmable s-tuyo" data-key="o-specs">
+        <rect class="pill-soft" x="196" y="580" width="252" height="46" rx="10"/>
+        <text class="lbl-xs" x="322" y="600" text-anchor="middle">Conocimiento en tu base</text>
+        <text class="note" x="322" y="616" text-anchor="middle">specs nuevas y actualizadas, con evidencia</text>
+        <rect class="hitbox" x="192" y="576" width="260" height="54"/>
+      </g>
+      <g class="node dimmable s-tuyo" data-key="o-entregables">
+        <rect class="pill-soft" x="470" y="580" width="252" height="46" rx="10"/>
+        <text class="lbl-xs" x="596" y="600" text-anchor="middle">Entregables</text>
+        <text class="note" x="596" y="616" text-anchor="middle">Word · Excel · PowerPoint · HTML · código</text>
+        <rect class="hitbox" x="466" y="576" width="260" height="54"/>
+      </g>
+      <g class="node dimmable s-tuyo s-local" data-key="o-commits">
+        <rect class="pill-soft" x="744" y="580" width="252" height="46" rx="10"/>
+        <text class="lbl-xs" x="870" y="600" text-anchor="middle">Commits en tus repositorios</text>
+        <text class="note" x="870" y="616" text-anchor="middle">revisados por ti, en su rama</text>
+        <rect class="hitbox" x="740" y="576" width="260" height="54"/>
+      </g>
+
+      <!-- barrido de verificación hacia atrás -->
+      <g class="dimmable s-doriath">
+        <path d="M1518,478 V664 H240" fill="none" stroke="#001391" stroke-width="1.8"
+              stroke-dasharray="8 7" stroke-opacity=".55" marker-end="url(#arw)"/>
+        <text class="note" x="880" y="656" text-anchor="middle" fill="#001391">
+          La verificación se aplica a todo lo que se escribe en la base, venga del Studio o de un módulo</text>
+      </g>
+
+      <!-- leyenda dentro del lienzo -->
+      <g class="dimmable s-tuyo">
+        <line class="underline" x1="56" y1="646" x2="92" y2="646"/>
+        <text class="note-b" x="102" y="651" fill="#1F6B33">LO APORTA TU EQUIPO</text>
+      </g>
+      <g class="dimmable s-humano">
+        <line class="hmark" x1="60" y1="672" x2="60" y2="694"/>
+        <text class="note-m" x="76" y="689">AQUÍ DECIDES TÚ</text>
+      </g>
+    </svg>
+  </div>
+
+  <aside class="panel" id="panel"></aside>
+</div>
+
+<div class="legend">
+  <span class="lg"><i class="i-lime"></i>Verde = lo aporta tu equipo</span>
+  <span class="lg"><i class="i-mand"></i>Marca naranja = punto donde decide una persona</span>
+  <span class="lg"><i class="i-dash"></i>Discontinua = catálogo abierto, crece con el uso</span>
+  <span class="lg"><i class="i-can"></i>LÍMITES = lo que Doriath <b>no</b> hace nunca</span>
+  <span class="lg"><i class="i-aqua"></i>VERIFICACIÓN = lo que <b>sí</b> comprueba siempre</span>
+  <span class="lg"><i class="i-purple"></i>Morado = no sale de tu equipo</span>
+</div>
+
+<script>
+(function(){
+var N = {
+
+/* ── Studio ── */
+studio:{k:"Módulo 1 · Studio",h:"Knowledge Bases Studio",role:"Donde se construye y se mantiene la base",
+  tags:[["doriath","Lo fija Doriath"],["humano","Tú confirmas"]],
+  d:"Es el <b>único sitio donde se escribe en la base sin pasar por una conversación</b>. Le das documentos, Doriath los analiza y te propone qué conocimiento ha encontrado; tú lo revisas y confirmas. Después es también donde se mantiene: catálogo de specs, grafo, impacto, gobernanza y registro de actividad.",
+  L:[["Sus pestañas",["<b>Panel</b> — specs totales, reparto por capa, salud e incidencias","<b>Documentos</b> — qué se importó, quién y cuándo","<b>Análisis</b> — los preview pendientes de confirmar","<b>Specs</b> — catálogo, edición y estados","<b>Grafo</b> — qué activa qué, y qué referencias están rotas","<b>Gobernanza</b> — ADR, RFC y reglas","<b>Actividad</b> — el registro completo de cambios"]],
+    ["Quién entra aquí",["El rol <b>Admin</b>. El rol Usuario ve la misma base con otra cara: subir documentos y preguntar, sin jerga."]]],
+  call:["ok","La pieza que faltaba","El Asistente y KDD <em>consumen</em> la base. El Studio es el que la <b>construye</b>: sin él los otros dos no tienen de qué hablar."]},
+
+documentos:{k:"Entrada",h:"Documentos",role:"Lo que le das a Doriath",
+  tags:[["tuyo","Lo aporta tu equipo"],["local","No sale de tu equipo"]],
+  d:"Todo empieza con lo que ya tienes escrito: PDF, Word, Excel, PowerPoint, Markdown, texto plano o código. Doriath los <b>copia dentro de la propia base</b> —no los enlaza— para que la carpeta sea autocontenida y se pueda mover entera a otro equipo.",
+  L:[["Qué se guarda de cada uno",["El fichero, en <code>docs-tecnicos/</code>","Quién lo subió y cuándo","Qué specs salieron de él"]],
+    ["Qué no ocurre",["No se sube a ninguna nube","No se indexa fuera de tu equipo"]]],
+  call:["","Por qué importa la autoría","Meses después alguien pregunta «¿de dónde sale esta regla?». El registro lleva del dato al documento, y del documento a la persona que lo trajo."]},
+
+analizador:{k:"Studio · Análisis",h:"El analizador",role:"De documento a specs, en dos fases",
+  tags:[["doriath","Lo fija Doriath"],["humano","Tú confirmas el resultado"]],
+  d:"No es un resumen. Es un proceso en dos fases pensado para <b>no perder detalle</b> en la primera y <b>no inventar estructura</b> en la segunda. Termina en un preview que no toca la base hasta que una persona lo aprueba.",
+  L:[["Las tres etapas",["<b>1 · Extracción</b> — recorre el documento por trozos y saca todos los átomos de conocimiento que encuentra","<b>2 · Plan de curación</b> — clasifica, fusiona duplicados, descarta ruido, conecta y comprueba cobertura, todavía sin escribir contenido","<b>3 · Generación</b> — redacta el cuerpo de cada spec por grupos, volviendo a las rebanadas del documento que le corresponden"]],
+    ["Qué sale del preview",["Las specs propuestas, con sus incidencias","Las preguntas abiertas que no ha podido resolver","Los conflictos entre documentos","Los átomos descartados y por qué"]]],
+  call:["stop","La regla de oro","El analizador <b>nunca escribe en la base directamente</b>. Produce un preview. Lo que entra en la base lo decide una persona."]},
+
+an1:{k:"Analizador · Fase 1",h:"Extracción de átomos",role:"Sacar todo lo que hay",
+  tags:[["doriath","Lo fija Doriath"]],
+  d:"Recorre el documento <b>por trozos</b> y extrae cada unidad de conocimiento por separado: una regla, un dato, una decisión, una integración. En esta fase no se agrupa ni se juzga nada — el objetivo es <em>no perder nada</em>.",
+  L:[["Por qué por trozos",["Un documento largo no cabe entero en una petición","Trozo a trozo el detalle sobrevive; de una vez, se resume y se pierde"]],
+    ["Qué se registra",["Cobertura por sección, para saber qué partes se han leído de verdad"]]],
+  call:["","Criterio","Mejor extraer de más y filtrar después que extraer de menos y no enterarse."]},
+
+an2:{k:"Analizador · Fase 2a",h:"Plan de curación",role:"Ordenar antes de escribir",
+  tags:[["doriath","Lo fija Doriath"]],
+  d:"Con todos los átomos sobre la mesa, decide <b>qué specs deben existir</b>: a qué capa va cada cosa, qué átomos son el mismo hecho contado dos veces, qué es ruido y qué conecta con qué. Todavía <em>no se redacta ningún contenido</em>.",
+  L:[["Qué decide",["La capa de cada spec: arquitectura, dominio, producto, funcionalidad o documentación","Qué átomos se fusionan en una sola spec","Qué se descarta, y por qué","Qué specs existentes hay que actualizar en vez de crear de cero","Qué relaciones declarar entre ellas"]]],
+  call:["","Por qué separado de la redacción","Decidir la estructura y redactar a la vez produce specs que se solapan. Separarlo da un mapa antes de escribir una sola línea."]},
+
+an3:{k:"Analizador · Fase 2b",h:"Generación de specs",role:"Escribir el contenido",
+  tags:[["doriath","Lo fija Doriath"]],
+  d:"Redacta el cuerpo de cada spec siguiendo el plan, <b>por grupos</b> y volviendo a las rebanadas del documento que le tocan a cada una. Así cada afirmación puede rastrearse hasta su origen en lugar de salir de la memoria del modelo.",
+  L:[["Cada spec sale con",["Las secciones obligatorias de su capa","Criterios de aceptación verificables","La evidencia: de dónde sale cada cosa","Sus relaciones con el resto"]]],
+  call:["","Trazabilidad","Una spec sin evidencia es una opinión. La evidencia es lo que convierte el análisis en conocimiento auditable."]},
+
+an4:{k:"Analizador · Preview",h:"Tú confirmas",role:"El primer punto de decisión",
+  tags:[["humano","Aquí decides tú"],["doriath","Lo fija Doriath"]],
+  d:"El preview te enseña <b>todo lo que el analizador quiere escribir</b>, antes de escribirlo: specs propuestas, cuáles son nuevas y cuáles actualizan algo, qué incidencias tienen, qué preguntas le han quedado abiertas y qué conflictos ha visto entre documentos.",
+  L:[["Qué puedes hacer",["Editar el título y el cuerpo de cualquier spec","Quitar de la selección lo que no te encaje","Responder las preguntas abiertas","Pedirle cambios por chat","Descartar la propuesta entera"]]],
+  call:["stop","Sin este paso no hay nada","Mientras no confirmes, la base no ha cambiado. Puedes cerrar Doriath y volver mañana: el preview sigue ahí."]},
+
+gobernanza:{k:"Studio · Gobernanza",h:"Gobernanza",role:"Decisiones, propuestas y reglas",
+  tags:[["humano","Aquí decides tú"],["tuyo","Lo aporta tu equipo"]],
+  d:"Tres tipos de spec que no describen <em>cómo es</em> el sistema sino <b>qué se ha decidido</b> sobre él, con su estado y su responsable: decisiones tomadas (ADR), propuestas en discusión (RFC) y reglas que hay que cumplir (Regla).",
+  L:[["Los tres tipos",["<b>ADR</b> — una decisión de arquitectura, con su contexto, su razón y sus consecuencias","<b>RFC</b> — una propuesta abierta a discusión","<b>Regla</b> — algo de obligado cumplimiento, con cómo se hace cumplir"]],
+    ["Qué decides aquí",["Aceptar o rechazar cada una","Y queda registrado quién lo hizo"]]],
+  call:["","Por qué vive en la base","Una decisión que solo está en un acta se pierde. Aquí está al lado del conocimiento que justifica, y el asistente la cita cuando toca."]},
+
+actividad:{k:"Studio · Actividad",h:"Registro de actividad",role:"Quién cambió qué, cuándo y desde dónde",
+  tags:[["doriath","Lo fija Doriath"],["local","No sale de tu equipo"]],
+  d:"Un registro append-only que vive <b>dentro de la propia base</b>, en <code>.kdd-studio/activity.json</code>. Viaja con ella, así que lo ve todo el equipo. Cada entrada va firmada con el usuario de tu sesión de GitHub.",
+  L:[["Qué se registra",["<b>Importación</b> — quién trajo cada documento","<b>Análisis</b> — qué specs creó o actualizó, y a partir de qué","<b>Edición</b> — cambios manuales sobre una spec","<b>Chat</b> — correcciones hechas desde una conversación","<b>Gobernanza</b> — aceptaciones y rechazos"]],
+    ["Cómo se consulta",["Filtrando por tipo, por persona o por spec"]]],
+  call:["","Para qué sirve de verdad","Para responder «¿quién metió esto y por qué?» sin tener que preguntar por el pasillo."]},
+
+/* ── KB ── */
+kb:{k:"El centro",h:"La base de conocimiento",role:"Lo que sabe tu aplicación",
+  tags:[["tuyo","Lo aporta tu equipo"],["local","No sale de tu equipo"]],
+  d:"Una <b>carpeta local</b> con el conocimiento destilado de una aplicación: dominio, procesos, integraciones y decisiones. Es la <em>única fuente de verdad</em> del eje: el Studio la construye, y el Asistente y KDD leen exactamente la misma, de forma que la respuesta que te dan y el código que se genera parten del mismo sitio.",
+  L:[["Qué hay dentro",["<code>specs/</code> — el conocimiento, una carpeta por capa","<code>docs-tecnicos/</code> — los documentos originales","<code>.kdd-studio/</code> — cachés derivadas y el registro de actividad","<code>kdd-source.json</code> — la identidad de la base"]],
+    ["Cómo se identifica cada spec",["<code>TIPO-[DOMINIO-]S###-NNN</code>, por ejemplo <code>DOM-PAY-S001-002</code>"]]],
+  call:["ok","Portátil por diseño","Mismo formato que las fuentes locales de KDD Studio, así que son intercambiables. Copias la carpeta y la base entera —documentos, historia y todo— se va contigo."]},
+
+"capas-k":{k:"KB · Capas",h:"Conocimiento",role:"Lo que el sistema es",
+  tags:[["tuyo","Lo aporta tu equipo"]],
+  d:"Las cinco capas que describen la aplicación tal y como es. No caducan con un proyecto: son la memoria estable.",
+  L:[["Las cinco capas",["<b>ARCH · Arquitectura</b> — cómo está construido","<b>DOM · Dominio</b> — los conceptos y sus reglas","<b>PROD · Producto</b> — qué ofrece y a quién","<b>FEAT · Funcionalidad</b> — qué hace, funcionalidad a funcionalidad","<b>DOC · Documentación</b> — lo que no encaja en las anteriores pero hay que conservar"]],
+    ["Todas comparten estructura",["Intent · Definition · Acceptance Criteria · Evidence · Traceability"]]],
+  call:["","Cómo se rellena","No a mano: sale del analizador a partir de tus documentos, y tú lo confirmas."]},
+
+"capas-w":{k:"KB · Capas",h:"Trabajo",role:"Lo que se está haciendo",
+  tags:[["tuyo","Lo aporta tu equipo"],["doriath","Lo fija Doriath"]],
+  d:"El trabajo en curso, en tres niveles. Es lo que produce KDD y lo que se ejecuta sobre tus repositorios. A diferencia del conocimiento, esto <b>sí caduca</b>: cuando la iniciativa termina, queda como historia.",
+  L:[["Los tres niveles",["<b>Iniciativa</b> — lo que se quiere conseguir y por qué","<b>Feature</b> — cada bloque de trabajo","<b>Historia de usuario</b> — cada pieza concreta que se ejecuta"]],
+    ["La conexión con el conocimiento",["La iniciativa declara qué specs de conocimiento <em>activa</em>","Ese vínculo es lo que hace que el código generado respete lo que ya se sabía"]]],
+  call:["","Por dentro y por fuera","Se guardan como <code>WRK-SPEC</code>, <code>WRK-PLAN</code> y <code>WRK-TASK</code> —el formato KDD no cambia— pero en pantalla se llaman iniciativa, feature e historia de usuario. Quien usa el módulo no tiene por qué saber qué es una spec."]},
+
+"capas-g":{k:"KB · Capas",h:"Gobernanza",role:"Lo que se ha decidido",
+  tags:[["tuyo","Lo aporta tu equipo"]],
+  d:"Decisiones, propuestas y reglas, con estado y responsable. Viven en la base junto al conocimiento que justifican, no en un acta suelta.",
+  L:[["Los tres tipos",["<b>ADR</b> — Context · Decision · Rationale · Consequences","<b>RFC</b> — Problem Statement · Proposed Solution","<b>Regla</b> — Rule · Enforcement"]]],
+  call:["","Se citan solas","Cuando el asistente responde algo que una regla condiciona, la cita. No hay que acordarse de mirarla."]},
+
+/* ── Módulos ── */
+modulos:{k:"Los dos módulos",h:"Asistente y KDD",role:"Lo que abre la persona",
+  tags:[["doriath","Lo fija Doriath"],["humano","Tú eres el que entra"]],
+  d:"Sobre la misma base hay <b>dos formas de trabajar</b>, y la persona elige. El Asistente <em>pregunta</em> y produce documentos. KDD <em>construye</em> y produce código. Ninguno de los dos llama al otro: los dos leen la misma base, y eso es suficiente.",
+  L:[["Asistente — para preguntar",["Consulta el conocimiento de las bases que elijas","Genera entregables con la identidad BBVA","No modifica la base, salvo cuando corriges una respuesta"]],
+    ["KDD — para construir",["Convierte lo que necesitas en iniciativa, features e historias","Detecta los repositorios implicados","Trabaja cada historia sobre tu código real"]]],
+  call:["","Por qué no se hablan entre ellos","Porque no hace falta. Si los dos leen la misma base, la coherencia sale sola; una integración entre módulos sería una fuente de desincronización sin ganancia."]},
+
+usuario:{k:"El centro del eje",h:"Tú",role:"Quien decide en cada paso",
+  tags:[["humano","Aquí decides tú"]],
+  d:"El eje <b>no funciona solo</b>, y es a propósito. Doriath propone en cada tramo; escribir en la base, guardar una propuesta o tocar el código son decisiones que toma una persona. La marca naranja del diagrama señala cada uno de esos puntos.",
+  L:[["Los cinco puntos donde decides",["<b>Confirmar el preview</b> — nada entra en la base antes","<b>Corregir una respuesta</b> — cuando algo no te encaja, se corrige la base","<b>Guardar la propuesta</b> — la iniciativa y sus historias","<b>Revisar el diff</b> — antes de cada commit, sin excepción","<b>Aceptar o rechazar</b> — en gobernanza"]]],
+  call:["stop","La diferencia con «dale a generar»","Un agente que escribe sin que nadie mire produce trabajo que hay que revisar entero después. Aquí la revisión está <em>dentro</em> del flujo, en el punto donde todavía es barata."]},
+
+roles:{k:"Módulos · Roles",h:"Usuario y Admin",role:"Dos caras de la misma base",
+  tags:[["humano","Tú eliges"],["doriath","Lo fija Doriath"]],
+  d:"El mismo Doriath, con dos niveles de exposición. Se cambia con un conmutador en la cabecera y se recuerda en el navegador.",
+  L:[["Usuario — para quien aporta",["<b>My Knowledge Bases</b>: sube documentos, pulsa «Aprender de estos documentos» y pregunta","Ni una spec, ni una capa, ni un identificador en pantalla","Cada respuesta lleva «Es correcto» y «No es así, corregir»"]],
+    ["Admin — para quien mantiene",["<b>Knowledge Bases Studio</b> al completo","Panel, grafo, gobernanza, actividad e identificadores"]]],
+  call:["","Por qué dos y no uno","Porque quien más conocimiento tiene de un dominio no suele ser quien sabe qué es KDD. Si para aportar hay que aprender el formato, no aporta nadie."]},
+
+asistente:{k:"Módulo 2 · Consulta",h:"BBVA CIB Assistant",role:"Preguntar y producir entregables",
+  tags:[["doriath","Lo fija Doriath"],["humano","Corriges lo que no encaje"]],
+  d:"Conversación con el conocimiento de las bases que elijas. La propiedad que lo define: <b>no recuerda nada</b>. Consulta la base con sus herramientas antes de afirmar, cita los identificadores en los que se apoya, y si algo no está, lo dice en vez de rellenarlo.",
+  L:[["Qué genera",["Word para informes y documentos","Excel para tablas, inventarios y matrices de prueba","PowerPoint para presentaciones","HTML para informes navegables","Markdown, código, SQL, JSON o CSV"]],
+    ["Con la identidad puesta",["Los entregables salen con la identidad visual BBVA × NFQ sin que haya que maquetar nada"]]],
+  call:["ok","Qué gana la base cuando preguntas","Si una respuesta no te encaja y pulsas «No es así, corregir», tu corrección se anota como evidencia sobre la spec afectada y le sube la versión. Preguntar <b>mejora</b> la base."]},
+
+kdd:{k:"Módulo 3 · Construcción",h:"Knowledge-Driven Development",role:"Del cambio que necesitas al commit",
+  tags:[["doriath","Lo fija Doriath"],["humano","Decides en tres puntos"]],
+  d:"Le cuentas qué necesitas cambiar, en lenguaje de negocio. Doriath te entrevista, consulta el conocimiento, mira tus repositorios y propone la <b>iniciativa</b> con sus <b>features</b> e <b>historias de usuario</b>. Después trabaja cada historia sobre tu código y te enseña los cambios.",
+  L:[["La entrevista, en cuatro fases",["<b>Entender</b> — pregunta lo que le falte del negocio","<b>Clasificar</b> — sitúa el cambio en el conocimiento que ya existe","<b>Validar</b> — comprueba que la propuesta se sostiene","<b>Generar</b> — emite la iniciativa completa"]],
+    ["Y luego, sobre el código",["Detecta los repositorios: carpetas locales con <code>.git</code>","Abre una rama por iniciativa","Trabaja cada historia con Copilot sobre el repositorio real","Te enseña el diff; tú confirmas el commit","Push y pull request cuando tú lo pides"]]],
+  call:["","Por qué «knowledge-driven»","Porque la iniciativa declara qué conocimiento activa. El código no sale de una descripción suelta: sale de lo que la base ya sabía sobre ese dominio."]},
+
+"h-corregir":{k:"Punto de decisión",h:"Corriges una respuesta",role:"Cuando algo no te encaja",
+  tags:[["humano","Aquí decides tú"]],
+  d:"En cada respuesta del asistente hay dos botones: <b>Es correcto</b> y <b>No es así, corregir</b>. Al corregir, escribes qué es lo cierto —«el plazo son 24 horas, no 2 días»— y Doriath busca a qué parte del conocimiento afecta.",
+  L:[["Qué pasa con tu corrección",["Si encuentra la spec afectada, la anota como evidencia y le sube la versión menor","Si no la encuentra, la guarda como <b>corrección sin asignar</b> para que la coloque quien mantiene la base","En los dos casos queda en el registro de actividad, firmada"]]],
+  call:["ok","Nunca se pierde","Antes esto devolvía un error y la corrección se perdía. Ahora, encuentre o no la spec, tu corrección queda registrada."]},
+
+"h-guardar":{k:"Punto de decisión",h:"Guardas la propuesta",role:"Antes de que exista la iniciativa",
+  tags:[["humano","Aquí decides tú"]],
+  d:"Cuando KDD termina la entrevista, te enseña la propuesta completa en un panel: la iniciativa, sus features y sus historias de usuario, cada una con sus incidencias. <b>No se guarda nada hasta que lo apruebas.</b>",
+  L:[["Qué puedes hacer antes de guardar",["Abrir cualquier elemento y editar su título o su contenido","Quitar de la selección lo que no vaya","Pedirle a Doriath que corrija la propuesta","Descartarla entera y empezar de nuevo"]]],
+  call:["","Bloqueantes","Si algún elemento tiene una incidencia bloqueante, se rechaza el paquete entero, no solo esa pieza. Media iniciativa guardada es peor que ninguna."]},
+
+/* ── Herramientas ── */
+herramientas:{k:"Capacidades",h:"Las herramientas",role:"Lo que los módulos saben hacer",
+  tags:[["doriath","Lo fija Doriath"],["abierto","Catálogo abierto"]],
+  d:"Los dos módulos no «saben» cosas: <b>tienen herramientas</b> y las usan. Es la diferencia entre un modelo que recuerda —y por tanto inventa— y uno que consulta y cita. Hoy son veintidós, agrupadas en cuatro familias.",
+  L:[["Las cuatro familias",["<b>Consultar la base</b> — 9 herramientas","<b>Leer los documentos</b> — 4","<b>Leer los repositorios</b> — 4","<b>Generar entregables</b> — 5"]],
+    ["Qué herramienta ve cada módulo",["El Asistente ve las de consulta, documentos y generación","KDD ve además las de repositorio y las de código","Una base sin repositorios registrados no expone las de repositorio"]]],
+  call:["","La regla que lo sostiene","El prompt lo dice explícitamente: <em>no recuerdas el contenido, lo consultas antes de afirmar nada</em>. Sin esa regla las herramientas sobran; con ella, son lo único que hay."]},
+
+"t-consulta":{k:"Herramientas",h:"Consultar la base",role:"Nueve formas de preguntarle al conocimiento",
+  tags:[["doriath","Lo fija Doriath"]],
+  d:"El grupo que convierte la base en algo consultable. Búsqueda por relevancia sobre el texto de las specs, lectura directa por identificador, y las consultas que solo tienen sentido sobre un grafo.",
+  L:[["Las nueve",["<code>search_specs</code> — búsqueda por relevancia","<code>read_spec</code> — leer una spec entera","<code>list_specs</code> — listar por capa o estado","<code>validate_spec</code> — comprobar su estructura","<code>spec_impact</code> — qué se ve afectado si esto cambia","<code>list_work_items</code> — el trabajo en curso","<code>list_pending_tasks</code> — lo que queda por hacer","<code>get_open_questions</code> — lo que quedó sin resolver","<code>search_decision_history</code> — qué se decidió antes y por qué"]]],
+  call:["","La más infravalorada","<code>spec_impact</code>. Antes de tocar algo, saber qué más depende de ello es la diferencia entre un cambio y un incidente."]},
+
+"t-docs":{k:"Herramientas",h:"Leer los documentos",role:"Volver al original",
+  tags:[["doriath","Lo fija Doriath"]],
+  d:"Las specs son el destilado, pero el documento original sigue ahí. Estas cuatro herramientas permiten volver a la fuente cuando la spec no basta o cuando hay que comprobar de dónde salió algo.",
+  L:[["Las cuatro",["<code>list_documents</code> — qué documentos tiene la base","<code>search_document</code> — buscar dentro de ellos","<code>read_section</code> — leer una sección concreta","<code>grep_document</code> — buscar un patrón literal"]]],
+  call:["","Por qué se conservan","Porque destilar pierde matices, y a veces el matiz es lo que importa. La base guarda las dos cosas: el conocimiento y su origen."]},
+
+"t-gen":{k:"Herramientas",h:"Generar entregables",role:"Del conocimiento al documento",
+  tags:[["doriath","Lo fija Doriath"]],
+  d:"El asistente elige el formato que mejor encaje y lo genera <b>sin pedir permiso</b>. Tú aportas la pregunta; él aporta contenido estructurado, y la maqueta la pone la identidad BBVA × NFQ automáticamente.",
+  L:[["Las cinco",["<code>generate_docx</code> — informes y documentos","<code>generate_xlsx</code> — tablas, inventarios, matrices de prueba","<code>generate_pptx</code> — presentaciones","<code>generate_html_document</code> — informes navegables","<code>write_output_file</code> — Markdown, código, SQL, JSON, CSV"]]],
+  call:["stop","Dónde se escriben","En la carpeta de salidas, <b>nunca dentro de un repositorio ni de una base</b>. Un documento generado que aparece en un repo acaba en un commit que nadie quería."]},
+
+"t-repo":{k:"Herramientas",h:"Leer tus repositorios",role:"Sobre el código que ya tienes",
+  tags:[["tuyo","Lo aporta tu equipo"],["local","No sale de tu equipo"]],
+  d:"KDD no clona nada ni trabaja sobre copias: <b>trabaja sobre tus clones locales</b>. Le señalas las carpetas, Doriath detecta las que tienen <code>.git</code> y las registra con su rama, su remoto y su stack.",
+  L:[["Las cuatro",["<code>list_repositories</code> — los repositorios registrados","<code>repo_tree</code> — la estructura de carpetas","<code>grep_repo</code> — buscar en el código","<code>read_repo_file</code> — leer un fichero concreto"]],
+    ["Para qué las usa antes de planificar",["Para que el plan cite módulos y ficheros reales, no inventados"]]],
+  call:["","Una restricción que es una garantía","Un repositorio no puede estar dentro de una base de conocimiento ni de la carpeta de salidas, ni al revés. Mezclarlos ensucia el repo con documentos generados o con specs que no le pertenecen."]},
+
+"t-git":{k:"Herramientas",h:"Trabajar el código",role:"Rama, diff, commit, push, PR",
+  tags:[["humano","Decides dos veces"],["local","No sale de tu equipo"]],
+  d:"La parte que toca código de verdad, y por eso la más acotada. Doriath abre una rama por iniciativa, deja que el agente edite los ficheros, y <b>para</b>. El commit no lo hace el agente: lo hace Doriath cuando tú has visto el diff.",
+  L:[["La secuencia",["Abre o cambia a la rama de la iniciativa","El agente edita los ficheros que necesita","Doriath calcula el diff y te lo enseña","<b>Tú revisas y confirmas el commit</b>","<b>Tú pides el push y la pull request</b>"]],
+    ["Lo que el agente tiene prohibido",["Hacer commits por su cuenta","Ejecutar comandos que toquen tu sistema fuera del repositorio"]]],
+  call:["stop","Los dos puntos de decisión","Confirmar el commit y pedir el push. Son los dos únicos momentos en que algo sale del área de trabajo, y los dos los decides tú."]},
+
+"t-mas":{k:"Herramientas",h:"Y las que vengan",role:"El catálogo crece",
+  tags:[["abierto","Catálogo abierto"],["doriath","Lo fija Doriath"]],
+  d:"Las veintidós de hoy son las que el trabajo ha pedido hasta ahora. La lista es explícitamente abierta: cada base y cada equipo puede necesitar otras.",
+  L:[["Al añadir una herramienta hay que responder",["¿Qué módulo la ve?","¿Lee o escribe?","¿Qué límite le aplica?","¿Deja rastro en el registro de actividad?"]]],
+  call:["","Idea clave","Una herramienta nueva <b>no crea</b> límites nuevos: se acoge a los que ya hay. Si necesita una excepción, la excepción es el problema."]},
+
+/* ── Límites ── */
+limites:{k:"Control · antes",h:"Los límites",role:"Lo que Doriath no hace nunca",
+  tags:[["doriath","Lo fija Doriath"]],
+  d:"Se leen siempre <b>en negativo</b>. No son una lista de permisos, sino de cosas que no ocurren, y no ocurren porque el flujo no las contempla — no porque estén desaconsejadas en un documento.",
+  L:[["Los cinco",["<b>Commit</b> — nunca sin que revises el diff","<b>Rama base</b> — nunca directamente; una rama por iniciativa","<b>Tu sistema</b> — el agente solo toca el repositorio asignado","<b>Sin mezclar</b> — las salidas nunca dentro de un repo ni de una base","<b>La nube</b> — nada sale de tu equipo"]]],
+  call:["stop","La diferencia con la verificación","Un límite <b>impide</b> antes de actuar. La verificación <b>comprueba</b> después. Uno es una puerta cerrada; la otra, un examen."]},
+
+"l-commit":{k:"Límite",h:"Ningún commit a ciegas",role:"El diff siempre pasa por ti",
+  tags:[["humano","Aquí decides tú"],["doriath","Lo fija Doriath"]],
+  d:"El agente <b>no hace commits</b>. Edita ficheros; Doriath calcula el diff, te lo enseña y espera. El commit lo hace Doriath con el mensaje que tú apruebas, y no antes.",
+  L:[["Qué ves antes de confirmar",["Qué ficheros ha tocado y en qué repositorio","El diff completo","El informe de qué ha hecho y por qué","El mensaje de commit propuesto, editable"]],
+    ["Y si no te convence",["Descartas los cambios y el repositorio vuelve a como estaba"]]],
+  call:["","La trazabilidad que sí se mantiene","El mensaje de commit lleva el identificador de la historia de usuario. Es el hilo entre el código y el conocimiento que lo justifica, y vive en el repositorio, no en la interfaz."]},
+
+"l-rama":{k:"Límite",h:"Nunca sobre la rama base",role:"Una rama por iniciativa",
+  tags:[["doriath","Lo fija Doriath"]],
+  d:"Doriath abre una rama para la iniciativa y trabaja siempre ahí. El nombre sale del identificador y del título, con el prefijo configurado.",
+  L:[["Qué garantiza",["Tu rama de trabajo no se toca","El trabajo de una iniciativa se puede descartar entero","La pull request es la unidad de revisión, como en cualquier otro cambio"]]],
+  call:["","Se integra con lo que ya tienes","No hay un flujo de git paralelo. Es tu repositorio, tu modelo de ramas y tu proceso de revisión."]},
+
+"l-fuera":{k:"Límite",h:"Solo el repositorio",role:"No toca tu sistema",
+  tags:[["doriath","Lo fija Doriath"]],
+  d:"El prompt del agente lo dice literalmente: trabaja dentro del repositorio asignado y <b>no ejecuta comandos que modifiquen el sistema fuera de él</b>. Cada historia de usuario se ejecuta contra un repositorio concreto, que eliges tú.",
+  L:[["Qué implica",["Un agente no instala nada en tu equipo","No toca configuración del sistema","No escribe fuera del repositorio de la historia"]]],
+  call:["","Por qué se asigna repositorio a mano","Porque adivinar sobre qué repositorio se trabaja es exactamente el tipo de acierto que no compensa. Lo eliges tú, historia a historia."]},
+
+"l-mezcla":{k:"Límite",h:"Sin mezclar carpetas",role:"Cada cosa en su sitio",
+  tags:[["doriath","Lo fija Doriath"]],
+  d:"Los documentos que genera Doriath van a la carpeta de salidas, y esa carpeta <b>no puede estar dentro de un repositorio ni de una base de conocimiento</b>. Tampoco una base puede vivir dentro de un repositorio, ni contenerlo.",
+  L:[["Qué se comprueba al registrar",["Que la base no está dentro de las salidas","Que la base no está dentro de un repositorio registrado, ni lo contiene","Y si lo está, se rechaza con el motivo"]]],
+  call:["","Lo que evita","Un repositorio que amanece con veinte informes generados dentro, o una base de conocimiento versionada por accidente dentro del código."]},
+
+"l-nube":{k:"Límite",h:"Nada sale de tu equipo",role:"Todo es local",
+  tags:[["local","No sale de tu equipo"],["doriath","Lo fija Doriath"]],
+  d:"Las bases son carpetas de tu equipo. Los repositorios son tus clones locales. Los documentos se copian dentro de la base. El registro de actividad vive en la propia base. <b>No hay un servidor de Doriath</b> al que se suba nada.",
+  L:[["Qué sí sale",["Las peticiones al modelo, por el canal corporativo de Copilot, con la sesión de GitHub Enterprise de la persona","Y nada más"]]],
+  call:["","Por qué importa en un banco","Porque la pregunta «¿dónde acaba esto?» tiene una respuesta corta y comprobable: en tu equipo."]},
+
+/* ── Verificación ── */
+verificacion:{k:"Control · después",h:"La verificación",role:"Lo que sí se comprueba, siempre",
+  tags:[["doriath","Lo fija Doriath"]],
+  d:"Todo lo que se escribe en la base pasa por las mismas comprobaciones, venga del analizador, de una edición a mano o de una propuesta de KDD. No juzga el contenido: comprueba que <b>tiene la forma que permite auditarlo después</b>.",
+  L:[["Qué comprueba",["<b>Estructura</b> — las secciones obligatorias de cada capa","<b>Criterios</b> — que los criterios de aceptación sean verificables","<b>Grafo</b> — que <code>activates</code> y <code>parent</code> apunten a algo que existe","<b>Salud</b> — la puntuación agregada de la base y sus incidencias"]],
+    ["Dos severidades",["<b>Bloqueante</b> — no se persiste","<b>Aviso</b> — se persiste, pero queda anotado"]]],
+  call:["stop","Atómico a propósito","Si una sola spec del paquete tiene un bloqueante, se rechaza el paquete <b>entero</b>. Media propuesta guardada deja la base en un estado que nadie sabe interpretar."]},
+
+"v-estructura":{k:"Verificación",h:"Estructura",role:"Las secciones obligatorias",
+  tags:[["doriath","Lo fija Doriath"]],
+  d:"Cada capa tiene sus secciones canónicas, y faltar una es un error bloqueante. No es burocracia: es lo que permite que una spec escrita por otra persona, hace un año, se lea sin preguntarle a nadie.",
+  L:[["Qué exige cada capa",["<b>Conocimiento</b> — Intent · Definition · Acceptance Criteria · Evidence · Traceability","<b>Iniciativa</b> — Problem Statement · Proposed Change · Acceptance Criteria","<b>Feature</b> — Approach · Task Breakdown","<b>Historia</b> — Objective · Acceptance Criteria","<b>ADR</b> — Context · Decision · Rationale · Consequences"]]],
+  call:["","También avisa de lo pobre","Una sección Definition con dos líneas no es un error, pero sí un aviso. Cumple la forma sin aportar nada."]},
+
+"v-criterios":{k:"Verificación",h:"Criterios verificables",role:"Nada de buenas intenciones",
+  tags:[["doriath","Lo fija Doriath"]],
+  d:"Un criterio de aceptación tiene que poder comprobarse. «Mejorar el rendimiento» no es un criterio; «cuando la orden supera 100.000 EUR, se rechaza con el código AC04» sí lo es.",
+  L:[["Qué detecta",["Que la sección exista pero esté vacía — bloqueante","Que los criterios suenen aspiracionales en vez de verificables — aviso","Y sugiere el patrón <em>cuando X → Y</em>"]]],
+  call:["","Por qué es un aviso y no un error","Porque distinguir un criterio verificable de uno aspiracional es un juicio, y bloquear por un juicio automático crea más fricción de la que evita. Se señala y decide una persona."]},
+
+"v-grafo":{k:"Verificación",h:"El grafo",role:"Que las referencias existan",
+  tags:[["doriath","Lo fija Doriath"]],
+  d:"Las specs se referencian entre ellas: una iniciativa declara qué conocimiento <code>activa</code>, una feature declara de qué iniciativa cuelga. Si esas referencias apuntan a specs que no existen, el grafo miente y el impacto deja de ser fiable.",
+  L:[["Qué comprueba",["Que <code>activates</code> apunte a specs reales","Que <code>parent</code> exista en las features y las historias","Que <code>activates</code> solo se declare en la iniciativa: los hijos lo heredan"]]],
+  call:["","Lo que se pierde si no se cuida","<code>spec_impact</code>. Un grafo con referencias rotas responde «esto no afecta a nada» justo cuando afecta a todo."]},
+
+"v-salud":{k:"Verificación",h:"Salud de la base",role:"La foto agregada",
+  tags:[["doriath","Lo fija Doriath"]],
+  d:"El panel del Studio resume el estado de la base en una puntuación con sus incidencias detrás: cuántas specs hay, cómo se reparten por capa, cuántas siguen en borrador y qué está roto.",
+  L:[["Qué mirar cuando baja",["Specs en borrador que nadie ha revisado","Preguntas abiertas sin responder","Referencias rotas en el grafo","Documentos importados que no generaron nada"]]],
+  call:["","Para qué sirve","Para saber si la base está viva o se quedó parada hace tres meses, sin tener que abrirla spec a spec."]},
+
+/* ── Salidas ── */
+"o-specs":{k:"Resultado",h:"Conocimiento en tu base",role:"Lo que queda después",
+  tags:[["tuyo","Se queda contigo"],["local","No sale de tu equipo"]],
+  d:"Specs nuevas y actualizadas, cada una con su evidencia, su versión y su rastro en el registro de actividad. Es el resultado que <b>se acumula</b>: cada documento que importas y cada corrección que haces dejan la base mejor que antes.",
+  L:[["Lo que hace que valga",["Que se pueda citar por identificador","Que se sepa de qué documento salió","Que se sepa quién la tocó y cuándo"]]],
+  call:["ok","El único resultado que crece","Los entregables se consumen y los commits se mezclan. La base es lo que queda, y lo que hace que la siguiente pregunta se conteste mejor que la anterior."]},
+
+"o-entregables":{k:"Resultado",h:"Entregables",role:"Lo que te llevas a una reunión",
+  tags:[["tuyo","Se queda contigo"]],
+  d:"Word, Excel, PowerPoint, HTML, Markdown o código, generados a partir del conocimiento de la base y con la identidad BBVA × NFQ ya puesta.",
+  L:[["Dónde aparecen",["En la carpeta de salidas, fuera de repositorios y bases","Y listados en el panel de la conversación que los generó"]]],
+  call:["","Con la fuente detrás","Un informe generado desde la base cita las specs en las que se apoya. Si alguien pregunta de dónde sale un dato, la respuesta está en el propio documento."]},
+
+"o-commits":{k:"Resultado",h:"Commits en tus repositorios",role:"Código real, en tu rama",
+  tags:[["tuyo","Se queda contigo"],["local","No sale de tu equipo"]],
+  d:"Commits en tu clon local, en la rama de la iniciativa, con el identificador de la historia de usuario en el mensaje. Revisados por ti antes de existir.",
+  L:[["Y a partir de ahí",["Push cuando tú lo pides","Pull request contra tu proceso de revisión de siempre"]]],
+  call:["","No es un flujo aparte","Doriath entrega en el mismo sitio donde ya trabajas. A partir del push, es una rama más."]}
+};
+
+var DEF = {k:"Eje Doriath",h:"De tus documentos al código",role:"Recorre el diagrama",
+  tags:[["tuyo","Lo tuyo"],["doriath","Lo fijo"],["humano","Tú decides"],["local","Local"],["abierto","Abierto"]],
+  d:"Doriath encadena <b>documentos → Studio → base de conocimiento → Asistente o KDD → tu trabajo</b>. El Studio construye la base; el Asistente y KDD la consumen. Los dos leen exactamente la misma, y por eso lo que te responden y lo que generan cuentan la misma historia.",
+  L:[["Lo que hace distinto a este eje",["El <b>Studio</b> es quien construye: sin él, los otros dos no tienen de qué hablar","La <b>base</b> es una carpeta de tu equipo, no un servicio","La persona decide en <b>cinco puntos</b>, marcados en naranja","Los <b>límites</b> impiden antes; la <b>verificación</b> comprueba después"]],
+    ["Cómo leer los colores",["<b>Verde</b> — lo aporta tu equipo: documentos, base, repositorios","<b>Azul</b> — lo fija Doriath: el flujo, las herramientas, los controles","<b>Naranja</b> — donde decide una persona","<b>Morado</b> — lo que no sale de tu equipo","<b>Discontinuo</b> — catálogo abierto"]]],
+  call:["","Cómo usar el diagrama","Pasa el cursor por cualquier elemento para leerlo aquí, haz clic para fijarlo y usa los filtros de arriba para aislar una lectura concreta."]};
+
+var panel=document.getElementById('panel'), svg=document.getElementById('dg');
+
+function render(o){
+  var h='<div class="dp-k">'+o.k+'</div><div class="dp-h">'+o.h+'</div>';
+  if(o.role) h+='<div class="dp-role">'+o.role+'</div>';
+  if(o.tags&&o.tags.length){h+='<div class="dp-tags">';o.tags.forEach(function(t){h+='<span class="tag '+t[0]+'">'+t[1]+'</span>';});h+='</div>';}
+  h+='<div class="dp-d">'+o.d+'</div>';
+  (o.L||[]).forEach(function(b){
+    var t=b[0], c='';
+    if(/tu equipo|Se queda|tuyo|tus repositorios/i.test(t)) c=' tuyo';
+    if(/decides|Punto|puedes hacer|prohibido/i.test(t)) c=' humano';
+    if(/no sale|local|sí sale/i.test(t)) c=' local';
+    if(/Prohib|evita|garantiza|implica|severidad/i.test(t)) c=' stop';
+    h+='<div class="dp-block'+c+'"><div class="bt">'+t+'</div><ul>';
+    b[1].forEach(function(li){h+='<li>'+li+'</li>';});
+    h+='</ul></div>';
+  });
+  if(o.call){h+='<div class="dp-call '+o.call[0]+'"><span class="ct">'+o.call[1]+'</span>'+o.call[2]+'</div>';}
+  h+='<div class="dp-hint">Haz clic en otro elemento para compararlo con este.</div>';
+  panel.innerHTML=h; panel.scrollTop=0;
+}
+render(DEF);
+
+function sel(el,key){
+  Array.prototype.forEach.call(svg.querySelectorAll('.sel'),function(n){n.classList.remove('sel');});
+  el.classList.add('sel'); render(N[key]||DEF);
+}
+Array.prototype.forEach.call(svg.querySelectorAll('[data-key]'),function(g){
+  var k=g.getAttribute('data-key');
+  g.addEventListener('click',function(){sel(g,k);});
+  g.addEventListener('mouseenter',function(){if(N[k])render(N[k]);});
+});
+svg.addEventListener('mouseleave',function(){
+  var s=svg.querySelector('.sel'); render(s?(N[s.getAttribute('data-key')]||DEF):DEF);
+});
+Array.prototype.forEach.call(document.querySelectorAll('.fbtn'),function(b){
+  b.addEventListener('click',function(){
+    Array.prototype.forEach.call(document.querySelectorAll('.fbtn'),function(x){x.classList.remove('on');});
+    b.classList.add('on');
+    var f=b.getAttribute('data-f');
+    if(f==='all')svg.removeAttribute('data-filter'); else svg.setAttribute('data-filter',f);
+  });
+});
+})();
+</script>
+</body>
+</html>
