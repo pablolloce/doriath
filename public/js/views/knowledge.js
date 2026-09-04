@@ -22,7 +22,7 @@ export async function renderKnowledge({ container, params, state }) {
       h("div", { class: "card__actions", style: { marginTop: "20px" } }, h("button", { class: "btn btn--accent", text: "Gestionar bases de conocimiento", onclick: openSourcesManager }))));
     return {};
   }
-  let tab = params[0] || localStorage.getItem("doriath.kbTab") || "dashboard";
+  let tab = params[0] || localStorage.getItem("kdd.kbTab") || "dashboard";
   const layers = state.layers || [];
   const labelFor = (layer) => layers.find((item) => item.id === layer)?.label || layer;
   const overviewNode = h("div", { class: "bento bento--4" });
@@ -58,7 +58,7 @@ export async function renderKnowledge({ container, params, state }) {
 
   async function selectTab(id, extra) {
     tab = id;
-    localStorage.setItem("doriath.kbTab", id);
+    localStorage.setItem("kdd.kbTab", id);
     renderTabs();
     cleanup?.();
     cleanup = null;
@@ -521,7 +521,7 @@ export async function renderKnowledge({ container, params, state }) {
       const title = h("input", { class: "input", placeholder: "Título" });
       document.querySelector(".modal").append(
         modalHeader("Nueva spec", close, "Creación manual"),
-        h("p", { class: "muted small", text: "Doriath asigna el identificador siguiendo el patrón de la caja y crea el cuerpo con las secciones canónicas de la capa. Para crear specs con ayuda del asistente usa la pestaña Crear specs." }),
+        h("p", { class: "muted small", text: "KDD Studio asigna el identificador siguiendo el patrón de la caja y crea el cuerpo con las secciones canónicas de la capa. Para crear specs con ayuda del asistente usa la pestaña Crear specs." }),
         h("div", { class: "bento bento--2" }, h("div", { class: "field" }, h("label", { text: "Capa" }), layerInput), h("div", { class: "field" }, h("label", { text: "Dominio" }), domain)),
         h("div", { class: "field" }, h("label", { text: "Título" }), title),
         h("div", { class: "card__actions", style: { justifyContent: "flex-end" } }, h("button", { class: "btn", text: "Crear", onclick: async () => { try { const result = await post(`/api/sources/${source.id}/specs`, { layer: layerInput.value, domain: domain.value, title: title.value }); close(); toast(`Creada ${result.spec.id}`, "ok"); refreshTable(); openSpec(result.spec.id); loadOverview(); } catch (error) { toast(error.message, "error"); } } })));

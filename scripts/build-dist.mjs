@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * Construye el payload de distribución en dist/Doriath:
+ * Construye el payload de distribución en dist/KDD-Studio:
  *   app/          código + node_modules de producción (paquete Copilot de Windows x64)
  *   runtime/node/ Node.js portable para Windows
  *   data/ outputs/ knowledge-bases/  carpetas vacías (las crea también el instalador)
- *   doriath-root.json, Doriath.cmd, Doriath-Diagnostico.cmd, BUILD.json
+ *   kdd-root.json, KDD Studio.cmd, KDD Studio-Diagnostico.cmd, BUILD.json
  *
  * Opciones: --fresh (reinstala node_modules desde el registro en vez de copiar el árbol probado),
  *           --skip-node (no descarga Node), --platform linux (payload Linux para pruebas)
@@ -21,9 +21,9 @@ import { extractZip } from "./launcher/zip.cjs";
 const require = createRequire(import.meta.url);
 const tools = require("./launcher/tools.json");
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-// DORIATH_DIST permite construir en otra unidad con más espacio (p. ej. DORIATH_DIST=D:\\doriath-dist).
-const dist = process.env.DORIATH_DIST ? path.resolve(process.env.DORIATH_DIST) : path.join(root, "dist");
-const target = path.join(dist, "Doriath");
+// KDD_DIST permite construir en otra unidad con más espacio (p. ej. KDD_DIST=D:\\kdd-dist).
+const dist = process.env.KDD_DIST ? path.resolve(process.env.KDD_DIST) : path.join(root, "dist");
+const target = path.join(dist, "KDD Studio");
 const cache = path.join(root, ".cache");
 const args = process.argv.slice(2);
 const flag = (name) => { const index = args.indexOf(name); return index >= 0 ? args[index + 1] : undefined; };
@@ -142,8 +142,8 @@ async function stageNode() {
 
 async function stageScaffold() {
   for (const folder of ["data", "outputs", "knowledge-bases", "runtime"]) await mkdir(path.join(target, folder), { recursive: true });
-  await writeFile(path.join(target, "doriath-root.json"), JSON.stringify({ product: "Doriath", version: pkg.version, builtAt: new Date().toISOString() }, null, 2));
-  await writeFile(path.join(target, "knowledge-bases", "LEEME.txt"), "Carpeta sugerida para tus bases de conocimiento KDD. Puedes usar cualquier otra desde Doriath > Gestionar.\n");
+  await writeFile(path.join(target, "kdd-root.json"), JSON.stringify({ product: "KDD Studio", version: pkg.version, builtAt: new Date().toISOString() }, null, 2));
+  await writeFile(path.join(target, "knowledge-bases", "LEEME.txt"), "Carpeta sugerida para tus bases de conocimiento KDD. Puedes usar cualquier otra desde KDD Studio > Gestionar.\n");
   await writeFile(path.join(target, "outputs", "LEEME.txt"), "Aquí deja el BBVA CIB Assistant los ficheros que genera.\n");
   const cmd = [
     "@echo off",
@@ -156,27 +156,27 @@ async function stageScaffold() {
     "if errorlevel 1 pause",
     "endlocal",
   ].join("\r\n");
-  await writeFile(path.join(target, "Doriath.cmd"), `${cmd}\r\n`);
-  // Ejecuta el launcher con la ventana fija: si Doriath.exe no llega ni a arrancar (por ejemplo, si el
+  await writeFile(path.join(target, "KDD Studio.cmd"), `${cmd}\r\n`);
+  // Ejecuta el launcher con la ventana fija: si KDD-Studio.exe no llega ni a arrancar (por ejemplo, si el
   // equipo bloquea el binario), el mensaje queda a la vista en vez de cerrarse la consola.
   const diagnostic = [
     "@echo off",
     "setlocal",
-    "title Doriath - diagnostico",
-    "echo Ejecutando Doriath.exe con la ventana fija. El registro completo queda en data\\logs\\launcher.log",
+    "title KDD Studio - diagnostico",
+    "echo Ejecutando KDD-Studio.exe con la ventana fija. El registro completo queda en data\\logs\\launcher.log",
     "echo.",
-    "\"%~dp0Doriath.exe\" %*",
+    "\"%~dp0KDD-Studio.exe\" %*",
     "echo.",
-    "echo Doriath.exe ha terminado con codigo %ERRORLEVEL%.",
+    "echo KDD-Studio.exe ha terminado con codigo %ERRORLEVEL%.",
     "pause",
     "endlocal",
   ].join("\r\n");
-  await writeFile(path.join(target, "Doriath-Diagnostico.cmd"), `${diagnostic}\r\n`);
+  await writeFile(path.join(target, "KDD Studio-Diagnostico.cmd"), `${diagnostic}\r\n`);
   let commit = "";
   try {
     commit = spawnSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).stdout.trim();
   } catch { /* sin git */ }
-  await writeFile(path.join(target, "BUILD.json"), JSON.stringify({ product: "Doriath", version: pkg.version, platform, commit, builtAt: new Date().toISOString(), node: tools.node.version }, null, 2));
+  await writeFile(path.join(target, "BUILD.json"), JSON.stringify({ product: "KDD Studio", version: pkg.version, platform, commit, builtAt: new Date().toISOString(), node: tools.node.version }, null, 2));
 }
 
 /**
@@ -193,7 +193,7 @@ export async function ensureFreeSpace(directory, requiredBytes, label) {
     const free = Number(info.bavail) * Number(info.bsize);
     const gb = (value) => (value / (1024 ** 3)).toFixed(1);
     if (free < requiredBytes) {
-      throw new Error(`Espacio insuficiente en ${probe}: ${gb(free)} GB libres y ${label} necesita al menos ${gb(requiredBytes)} GB. Libera espacio (npm cache clean --force, borrar dist/) o construye en otra unidad con DORIATH_DIST=<carpeta>.`);
+      throw new Error(`Espacio insuficiente en ${probe}: ${gb(free)} GB libres y ${label} necesita al menos ${gb(requiredBytes)} GB. Libera espacio (npm cache clean --force, borrar dist/) o construye en otra unidad con KDD_DIST=<carpeta>.`);
     }
     log(`Espacio libre en ${probe}: ${gb(free)} GB.`);
   } catch (error) {

@@ -242,7 +242,7 @@ export async function probeRunningInstance(port, host = "127.0.0.1") {
     const response = await fetch(`http://${host}:${port}/api/health`, { signal: AbortSignal.timeout(2000) });
     if (!response.ok) return null;
     const payload = await response.json();
-    return payload?.product === "Doriath" ? payload : null;
+    return payload?.product === "KDD Studio" ? payload : null;
   } catch {
     return null;
   }

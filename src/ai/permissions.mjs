@@ -19,14 +19,14 @@ function insideWorkspace(target, roots) {
 }
 
 function deny(reason) {
-  return { kind: "denied-by-rules", rules: [{ id: "doriath", description: reason }] };
+  return { kind: "denied-by-rules", rules: [{ id: "kdd", description: reason }] };
 }
 
 export function createPermissionHandler(profile, { workspaceRoots = [], allowNetwork = false } = {}) {
   return (request) => {
     const kind = String(request?.kind || "");
     if (profile === "none") return deny("Perfil sin herramientas.");
-    if (kind === "url" && !allowNetwork) return deny("Acceso a red deshabilitado en Doriath.");
+    if (kind === "url" && !allowNetwork) return deny("Acceso a red deshabilitado en KDD Studio.");
     if (READ_KINDS.has(kind)) return { kind: "approved" };
     if (profile !== "implementation") return deny(`Operación ${kind} no permitida en un chat de solo lectura.`);
 
@@ -40,7 +40,7 @@ export function createPermissionHandler(profile, { workspaceRoots = [], allowNet
     if (kind === "shell" || kind === "commands") {
       const commands = Array.isArray(request.commands) ? request.commands.map(String) : [String(request.command || "")];
       const dangerous = commands.some((command) => /\b(rm\s+-rf\s+[\/~]|format\s+[a-z]:|del\s+\/s\s+\/q\s+[a-z]:\\\s*$|shutdown|reg\s+delete|git\s+push\s+--force)/i.test(command));
-      if (dangerous) return deny("Comando potencialmente destructivo bloqueado por Doriath.");
+      if (dangerous) return deny("Comando potencialmente destructivo bloqueado por KDD Studio.");
       return { kind: "approved" };
     }
     if (kind === "memory" || kind === "hook") return { kind: "approved" };

@@ -4,7 +4,7 @@ import path from "node:path";
 import os from "node:os";
 import { mkdtemp, writeFile, chmod } from "node:fs/promises";
 
-process.env.DORIATH_HOME = await mkdtemp(path.join(os.tmpdir(), "doriath-test-auth-"));
+process.env.KDD_HOME = await mkdtemp(path.join(os.tmpdir(), "kdd-test-auth-"));
 const { inspectGitHubCli, invalidateAuthCache } = await import("../src/auth/gh.mjs");
 
 /**
@@ -12,7 +12,7 @@ const { inspectGitHubCli, invalidateAuthCache } = await import("../src/auth/gh.m
  * argumentos de gh; así se reproducen los casos reales sin depender de la CLI instalada.
  */
 async function fakeGh(behaviour) {
-  const dir = await mkdtemp(path.join(os.tmpdir(), "doriath-fake-gh-"));
+  const dir = await mkdtemp(path.join(os.tmpdir(), "kdd-fake-gh-"));
   const file = path.join(dir, "gh");
   await writeFile(file, `#!/bin/sh\n${behaviour}\n`, "utf8");
   await chmod(file, 0o755);

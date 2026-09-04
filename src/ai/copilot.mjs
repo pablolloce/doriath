@@ -32,7 +32,7 @@ async function loadSdk() {
 /**
  * Localiza el runtime Copilot (paquete de plataforma `@github/copilot-<os>-<arch>`). Las versiones
  * recientes del paquete no exportan `./sdk`, por lo que la resolución automática del SDK falla; se
- * indica la ruta por `COPILOT_CLI_PATH`. Se prefiere la entrada JS (corre con el Node de Doriath) y,
+ * indica la ruta por `COPILOT_CLI_PATH`. Se prefiere la entrada JS (corre con el Node de KDD Studio) y,
  * si no existe, el binario nativo.
  */
 export function resolveCopilotCliPath() {
@@ -85,7 +85,7 @@ export async function createCopilotClient(config, workingDirectory, { authMode }
     logLevel: "warning",
     ...(await authOptions(config, mode)),
   });
-  client.__doriathAuthMode = mode;
+  client.__kddAuthMode = mode;
   return client;
 }
 
@@ -160,7 +160,7 @@ export async function getModelCatalog(config, { refresh = false } = {}) {
       client.getAuthStatus().catch(() => null),
     ]);
     return {
-      authMode: client.__doriathAuthMode,
+      authMode: client.__kddAuthMode,
       auth: auth ? { login: auth.login || "", host: auth.host || "", authType: auth.authType || "" } : null,
       quota: normalizeCopilotQuota(quota),
       models: models.map((model) => ({
@@ -205,7 +205,7 @@ export function pickModel(catalog, requested) {
 
 /* ---------- Herramientas propias ---------- */
 
-export async function defineDoriathTool(name, { description, parameters, handler }) {
+export async function defineKddTool(name, { description, parameters, handler }) {
   const { defineTool } = await loadSdk();
   return defineTool(name, {
     description,
@@ -299,7 +299,7 @@ function buildSessionConfig({ config, model, reasoningEffort, systemMessage, too
   const available = availableTools || [...new Set([...profileTools, ...customNames])];
   const session = {
     streaming: true,
-    clientName: "doriath",
+    clientName: "kdd",
     model,
     availableTools: available,
     tools: tools || [],

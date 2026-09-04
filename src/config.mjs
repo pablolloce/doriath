@@ -2,7 +2,7 @@ import { readJson, writeJson } from "./util/fs.mjs";
 import { paths, defaultOutputsRoot, defaultKnowledgeBasesRoot } from "./paths.mjs";
 
 export const DEFAULT_CONFIG = Object.freeze({
-  product: { name: "Doriath", version: "0.1.0" },
+  product: { name: "KDD Studio", version: "0.1.0" },
   server: { host: "127.0.0.1", port: 4410 },
   github: { host: "bbva.ghe.com", type: "ghec" },
   copilot: {
@@ -20,7 +20,7 @@ export const DEFAULT_CONFIG = Object.freeze({
   // proxy local corporativo de Ivanti (http://127.0.0.1:8999); actívalo aquí si tu red lo exige.
   network: { proxyUrl: "", noProxy: "127.0.0.1,localhost" },
   paths: { outputs: defaultOutputsRoot, knowledgeBases: defaultKnowledgeBasesRoot },
-  work: { commitAuthor: "", branchPrefix: "feature/doriath" },
+  work: { commitAuthor: "", branchPrefix: "feature/kdd" },
 });
 
 function merge(base, extra) {
@@ -39,11 +39,11 @@ let cached = null;
 export async function loadConfig() {
   const stored = await readJson(paths.configFile, {});
   cached = merge(structuredClone(DEFAULT_CONFIG), stored);
-  if (process.env.DORIATH_PORT) cached.server.port = Number(process.env.DORIATH_PORT);
-  if (process.env.DORIATH_PROXY) cached.network.proxyUrl = process.env.DORIATH_PROXY;
-  if (process.env.DORIATH_GITHUB_HOST) {
-    cached.github.host = process.env.DORIATH_GITHUB_HOST;
-    cached.copilot.host = process.env.DORIATH_GITHUB_HOST;
+  if (process.env.KDD_PORT) cached.server.port = Number(process.env.KDD_PORT);
+  if (process.env.KDD_PROXY) cached.network.proxyUrl = process.env.KDD_PROXY;
+  if (process.env.KDD_GITHUB_HOST) {
+    cached.github.host = process.env.KDD_GITHUB_HOST;
+    cached.copilot.host = process.env.KDD_GITHUB_HOST;
   }
   return cached;
 }

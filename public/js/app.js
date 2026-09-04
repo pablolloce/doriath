@@ -1,4 +1,4 @@
-/** Doriath — aplicación (shell, navegación, bases de conocimiento, sesión). */
+/** KDD Studio — aplicación (shell, navegación, bases de conocimiento, sesión). */
 import { get, post, put, del } from "./api.js";
 import { h, clear, toast, openModal, modalHeader, confirmDialog, promptDialog, pickFolder, fmtDate } from "./ui.js";
 import { renderKnowledge } from "./views/knowledge.js";
@@ -9,15 +9,15 @@ import { renderWork } from "./views/work.js";
 export const state = {
   status: null,
   sources: [],
-  activeSourceId: localStorage.getItem("doriath.activeSource") || "",
+  activeSourceId: localStorage.getItem("kdd.activeSource") || "",
   models: null,
-  model: localStorage.getItem("doriath.model") || "auto",
+  model: localStorage.getItem("kdd.model") || "auto",
   route: "knowledge",
   routeParams: {},
   gateOpen: false,
   gateDismissed: false,
   // "user": quien aporta documentos y pregunta. "admin": quien mantiene la base de conocimiento.
-  role: localStorage.getItem("doriath.role") === "admin" ? "admin" : "user",
+  role: localStorage.getItem("kdd.role") === "admin" ? "admin" : "user",
 };
 
 const listeners = new Set();
@@ -39,7 +39,7 @@ export async function refreshSources() {
   state.layers = data.layers;
   if (!state.sources.some((source) => source.id === state.activeSourceId)) {
     state.activeSourceId = state.sources.find((source) => source.exists)?.id || "";
-    localStorage.setItem("doriath.activeSource", state.activeSourceId);
+    localStorage.setItem("kdd.activeSource", state.activeSourceId);
   }
   renderSourceMenu();
   notify();
@@ -48,7 +48,7 @@ export async function refreshSources() {
 
 export function setActiveSource(id) {
   state.activeSourceId = id;
-  localStorage.setItem("doriath.activeSource", id);
+  localStorage.setItem("kdd.activeSource", id);
   post(`/api/sources/${id}/touch`).catch(() => undefined);
   renderSourceMenu();
   notify();
@@ -96,7 +96,7 @@ function renderRolePicker() {
 function setRole(role) {
   if (state.role === role) return;
   state.role = role;
-  localStorage.setItem("doriath.role", role);
+  localStorage.setItem("kdd.role", role);
   renderRolePicker();
   renderNav();
   renderSourceMenu();
@@ -169,7 +169,7 @@ export async function openSourcesManager() {
         h("div", { class: "card__actions" },
           h("button", { class: "btn btn--outline btn--sm", text: "Renombrar", onclick: async () => { const name = await promptDialog("Renombrar base de conocimiento", { label: "Nombre", value: source.name }); if (name) { await put(`/api/sources/${source.id}`, { name }); await refreshSources(); render(); } } }),
           h("button", { class: "btn btn--outline btn--sm", text: "Abrir carpeta", onclick: () => post("/api/open", { path: source.path }).catch((error) => toast(error.message, "error")) }),
-          h("button", { class: "btn btn--danger btn--sm", text: "Quitar", onclick: async () => { if (await confirmDialog("Quitar del registro", `Se quitará "${source.name}" de Doriath. La carpeta y sus specs no se borran.`, { okLabel: "Quitar", danger: true })) { await del(`/api/sources/${source.id}`); await refreshSources(); render(); } } }))));
+          h("button", { class: "btn btn--danger btn--sm", text: "Quitar", onclick: async () => { if (await confirmDialog("Quitar del registro", `Se quitará "${source.name}" de KDD Studio. La carpeta y sus specs no se borran.`, { okLabel: "Quitar", danger: true })) { await del(`/api/sources/${source.id}`); await refreshSources(); render(); } } }))));
     }
   };
   const addExisting = async () => {
@@ -298,23 +298,23 @@ function renderGate() {
   const detail = [
     `Host configurado: ${github.host}`,
     github.executable ? `GitHub CLI: ${github.executable}` : "",
-    build ? `Doriath ${build.version}${build.commit ? ` · commit ${build.commit}` : ""}${build.builtAt ? ` · construido ${new Date(build.builtAt).toLocaleString("es-ES")}` : " · ejecutando desde el código fuente"}` : "",
+    build ? `KDD-Studio ${build.version}${build.commit ? ` · commit ${build.commit}` : ""}${build.builtAt ? ` · construido ${new Date(build.builtAt).toLocaleString("es-ES")}` : " · ejecutando desde el código fuente"}` : "",
     build?.root ? `Instalación: ${build.root}` : "",
-    github.otherHosts?.length ? `Hay sesión de gh en: ${github.otherHosts.join(", ")}. Doriath busca ${github.host}; cámbialo en Ajustes si no es el correcto.` : "",
+    github.otherHosts?.length ? `Hay sesión de gh en: ${github.otherHosts.join(", ")}. KDD Studio busca ${github.host}; cámbialo en Ajustes si no es el correcto.` : "",
     github.authOutput || github.error || "",
   ].filter(Boolean).join("\n");
   overlay.replaceChildren(h("div", { class: "gate", id: "gate" },
-    h("img", { src: "/brand/doriath-mark-white.png", alt: "", class: "gate__mark" }),
-    h("div", {}, h("p", { class: "ante-title", text: "Doriath · BBVA CIB" }), h("h1", { text: github.installed ? "Inicia sesión en GitHub" : "Falta GitHub CLI" })),
+    h("img", { src: "/brand/kdd-mark-white.png", alt: "", class: "gate__mark" }),
+    h("div", {}, h("p", { class: "ante-title", text: "KDD Studio · BBVA CIB" }), h("h1", { text: github.installed ? "Inicia sesión en GitHub" : "Falta GitHub CLI" })),
     h("p", { class: "lead", text: github.installed
-      ? `Doriath usa tu sesión corporativa de GitHub (${github.host}) para acceder a los repositorios y a GitHub Copilot. Al pulsar el botón se abrirá una consola y el navegador para completar el inicio de sesión con tu correo de BBVA.`
-      : "No se ha encontrado la CLI de GitHub (gh). Instálala o vuelve a ejecutar el instalador de Doriath, y después pulsa Reintentar." }),
+      ? `KDD-Studio usa tu sesión corporativa de GitHub (${github.host}) para acceder a los repositorios y a GitHub Copilot. Al pulsar el botón se abrirá una consola y el navegador para completar el inicio de sesión con tu correo de BBVA.`
+      : "No se ha encontrado la CLI de GitHub (gh). Instálala o vuelve a ejecutar el instalador de KDD Studio, y después pulsa Reintentar." }),
     h("div", { class: "card__actions" },
       github.installed ? h("button", { class: "btn btn--accent", text: "Iniciar sesión en GitHub", onclick: startLogin }) : null,
       h("button", { class: "btn btn--outline", style: { color: "#F7F8F8", borderColor: "#85C8FF" }, text: "Reintentar", onclick: async () => { try { await refreshStatus({ refresh: true }); } catch (error) { toast(error.message, "error"); } } }),
       h("button", { class: "btn btn--ghost", style: { color: "#85C8FF" }, text: "Continuar sin sesión", onclick: () => { state.gateDismissed = true; closeGate(); } })),
     detail ? h("div", { class: "gate__detail" },
-      h("p", { class: "ante-title", style: { color: "#85C8FF" }, text: "Qué ve Doriath al comprobar la sesión" }),
+      h("p", { class: "ante-title", style: { color: "#85C8FF" }, text: "Qué ve KDD Studio al comprobar la sesión" }),
       h("pre", { class: "gate__output", text: detail })) : null,
     h("p", { class: "small", style: { opacity: 0.8 }, text: `También puedes ejecutarlo a mano: gh auth login --hostname ${github.host} --web --git-protocol https` }),
   ));
@@ -330,7 +330,7 @@ export async function loadModels({ refresh = false } = {}) {
     picker.replaceChildren(h("span", { class: "chip chip--outline", title: error.message, text: "Copilot no disponible" }));
     return;
   }
-  const select = h("select", { onchange: (event) => { state.model = event.target.value; localStorage.setItem("doriath.model", state.model); notify(); } },
+  const select = h("select", { onchange: (event) => { state.model = event.target.value; localStorage.setItem("kdd.model", state.model); notify(); } },
     h("option", { value: "auto", text: "Modelo automático" }),
     ...state.models.models.map((model) => h("option", { value: model.id, text: `${model.name}${model.multiplier ? ` (x${model.multiplier})` : ""}`, selected: model.id === state.model })));
   if (!state.models.models.some((model) => model.id === state.model)) state.model = "auto";
@@ -396,7 +396,7 @@ export function navigate(path) {
 export function setBreadcrumb(...parts) {
   const node = document.getElementById("breadcrumb");
   clear(node);
-  node.append(h("span", { text: "DORIATH" }));
+  node.append(h("span", { text: "KDD STUDIO" }));
   parts.filter(Boolean).forEach((part, index) => node.append(h("span", { class: index === parts.length - 1 ? "breadcrumb__sub" : "", text: String(part).toUpperCase() })));
 }
 

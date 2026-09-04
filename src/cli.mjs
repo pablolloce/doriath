@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import process from "node:process";
-import { startDoriath } from "./main.mjs";
+import { startKddStudio } from "./main.mjs";
 import { loadConfig } from "./config.mjs";
 import { paths } from "./paths.mjs";
 import { inspectGitHubCli } from "./auth/gh.mjs";
@@ -17,12 +17,12 @@ async function main() {
   if (command === "start") {
     const noBrowser = rest.includes("--no-browser");
     const port = flag("--port");
-    if (port) process.env.DORIATH_PORT = port;
+    if (port) process.env.KDD_PORT = port;
     const proxy = flag("--proxy");
-    if (proxy) process.env.DORIATH_PROXY = proxy;
-    const { url, reused } = await startDoriath({ openBrowser: noBrowser ? false : undefined });
+    if (proxy) process.env.KDD_PROXY = proxy;
+    const { url, reused } = await startKddStudio({ openBrowser: noBrowser ? false : undefined });
     if (reused) process.exit(0);
-    console.log(`Doriath disponible en ${url}`);
+    console.log(`KDD-Studio disponible en ${url}`);
     return;
   }
   if (command === "doctor") {
@@ -57,11 +57,11 @@ async function main() {
     if (catalog.quota) console.log(`Cuota premium: ${catalog.quota.unlimited ? "ilimitada" : `${catalog.quota.remaining}/${catalog.quota.entitlement}`}`);
     return;
   }
-  console.log(`Uso: doriath <start|doctor|models> [--port N] [--proxy URL] [--no-browser]`);
+  console.log(`Uso: kdd <start|doctor|models> [--port N] [--proxy URL] [--no-browser]`);
   process.exit(command === "help" || command === "--help" ? 0 : 1);
 }
 
 main().catch((error) => {
-  console.error(`Doriath: ${error.message}`);
+  console.error(`KDD-Studio: ${error.message}`);
   process.exit(1);
 });

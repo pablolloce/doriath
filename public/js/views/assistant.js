@@ -11,7 +11,7 @@ export async function renderAssistant({ container, params, state }) {
   const filesNode = h("div", { class: "files-panel" });
   const scopeNode = h("div", { class: "list" });
   let view = null;
-  let current = params[0] || localStorage.getItem("doriath.assistantChat") || "";
+  let current = params[0] || localStorage.getItem("kdd.assistantChat") || "";
 
   const aside = h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } },
     h("div", { class: "card" },
@@ -75,7 +75,7 @@ export async function renderAssistant({ container, params, state }) {
 
   async function openConversation(id, { silentIfMissing = false } = {}) {
     current = id;
-    localStorage.setItem("doriath.assistantChat", id);
+    localStorage.setItem("kdd.assistantChat", id);
     view?.destroy();
     clear(chatHost);
     view = createChatView({
@@ -97,7 +97,7 @@ export async function renderAssistant({ container, params, state }) {
       await refreshList();
     } catch (error) {
       current = "";
-      localStorage.removeItem("doriath.assistantChat");
+      localStorage.removeItem("kdd.assistantChat");
       clear(chatHost);
       // 404 al restaurar la última conversación abierta (se borró, o viene de otra instalación): no es un
       // fallo que el usuario haya provocado, así que se resuelve en silencio en vez de enseñar el error técnico.

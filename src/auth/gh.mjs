@@ -6,7 +6,7 @@ import { paths } from "../paths.mjs";
 import { log } from "../util/log.mjs";
 
 /**
- * Sesión GitHub tomada de la CLI `gh`, igual que FENIX: Doriath nunca guarda contraseñas ni tokens
+ * Sesión GitHub tomada de la CLI `gh`, igual que FENIX: KDD Studio nunca guarda contraseñas ni tokens
  * propios; pide el token a `gh auth token` cuando lo necesita y lo cachea unos segundos en memoria.
  */
 const TOKEN_TTL_MS = 30_000;
@@ -15,8 +15,8 @@ const statusCache = new Map();
 
 /**
  * Localiza `gh`. Normalmente basta con el PATH, pero el servidor lo hereda del proceso que lo lanzó:
- * si el usuario instala la CLI (o la añade al PATH de usuario) con Doriath ya abierto, ese PATH se
- * queda antiguo y `gh` deja de encontrarse. Se prueban también la copia portable de Doriath y las
+ * si el usuario instala la CLI (o la añade al PATH de usuario) con KDD Studio ya abierto, ese PATH se
+ * queda antiguo y `gh` deja de encontrarse. Se prueban también la copia portable de KDD Studio y las
  * rutas de instalación habituales en Windows, incluida la que usa FENIX.
  */
 let ghPath = "";
@@ -92,13 +92,13 @@ export async function inspectGitHubCli(host) {
 
   // `gh auth status` valida el token contra la API. En la red corporativa esa llamada puede fallar
   // (proxy, certificados, SSO caducado) aunque la sesión exista y sea utilizable, y entonces gh
-  // devuelve un código distinto de cero. Lo que Doriath necesita de verdad es el token, así que se
+  // devuelve un código distinto de cero. Lo que KDD Studio necesita de verdad es el token, así que se
   // pregunta directamente: si gh lo entrega, hay sesión.
   if (!authenticated) {
     const token = await gh(["auth", "token", "--hostname", hostname], { timeoutMs: 15000 });
     if (token.ok && token.stdout.trim()) {
       authenticated = true;
-      warning = `Hay una sesión de gh para ${hostname}, pero "gh auth status" no ha podido validarla (proxy, certificados o SSO). Doriath usa el token igualmente; si Copilot falla, revisa la salida de gh.`;
+      warning = `Hay una sesión de gh para ${hostname}, pero "gh auth status" no ha podido validarla (proxy, certificados o SSO). KDD Studio usa el token igualmente; si Copilot falla, revisa la salida de gh.`;
       log.warn("auth", `gh auth status falló para ${hostname} pero hay token disponible.`);
     }
   }
@@ -147,7 +147,7 @@ export async function resolveGitHubToken(host) {
     expiresAt: Date.now() + TOKEN_TTL_MS,
     promise: gh(["auth", "token", "--hostname", hostname], { timeoutMs: 15000 }).then((result) => {
       if (!result.ok || !result.stdout) {
-        throw new Error(`No hay sesión activa de GitHub CLI para ${hostname}. Inicia sesión desde Doriath o ejecuta "gh auth login --hostname ${hostname}".`);
+        throw new Error(`No hay sesión activa de GitHub CLI para ${hostname}. Inicia sesión desde KDD Studio o ejecuta "gh auth login --hostname ${hostname}".`);
       }
       return result.stdout.trim();
     }),
@@ -196,14 +196,14 @@ export async function startGitHubLogin(host) {
   const loginArgs = ["auth", "login", "--hostname", hostname, "--web", "--git-protocol", "https"];
   const setupArgs = ["auth", "setup-git", "--hostname", hostname];
   // Se resuelve gh antes de vaciar la caché: la consola que se abre debe usar el mismo ejecutable
-  // que encontró Doriath, no confiar en que esté en el PATH de esa consola.
+  // que encontró KDD Studio, no confiar en que esté en el PATH de esa consola.
   const executable = await ghCommand();
   const quoted = /\s/.test(executable) ? `"${executable}"` : executable;
   invalidateAuthCache();
 
   if (process.platform === "win32") {
-    const script = `${quoted} ${loginArgs.join(" ")} && ${quoted} ${setupArgs.join(" ")} && echo. && echo Sesion iniciada. Puedes cerrar esta ventana y volver a Doriath. && timeout /t 8`;
-    spawnDetached("cmd.exe", ["/c", "start", "Doriath - Inicio de sesion en GitHub", "cmd.exe", "/c", script]);
+    const script = `${quoted} ${loginArgs.join(" ")} && ${quoted} ${setupArgs.join(" ")} && echo. && echo Sesion iniciada. Puedes cerrar esta ventana y volver a KDD Studio. && timeout /t 8`;
+    spawnDetached("cmd.exe", ["/c", "start", "KDD Studio - Inicio de sesion en GitHub", "cmd.exe", "/c", script]);
     return { started: true, mode: "console", message: "Se ha abierto una consola con el inicio de sesión de GitHub. Completa el flujo en el navegador con tu correo de BBVA." };
   }
 

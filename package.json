@@ -1,7 +1,7 @@
 {
-  "name": "doriath",
+  "name": "kdd",
   "version": "0.1.0",
-  "description": "Doriath: workbench local BBVA CIB que une FENIX (Copilot + GitHub CLI) con KDD Studio (Knowledge-Driven Development).",
+  "description": "KDD Studio: workbench local BBVA CIB que une FENIX (Copilot + GitHub CLI) con KDD Studio (Knowledge-Driven Development).",
   "type": "module",
   "private": true,
   "license": "UNLICENSED",
@@ -9,7 +9,7 @@
     "node": ">=22.12.0"
   },
   "bin": {
-    "doriath": "src/cli.mjs"
+    "kdd": "src/cli.mjs"
   },
   "scripts": {
     "setup": "node scripts/install-deps.mjs",

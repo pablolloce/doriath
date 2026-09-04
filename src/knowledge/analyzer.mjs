@@ -630,7 +630,7 @@ export async function confirmAnalysis(jobId, { specIds } = {}) {
           parent: spec.parent,
           source: job.sourceCode,
           body: spec.body,
-        }, { generatedBy: `doriath-analyzer (${job.documents.join(", ")})` });
+        }, { generatedBy: `kdd-analyzer (${job.documents.join(", ")})` });
         results.push({ id: saved.id, action: "created", version: saved.version });
       }
     } catch (error) {

@@ -7,7 +7,7 @@ import { cacheDir } from "../kdd/layout.mjs";
 
 /**
  * Repositorios locales para el módulo Knowledge-Driven Development. El usuario selecciona carpetas,
- * Doriath busca `.git` dentro (hasta 3 niveles) y trabaja directamente sobre esos checkouts: sin
+ * KDD Studio busca `.git` dentro (hasta 3 niveles) y trabaja directamente sobre esos checkouts: sin
  * clones gestionados ni worktrees. La lista de repos conocidos se guarda por base de conocimiento en
  * `.kdd-studio/repositories.json` para que la detección del cambio pueda proponerlos.
  */

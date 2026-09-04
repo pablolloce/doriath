@@ -122,7 +122,7 @@ async function looksLikeKddFolder(dir) {
   return false;
 }
 
-/** Registra una carpeta existente (creada por Doriath, KDD Studio o a mano). */
+/** Registra una carpeta existente (creada por KDD Studio, KDD Studio o a mano). */
 export async function addExistingSource(dir, { name, description } = {}) {
   const clean = normalizeUserPath(dir);
   if (!clean) throw Object.assign(new Error("Indica la carpeta de la base de conocimiento."), { status: 400 });
@@ -147,7 +147,7 @@ export async function addExistingSource(dir, { name, description } = {}) {
     initialized: isKdd,
   };
   await getSpecStore(resolved).ensureLayout();
-  if (!meta) await writeSourceMeta(resolved, { name: entry.name, sourceId: entry.sourceId, description: entry.description, createdBy: "doriath", createdAt: entry.createdAt });
+  if (!meta) await writeSourceMeta(resolved, { name: entry.name, sourceId: entry.sourceId, description: entry.description, createdBy: "kdd", createdAt: entry.createdAt });
   sources.push(entry);
   await writeRegistry(sources);
   return { source: entry, created: true };
@@ -171,8 +171,8 @@ export async function createSource({ name, description = "", parentDir, sourceId
   await ensureDir(documentsDir(dir));
   const store = getSpecStore(dir);
   await store.ensureLayout();
-  await writeSourceMeta(dir, { name: cleanName, sourceId: finalSourceId, description, createdBy: "doriath", createdAt: new Date().toISOString() });
-  await writeText(path.join(dir, "README.md"), `# ${cleanName}\n\nBase de conocimiento KDD (${finalSourceId}) creada con Doriath.\n\n- \`specs/\`: especificaciones por capa (Knowledge, Work, Governance).\n- \`docs-tecnicos/\`: documentos importados.\n- \`.kdd-studio/\`: cachés derivadas (se pueden borrar).\n`);
+  await writeSourceMeta(dir, { name: cleanName, sourceId: finalSourceId, description, createdBy: "kdd", createdAt: new Date().toISOString() });
+  await writeText(path.join(dir, "README.md"), `# ${cleanName}\n\nBase de conocimiento KDD (${finalSourceId}) creada con KDD Studio.\n\n- \`specs/\`: especificaciones por capa (Knowledge, Work, Governance).\n- \`docs-tecnicos/\`: documentos importados.\n- \`.kdd-studio/\`: cachés derivadas (se pueden borrar).\n`);
   const entry = {
     id: randomUUID(),
     name: cleanName,

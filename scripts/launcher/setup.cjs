@@ -1,11 +1,11 @@
 "use strict";
 /**
- * Doriath-Setup.exe — instalador (Node SEA con el payload comprimido como asset).
+ * KDD-Studio-Setup.exe — instalador (Node SEA con el payload comprimido como asset).
  *
  * Crea la estructura de carpetas de la instalación, extrae la aplicación con su Node portable, deja
  * intactos los datos existentes (data/, outputs/, knowledge-bases/) y crea accesos directos. Uso:
- *   Doriath-Setup.exe                 asistente en consola (carpeta por defecto %LOCALAPPDATA%\Doriath)
- *   Doriath-Setup.exe --dir C:\Doriath --silent [--no-launch]
+ *   KDD-Studio-Setup.exe                 asistente en consola (carpeta por defecto %LOCALAPPDATA%\KDD Studio)
+ *   KDD-Studio-Setup.exe --dir C:\KDD Studio --silent [--no-launch]
  */
 const fs = require("node:fs");
 const path = require("node:path");
@@ -22,7 +22,7 @@ const has = (name) => args.includes(name);
 // El payload (medio giga largo) no cabe como recurso incrustado, así que va pegado detrás del
 // ejecutable con un pie de 32 bytes que dice dónde empieza. Es la técnica clásica de los
 // autoextraíbles: el cargador de Windows ignora lo que hay más allá de la imagen PE.
-const PAYLOAD_MAGIC = "DORIATH-PAYLOAD1";
+const PAYLOAD_MAGIC = "KDD-PAYLOAD1";
 const TRAILER_SIZE = PAYLOAD_MAGIC.length + 16;
 
 function readAppendedPayload(file) {
@@ -64,10 +64,10 @@ function ask(question, fallback) {
 function createIcon(root) {
   // El .ico multirresolución viaja con la aplicación: se usa tal cual para los accesos directos, sin
   // depender de PowerShell ni perder resoluciones por el camino.
-  const shipped = path.join(root, "app", "public", "brand", "doriath.ico");
+  const shipped = path.join(root, "app", "public", "brand", "kdd.ico");
   if (isWindows && fs.existsSync(shipped)) return shipped;
-  const png = path.join(root, "app", "public", "brand", "doriath-icon.png");
-  const ico = path.join(root, "data", "doriath.ico");
+  const png = path.join(root, "app", "public", "brand", "kdd-icon.png");
+  const ico = path.join(root, "data", "kdd.ico");
   if (!isWindows || !fs.existsSync(png)) return "";
   fs.mkdirSync(path.dirname(ico), { recursive: true });
   const script = [
@@ -90,17 +90,17 @@ function createIcon(root) {
 
 function createShortcuts(root) {
   if (!isWindows) return;
-  const target = path.join(root, "Doriath.exe");
+  const target = path.join(root, "KDD-Studio.exe");
   const icon = createIcon(root) || target;
   const script = [
     "$shell = New-Object -ComObject WScript.Shell",
-    `$desktop = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Doriath.lnk'`,
-    `$menu = Join-Path ([Environment]::GetFolderPath('Programs')) 'Doriath.lnk'`,
+    `$desktop = Join-Path ([Environment]::GetFolderPath('Desktop')) 'KDD Studio.lnk'`,
+    `$menu = Join-Path ([Environment]::GetFolderPath('Programs')) 'KDD Studio.lnk'`,
     "foreach ($file in @($desktop, $menu)) {",
     "  $s = $shell.CreateShortcut($file)",
     `  $s.TargetPath = '${target.replace(/'/g, "''")}'`,
     `  $s.WorkingDirectory = '${root.replace(/'/g, "''")}'`,
-    "  $s.Description = 'Doriath - BBVA CIB Knowledge-Driven Development'",
+    "  $s.Description = 'KDD Studio - BBVA CIB Knowledge-Driven Development'",
     `  $s.IconLocation = '${icon.replace(/'/g, "''")},0'`,
     "  $s.Save()",
     "}",
@@ -111,8 +111,8 @@ function createShortcuts(root) {
 }
 
 async function main() {
-  process.stdout.write("\nDoriath — instalador\n====================\n\n");
-  const defaultDir = flag("--dir") || (isWindows ? path.join(process.env.LOCALAPPDATA || os.homedir(), "Doriath") : path.join(os.homedir(), "Doriath"));
+  process.stdout.write("\nKDD Studio — instalador\n====================\n\n");
+  const defaultDir = flag("--dir") || (isWindows ? path.join(process.env.LOCALAPPDATA || os.homedir(), "KDD Studio") : path.join(os.homedir(), "KDD Studio"));
   const root = path.resolve(await ask("Carpeta de instalación", defaultDir));
   const payload = readPayload();
   fs.mkdirSync(root, { recursive: true });
@@ -126,12 +126,12 @@ async function main() {
   });
   process.stdout.write(`\r[Setup] ${count} ficheros extraídos.        \n`);
   for (const folder of ["data", "outputs", "knowledge-bases"]) fs.mkdirSync(path.join(root, folder), { recursive: true });
-  fs.writeFileSync(path.join(root, "doriath-root.json"), JSON.stringify({ product: "Doriath", installedAt: new Date().toISOString(), root }, null, 2));
+  fs.writeFileSync(path.join(root, "kdd-root.json"), JSON.stringify({ product: "KDD Studio", installedAt: new Date().toISOString(), root }, null, 2));
   createShortcuts(root);
-  process.stdout.write(`\n[Setup] Instalación completada.\n  Ejecutable:            ${path.join(root, "Doriath.exe")}\n  Bases de conocimiento: ${path.join(root, "knowledge-bases")}\n  Salidas:               ${path.join(root, "outputs")}\n  Datos:                 ${path.join(root, "data")}\n\n`);
-  const launch = has("--no-launch") ? "n" : await ask("¿Abrir Doriath ahora? (s/n)", "s");
+  process.stdout.write(`\n[Setup] Instalación completada.\n  Ejecutable:            ${path.join(root, "KDD-Studio.exe")}\n  Bases de conocimiento: ${path.join(root, "knowledge-bases")}\n  Salidas:               ${path.join(root, "outputs")}\n  Datos:                 ${path.join(root, "data")}\n\n`);
+  const launch = has("--no-launch") ? "n" : await ask("¿Abrir KDD Studio ahora? (s/n)", "s");
   if (/^s/i.test(launch)) {
-    const executable = path.join(root, isWindows ? "Doriath.exe" : "Doriath");
+    const executable = path.join(root, isWindows ? "KDD-Studio.exe" : "KDD Studio");
     if (fs.existsSync(executable)) {
       const child = spawn(executable, [], { cwd: root, detached: true, stdio: "ignore" });
       child.unref();

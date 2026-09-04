@@ -125,7 +125,7 @@ export class SpecStore {
   }
 
   /** Crea una spec nueva. Falla si el id ya existe. */
-  async create(spec, { generatedBy = "doriath" } = {}) {
+  async create(spec, { generatedBy = "kdd" } = {}) {
     await this.load();
     if (this.get(spec.id)) throw new Error(`La spec ${spec.id} ya existe.`);
     const today = new Date().toISOString().slice(0, 10);

@@ -6,7 +6,7 @@ const pending = [];
 let flushing = false;
 
 export function configureLog(directory) {
-  logFile = path.join(directory, "doriath.log");
+  logFile = path.join(directory, "kdd.log");
   mkdir(directory, { recursive: true }).catch(() => undefined);
 }
 
@@ -27,7 +27,7 @@ async function flush() {
 function write(level, scope, message, extra) {
   const line = `${new Date().toISOString()} [${level}] [${scope}] ${message}${extra ? ` ${typeof extra === "string" ? extra : JSON.stringify(extra)}` : ""}\n`;
   if (level === "error") process.stderr.write(line);
-  else if (process.env.DORIATH_VERBOSE || level !== "debug") process.stdout.write(line);
+  else if (process.env.KDD_VERBOSE || level !== "debug") process.stdout.write(line);
   pending.push(line);
   flush();
 }

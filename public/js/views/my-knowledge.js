@@ -2,7 +2,7 @@
  * My Knowledge Bases — la cara para quien aporta conocimiento pero no lo mantiene.
  *
  * Aquí no se nombra ni una vez una spec, ni una capa, ni un identificador: se suben documentos,
- * Doriath "aprende" de ellos y se le pregunta. Si una respuesta no encaja, se corrige desde el propio
+ * KDD Studio "aprende" de ellos y se le pregunta. Si una respuesta no encaja, se corrige desde el propio
  * chat y la corrección queda firmada en el registro que ve el administrador.
  */
 import { get, post, subscribe, readFileAsBase64 } from "../api.js";
@@ -18,7 +18,7 @@ export async function renderMyKnowledge({ container }) {
     container.append(h("div", { class: "card card--electric" },
       h("p", { class: "ante-title", text: "Mis bases de conocimiento" }),
       h("h1", { text: "Empieza creando una" }),
-      h("p", { class: "lead", style: { marginTop: "12px" }, text: "Una base de conocimiento es, sencillamente, todo lo que Doriath sabe sobre un tema tuyo: sus documentos y lo que ha aprendido de ellos." }),
+      h("p", { class: "lead", style: { marginTop: "12px" }, text: "Una base de conocimiento es, sencillamente, todo lo que KDD Studio sabe sobre un tema tuyo: sus documentos y lo que ha aprendido de ellos." }),
       h("div", { class: "card__actions", style: { marginTop: "20px" } }, h("button", { class: "btn btn--accent", text: "Crear una base de conocimiento", onclick: openSourcesManager }))));
     return {};
   }
@@ -41,12 +41,12 @@ export async function renderMyKnowledge({ container }) {
         h("div", {},
           h("p", { class: "ante-title", text: "Tu base de conocimiento" }),
           h("h1", { text: source.name }),
-          h("p", { class: "lead", style: { marginTop: "10px", opacity: 0.9 }, text: "Sube los documentos de tu equipo y Doriath los lee y aprende de ellos. Después pregúntale lo que necesites; si una respuesta no te encaja, se lo dices y lo corrige." })),
+          h("p", { class: "lead", style: { marginTop: "10px", opacity: 0.9 }, text: "Sube los documentos de tu equipo y KDD Studio los lee y aprende de ellos. Después pregúntale lo que necesites; si una respuesta no te encaja, se lo dices y lo corrige." })),
         h("div", { class: "card__actions" }, h("button", { class: "btn btn--accent btn--sm", text: "Nueva base", onclick: openSourcesManager }))),
       heroChips),
     h("div", { class: "bento bento--main-aside" }, documentsCard(), howItWorksCard()),
     resultNode,
-    h("div", { class: "bento bento--main-aside" }, chatHost, h("div", { class: "card" }, h("p", { class: "ante-title", text: "Lo que Doriath sabe" }), learnedNode)),
+    h("div", { class: "bento bento--main-aside" }, chatHost, h("div", { class: "card" }, h("p", { class: "ante-title", text: "Lo que KDD Studio sabe" }), learnedNode)),
     fileInput,
   );
 
@@ -206,7 +206,7 @@ export async function renderMyKnowledge({ container }) {
       selected.clear();
       learnButton.disabled = true;
       renderDocuments();
-      toast("Doriath ha aprendido de tus documentos", "ok");
+      toast("KDD Studio ha aprendido de tus documentos", "ok");
     } catch (error) {
       resultNode.replaceChildren(h("div", { class: "callout callout--error", text: error.message }));
       learnButton.disabled = false;
@@ -247,7 +247,7 @@ export async function renderMyKnowledge({ container }) {
   function renderLearned() {
     clear(learnedNode);
     if (!knowledge.knows.length) {
-      learnedNode.append(h("div", { class: "empty small", text: "Cuando Doriath lea tus documentos, aquí verás lo que ha aprendido." }));
+      learnedNode.append(h("div", { class: "empty small", text: "Cuando KDD Studio lea tus documentos, aquí verás lo que ha aprendido." }));
       return;
     }
     learnedNode.append(h("p", { class: "small muted", style: { marginBottom: "10px" }, text: `${knowledge.total} cosas aprendidas de tus documentos y de tus correcciones.` }));
@@ -262,7 +262,7 @@ export async function renderMyKnowledge({ container }) {
         h("p", { class: "ante-title", text: "Cómo funciona" }),
         h("div", { style: { marginTop: "12px" } },
           [["Sube documentos", "Manuales, procedimientos, presentaciones… lo que ya tenga tu equipo."],
-            ["Doriath los lee", "Se queda con lo importante y te avisa si dos documentos se contradicen."],
+            ["KDD Studio los lee", "Se queda con lo importante y te avisa si dos documentos se contradicen."],
             ["Pregunta y corrige", "Si una respuesta no te encaja, se lo dices y lo aprende para siempre."]]
             .map(([title, text], index) => h("div", { class: "step" },
               h("div", { class: "step__n", text: String(index + 1) }),

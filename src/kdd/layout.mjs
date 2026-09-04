@@ -2,7 +2,7 @@ import path from "node:path";
 
 /**
  * Disposición de una base de conocimiento KDD en disco. Es la misma que usa KDD Studio para sus
- * fuentes locales, de modo que una carpeta creada por Doriath se puede abrir en KDD Studio y viceversa.
+ * fuentes locales, de modo que una carpeta creada por KDD Studio se puede abrir en KDD Studio y viceversa.
  *
  *   <kb>/
  *   ├── kdd-source.json            metadatos de la caja (nombre, Source ID, descripción)

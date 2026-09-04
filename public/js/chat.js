@@ -48,13 +48,13 @@ export function createChatView({ chatId, placeholder = "Escribe tu mensaje…", 
 
   function renderMessage(message) {
     const node = h("div", { class: `msg msg--${message.role}${message.error ? " msg--error" : ""}` },
-      h("div", { class: "msg__meta" }, h("span", { text: message.role === "user" ? "Tú" : "Doriath" }), h("span", { text: fmtDate(message.at) }), message.model ? h("span", { text: message.model }) : null),
+      h("div", { class: "msg__meta" }, h("span", { text: message.role === "user" ? "Tú" : "KDD Studio" }), h("span", { text: fmtDate(message.at) }), message.model ? h("span", { text: message.model }) : null),
     );
     if (message.error) node.append(h("p", { text: `Error: ${message.error}` }));
     else if (message.role === "user") node.append(h("div", { class: "md", text: message.content }));
     else node.append(md(message.content || "(sin contenido)"));
     if (message.attachments?.length) node.append(h("div", { class: "msg__attachments" }, message.attachments.map((file) => h("span", { class: "file-chip", text: `${file.name} · ${fmtBytes(file.size)}` }))));
-    if (message.packageId) node.append(h("div", { class: "callout callout--info", style: { marginTop: "10px" }, text: plain ? "Doriath ha preparado una propuesta. Revísala en el panel de la derecha y guárdala cuando te encaje." : "Se ha propuesto un paquete de specs. Revísalo en el panel de la derecha y confirma para persistirlo." }));
+    if (message.packageId) node.append(h("div", { class: "callout callout--info", style: { marginTop: "10px" }, text: plain ? "KDD Studio ha preparado una propuesta. Revísala en el panel de la derecha y guárdala cuando te encaje." : "Se ha propuesto un paquete de specs. Revísalo en el panel de la derecha y confirma para persistirlo." }));
     if (message.actionError) node.append(h("div", { class: "callout callout--warn", style: { marginTop: "10px" }, text: `El bloque de acciones no se pudo interpretar: ${message.actionError}` }));
     if (message.applied?.length) node.append(h("div", { class: "callout callout--ok", style: { marginTop: "10px" }, text: `Acciones aplicadas al preview: ${message.applied.map((item) => `${item.type} ${item.id}`).join(", ")}.` }));
     // Gancho para que una vista añada acciones bajo el mensaje (por ejemplo, corregir una respuesta).
@@ -74,7 +74,7 @@ export function createChatView({ chatId, placeholder = "Escribe tu mensaje…", 
   function ensureStreamingNode() {
     if (streamingNode) return streamingNode;
     toolsNode = h("div", { class: "msg__tools" });
-    streamingNode = h("div", { class: "msg msg--assistant" }, h("div", { class: "msg__meta" }, h("span", { text: "Doriath" }), h("span", { class: "typing" }, h("span"), h("span"), h("span"))), toolsNode, h("div", { class: "md" }));
+    streamingNode = h("div", { class: "msg msg--assistant" }, h("div", { class: "msg__meta" }, h("span", { text: "KDD Studio" }), h("span", { class: "typing" }, h("span"), h("span"), h("span"))), toolsNode, h("div", { class: "md" }));
     thread.append(streamingNode);
     return streamingNode;
   }

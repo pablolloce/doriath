@@ -20,14 +20,14 @@ function download(url, destination, { onProgress, redirects = 5 } = {}) {
           reject(new Error(`El proxy rechazó la conexión (${response.statusCode}).`));
           return;
         }
-        request = https.request({ host: target.hostname, path: `${target.pathname}${target.search}`, method: "GET", socket, agent: false, headers: { "user-agent": "doriath-launcher" }, servername: target.hostname }, handleResponse);
+        request = https.request({ host: target.hostname, path: `${target.pathname}${target.search}`, method: "GET", socket, agent: false, headers: { "user-agent": "kdd-launcher" }, servername: target.hostname }, handleResponse);
         request.on("error", reject);
         request.end();
       });
       connectRequest.on("error", reject);
       connectRequest.end();
     } else {
-      request = client.get(url, { headers: { "user-agent": "doriath-launcher" } }, handleResponse);
+      request = client.get(url, { headers: { "user-agent": "kdd-launcher" } }, handleResponse);
       request.on("error", reject);
     }
     function handleResponse(response) {

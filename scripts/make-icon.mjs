@@ -4,7 +4,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 
 /**
- * Genera `public/brand/doriath.ico` a partir del PNG de marca.
+ * Genera `public/brand/kdd.ico` a partir del PNG de marca.
  *
  * El detalle que importa: Windows solo entiende iconos comprimidos en PNG dentro de un `.ico`
  * en el tamaño 256x256. Para 16, 24, 32 y 48 —los que dibuja el Explorador en las vistas de
@@ -17,8 +17,8 @@ import zlib from "node:zlib";
  * vuelve a codificar. Así el icono se puede regenerar en cualquier equipo con solo Node.
  */
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const SOURCE = path.join(root, "public/brand/doriath-icon.png");
-const TARGET = path.join(root, "public/brand/doriath.ico");
+const SOURCE = path.join(root, "public/brand/kdd-icon.png");
+const TARGET = path.join(root, "public/brand/kdd.ico");
 
 /** Tamaños que pide Windows. Solo el último viaja como PNG. */
 const SIZES = [16, 24, 32, 48, 64, 128, 256];

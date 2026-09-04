@@ -28,7 +28,7 @@ export function buildXlsx(model) {
     if (headers.length) worksheet["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: data.length - rows.length - 1, c: 0 }, e: { r: data.length - 1, c: Math.max(0, headers.length - 1) } }) };
     XLSX.utils.book_append_sheet(workbook, worksheet, String(sheet.name || "Datos").slice(0, 31));
   }
-  const about = XLSX.utils.aoa_to_sheet([["Documento", plainText(model.title || "")], ["Generado por", "Doriath · NFQ para BBVA CIB"], ["Fecha", new Date().toISOString().slice(0, 10)], ["Fuente", plainText(model.source || "Bases de conocimiento KDD")]]);
+  const about = XLSX.utils.aoa_to_sheet([["Documento", plainText(model.title || "")], ["Generado por", "KDD Studio · NFQ para BBVA CIB"], ["Fecha", new Date().toISOString().slice(0, 10)], ["Fuente", plainText(model.source || "Bases de conocimiento KDD")]]);
   about["!cols"] = [{ wch: 18 }, { wch: 60 }];
   XLSX.utils.book_append_sheet(workbook, about, "Acerca de");
   return XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });

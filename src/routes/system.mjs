@@ -31,7 +31,7 @@ async function buildInfo() {
 /**
  * La carpeta de salidas (donde el asistente deja los documentos que genera) no puede coincidir con
  * ninguna base de conocimiento ni con ningún repositorio registrado, ni contenerlos: son carpetas que
- * Doriath no debe mezclar con lo que el usuario ya tiene versionado o catalogado.
+ * KDD Studio no debe mezclar con lo que el usuario ya tiene versionado o catalogado.
  */
 async function assertOutputPathsSeparate(patchPaths) {
   if (!patchPaths) return;
@@ -57,7 +57,7 @@ async function assertOutputPathsSeparate(patchPaths) {
 }
 
 export function registerSystemRoutes(router) {
-  router.get("/api/health", async () => ({ ok: true, product: "Doriath", version: getConfig().product.version, pid: process.pid }));
+  router.get("/api/health", async () => ({ ok: true, product: "KDD Studio", version: getConfig().product.version, pid: process.pid }));
 
   router.get("/api/status", async ({ query }) => {
     const config = getConfig();

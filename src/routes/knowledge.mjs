@@ -68,7 +68,7 @@ export function registerKnowledgeRoutes(router) {
     if (!parseSpecId(id)) throw new HttpError(400, "Identificador no válido.");
     const spec = await store.create({
       id, layer, axis: LAYERS[layer].axis, title: body?.title || id, status: body?.status, confidence: body?.confidence, owner: body?.owner || "", domain: body?.domainName || "", subdomain: body?.subdomain || "", tags: body?.tags || [], dependencies: body?.dependencies || [], activates: body?.activates || [], parent: body?.parent || "", source: source.sourceId, body: body?.body || defaultBody(layer),
-    }, { generatedBy: "doriath-manual" });
+    }, { generatedBy: "kdd-manual" });
     await recordActivity(source.path, { actor: await actor(), kind: "edit", title: `Creó ${spec.id}`, detail: spec.title, specs: [spec.id] });
     return { spec };
   });

@@ -1,6 +1,6 @@
 import path from "node:path";
 import { readFile, readdir, stat } from "node:fs/promises";
-import { defineDoriathTool } from "./copilot.mjs";
+import { defineKddTool } from "./copilot.mjs";
 import { buildSpecIndex, snippetFor } from "../kdd/search.mjs";
 import { buildGraph, impact as graphImpact } from "../kdd/graph.mjs";
 import { validateSpecStructure, findSection } from "../kdd/sections.mjs";
@@ -41,7 +41,7 @@ export async function createKddTools({ contexts, repos = [] }) {
 
   const tools = [];
 
-  tools.push(await defineDoriathTool("search_specs", {
+  tools.push(await defineKddTool("search_specs", {
     description: "Búsqueda léxica (BM25) de specs por vocabulario en las bases de conocimiento disponibles. Devuelve id, título, capa, caja y un fragmento. Úsala antes de read_spec cuando no conozcas el id exacto.",
     parameters: { type: "object", properties: { query: { type: "string", description: "Palabras clave o frase" }, layer: { type: "string", description: "Filtro opcional de capa: architecture, domain, product, feature, doc, work-spec, work-plan, work-task, adr, rfc, rule" }, limit: { type: "number", description: "Máximo de resultados (por defecto 8)" } }, required: ["query"] },
     handler: async ({ query, layer, limit }) => {
@@ -60,7 +60,7 @@ export async function createKddTools({ contexts, repos = [] }) {
     },
   }));
 
-  tools.push(await defineDoriathTool("read_spec", {
+  tools.push(await defineKddTool("read_spec", {
     description: "Devuelve el contenido completo (frontmatter y body) de una spec por su identificador.",
     parameters: { type: "object", properties: { id: { type: "string", description: "Identificador de la spec, p. ej. DOM-RISK-S001-001" } }, required: ["id"] },
     handler: async ({ id }) => {
@@ -72,7 +72,7 @@ export async function createKddTools({ contexts, repos = [] }) {
     },
   }));
 
-  tools.push(await defineDoriathTool("list_specs", {
+  tools.push(await defineKddTool("list_specs", {
     description: "Lista las specs de las bases de conocimiento (id, título, capa, estado, confianza). Admite filtros por capa, estado y caja.",
     parameters: { type: "object", properties: { layer: { type: "string" }, status: { type: "string" }, knowledgeBase: { type: "string", description: "Nombre o Source ID de la caja" }, limit: { type: "number" } } },
     handler: async ({ layer, status, knowledgeBase, limit }) => {
@@ -90,7 +90,7 @@ export async function createKddTools({ contexts, repos = [] }) {
     },
   }));
 
-  tools.push(await defineDoriathTool("validate_spec", {
+  tools.push(await defineKddTool("validate_spec", {
     description: "Valida la estructura de una spec (secciones canónicas, criterios verificables, coherencia Work) y devuelve las incidencias.",
     parameters: { type: "object", properties: { id: { type: "string" } }, required: ["id"] },
     handler: async ({ id }) => {
@@ -102,7 +102,7 @@ export async function createKddTools({ contexts, repos = [] }) {
     },
   }));
 
-  tools.push(await defineDoriathTool("spec_impact", {
+  tools.push(await defineKddTool("spec_impact", {
     description: "Análisis de impacto: qué specs dependen directa o transitivamente de la indicada (grafo inverso).",
     parameters: { type: "object", properties: { id: { type: "string" } }, required: ["id"] },
     handler: async ({ id }) => {
@@ -117,7 +117,7 @@ export async function createKddTools({ contexts, repos = [] }) {
     },
   }));
 
-  tools.push(await defineDoriathTool("list_work_items", {
+  tools.push(await defineKddTool("list_work_items", {
     description: "Lista las iniciativas Work (WRK-SPEC) con sus planes y tareas, incluyendo estado.",
     parameters: { type: "object", properties: { status: { type: "string" } } },
     handler: async ({ status }) => {
@@ -137,7 +137,7 @@ export async function createKddTools({ contexts, repos = [] }) {
     },
   }));
 
-  tools.push(await defineDoriathTool("list_pending_tasks", {
+  tools.push(await defineKddTool("list_pending_tasks", {
     description: "Preguntas y conflictos pendientes de análisis anteriores en las bases de conocimiento.",
     parameters: { type: "object", properties: {} },
     handler: async () => {
@@ -150,7 +150,7 @@ export async function createKddTools({ contexts, repos = [] }) {
     },
   }));
 
-  tools.push(await defineDoriathTool("get_open_questions", {
+  tools.push(await defineKddTool("get_open_questions", {
     description: "Devuelve la sección Open Questions de una WRK-SPEC (o de cualquier spec que la tenga).",
     parameters: { type: "object", properties: { id: { type: "string" } }, required: ["id"] },
     handler: async ({ id }) => {
@@ -161,7 +161,7 @@ export async function createKddTools({ contexts, repos = [] }) {
     },
   }));
 
-  tools.push(await defineDoriathTool("search_decision_history", {
+  tools.push(await defineKddTool("search_decision_history", {
     description: "Busca en el historial de decisiones (preguntas resueltas en análisis y chats anteriores).",
     parameters: { type: "object", properties: { query: { type: "string" } }, required: ["query"] },
     handler: async ({ query }) => {
@@ -178,7 +178,7 @@ export async function createKddTools({ contexts, repos = [] }) {
     },
   }));
 
-  tools.push(await defineDoriathTool("list_documents", {
+  tools.push(await defineKddTool("list_documents", {
     description: "Lista los documentos importados en las bases de conocimiento (docs-tecnicos).",
     parameters: { type: "object", properties: {} },
     handler: async () => {
@@ -191,7 +191,7 @@ export async function createKddTools({ contexts, repos = [] }) {
     },
   }));
 
-  tools.push(await defineDoriathTool("search_document", {
+  tools.push(await defineKddTool("search_document", {
     description: "Busca párrafos relevantes dentro de los documentos importados (BM25 por párrafo).",
     parameters: { type: "object", properties: { query: { type: "string" }, limit: { type: "number" } }, required: ["query"] },
     handler: async ({ query, limit }) => {
@@ -206,7 +206,7 @@ export async function createKddTools({ contexts, repos = [] }) {
     },
   }));
 
-  tools.push(await defineDoriathTool("read_section", {
+  tools.push(await defineKddTool("read_section", {
     description: "Lee una sección de un documento importado. Indica el nombre del documento y el título (o parte) de la sección; sin sección devuelve el índice de secciones.",
     parameters: { type: "object", properties: { document: { type: "string" }, section: { type: "string" }, maxChars: { type: "number" } }, required: ["document"] },
     handler: async ({ document, section, maxChars }) => {
@@ -227,7 +227,7 @@ export async function createKddTools({ contexts, repos = [] }) {
     },
   }));
 
-  tools.push(await defineDoriathTool("grep_document", {
+  tools.push(await defineKddTool("grep_document", {
     description: "Busca una expresión regular en un documento importado y devuelve las líneas coincidentes con contexto.",
     parameters: { type: "object", properties: { document: { type: "string" }, pattern: { type: "string" }, limit: { type: "number" } }, required: ["document", "pattern"] },
     handler: async ({ document, pattern, limit }) => {
@@ -249,13 +249,13 @@ export async function createKddTools({ contexts, repos = [] }) {
   }));
 
   if (repos.length) {
-    tools.push(await defineDoriathTool("list_repositories", {
+    tools.push(await defineKddTool("list_repositories", {
       description: "Lista los repositorios locales seleccionados para el trabajo, con su ruta, rama y remoto.",
       parameters: { type: "object", properties: {} },
       handler: async () => repos.map((repo) => ({ name: repo.name, path: repo.path, branch: repo.branch, remote: repo.remote, stacks: repo.stacks })),
     }));
 
-    tools.push(await defineDoriathTool("grep_repo", {
+    tools.push(await defineKddTool("grep_repo", {
       description: "Busca un patrón (regex) en los ficheros de un repositorio seleccionado. Devuelve ruta:línea:texto.",
       parameters: { type: "object", properties: { repository: { type: "string", description: "Nombre del repositorio (ver list_repositories)" }, pattern: { type: "string" }, glob: { type: "string", description: "Filtro opcional de fichero, p. ej. *.java" }, limit: { type: "number" } }, required: ["repository", "pattern"] },
       handler: async ({ repository, pattern, glob, limit }) => {
@@ -269,7 +269,7 @@ export async function createKddTools({ contexts, repos = [] }) {
       },
     }));
 
-    tools.push(await defineDoriathTool("read_repo_file", {
+    tools.push(await defineKddTool("read_repo_file", {
       description: "Lee un fichero de un repositorio seleccionado (ruta relativa a la raíz del repositorio).",
       parameters: { type: "object", properties: { repository: { type: "string" }, path: { type: "string" }, maxChars: { type: "number" } }, required: ["repository", "path"] },
       handler: async ({ repository, path: relative, maxChars }) => {
@@ -289,7 +289,7 @@ export async function createKddTools({ contexts, repos = [] }) {
       },
     }));
 
-    tools.push(await defineDoriathTool("repo_tree", {
+    tools.push(await defineKddTool("repo_tree", {
       description: "Estructura de carpetas y ficheros de un repositorio (hasta cierta profundidad), ignorando node_modules, target, build y .git.",
       parameters: { type: "object", properties: { repository: { type: "string" }, depth: { type: "number" }, subpath: { type: "string" } }, required: ["repository"] },
       handler: async ({ repository, depth, subpath }) => {

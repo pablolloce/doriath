@@ -186,7 +186,7 @@ export function promptDialog(title, { label = "Valor", value = "", placeholder =
 }
 
 /**
- * Selección de carpeta. El explorador propio de Doriath es el camino principal porque funciona
+ * Selección de carpeta. El explorador propio de KDD Studio es el camino principal porque funciona
  * siempre: el diálogo nativo de Windows depende de PowerShell y de que la ventana llegue a primer
  * plano, y en equipos con la política restringida no llega a aparecer, dejando al usuario delante de
  * un botón que no hace nada. Queda como atajo opcional dentro del propio explorador.
@@ -198,7 +198,7 @@ export function pickFolder({ title = "Selecciona una carpeta", initial = "" } = 
 export function browseFolder({ title = "Selecciona una carpeta", initial = "" } = {}) {
   return new Promise((resolve) => {
     const { close } = openModal([], { onClose: () => resolve(null) });
-    const current = h("input", { class: "input mono", value: initial, placeholder: "C:\\Doriath\\knowledge-bases\\mi-base" });
+    const current = h("input", { class: "input mono", value: initial, placeholder: "C:\\KDD Studio\\knowledge-bases\\mi-base" });
     const list = h("div", { class: "dir-browser" });
     const nativeButton = h("button", { class: "btn btn--outline btn--sm", text: "Selector de Windows", title: "Abre el diálogo del sistema. Si no aparece, búscalo en la barra de tareas.", onclick: async () => {
       nativeButton.disabled = true;

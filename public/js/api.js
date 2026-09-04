@@ -1,4 +1,4 @@
-/** Cliente HTTP mínimo para la API local de Doriath. */
+/** Cliente HTTP mínimo para la API local de KDD Studio. */
 export async function api(path, { method = "GET", body, headers = {} } = {}) {
   const options = { method, headers: { ...headers } };
   if (body !== undefined) {

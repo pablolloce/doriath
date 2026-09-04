@@ -177,7 +177,7 @@ function summarizePackage(specs, modifications) {
 }
 
 /** Persiste un paquete confirmado (specs nuevas + modificaciones). */
-export async function persistPackage(pkg, { store, sourceCode, generatedBy = "doriath-chat", force = false } = {}) {
+export async function persistPackage(pkg, { store, sourceCode, generatedBy = "kdd-chat", force = false } = {}) {
   const results = [];
   const selected = pkg.specs.filter((spec) => spec.selected !== false);
   if (!force && pkg.kind === "work" && selected.some((spec) => spec.blocking)) {

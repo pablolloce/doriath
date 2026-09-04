@@ -2,9 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
 import os from "node:os";
-import { mkdtemp, mkdir } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { pathToFileURL } from "node:url";
+import { tmpdir } from "node:os";
 
-process.env.DORIATH_HOME = await mkdtemp(path.join(os.tmpdir(), "doriath-test-home-"));
+process.env.KDD_HOME = await mkdtemp(path.join(os.tmpdir(), "kdd-test-home-"));
 const { loadConfig } = await import("../src/config.mjs");
 await loadConfig();
 const { parseSpecId, buildSpecId, allocateSpecId, extractSpecIds } = await import("../src/kdd/ids.mjs");
@@ -82,7 +86,7 @@ test("search: bm25 ranks by vocabulary", () => {
 });
 
 test("store and sources: create, persist, protect validated specs", async () => {
-  const parent = await mkdtemp(path.join(os.tmpdir(), "doriath-kb-"));
+  const parent = await mkdtemp(path.join(os.tmpdir(), "kdd-kb-"));
   const source = await createSource({ name: "Caja test", parentDir: parent });
   assert.equal(source.sourceId, "S001");
   const store = await getSpecStore(source.path).load();
@@ -112,28 +116,63 @@ test("util/fs: isPathWithin detecta contención insensible a mayúsculas", () =>
 
 test("util/fs: normalizeUserPath limpia lo que pega una persona desde Windows", () => {
   // "Copiar como ruta de acceso" envuelve la ruta en comillas: sin limpiarlas, la carpeta "no existe".
-  assert.equal(normalizeUserPath('"C:\\Doriath\\kb"'), "C:\\Doriath\\kb");
-  assert.equal(normalizeUserPath("  C:\\Doriath\\kb  "), "C:\\Doriath\\kb");
-  assert.equal(normalizeUserPath("C:\\Doriath\\kb\\"), "C:\\Doriath\\kb");
+  assert.equal(normalizeUserPath('"C:\\KDD Studio\\kb"'), "C:\\KDD Studio\\kb");
+  assert.equal(normalizeUserPath("  C:\\KDD Studio\\kb  "), "C:\\KDD Studio\\kb");
+  assert.equal(normalizeUserPath("C:\\KDD Studio\\kb\\"), "C:\\KDD Studio\\kb");
   assert.equal(normalizeUserPath("'/home/ana/kb/'"), "/home/ana/kb");
   assert.equal(normalizeUserPath("file:///home/ana/kb"), "/home/ana/kb");
-  assert.equal(normalizeUserPath("file:///C:/Doriath/kb"), "C:/Doriath/kb");
+  assert.equal(normalizeUserPath("file:///C:/KDD Studio/kb"), "C:/KDD Studio/kb");
   assert.equal(normalizeUserPath("C:\\"), "C:\\", "la raíz de una unidad conserva su barra");
   assert.equal(normalizeUserPath(""), "");
   assert.equal(normalizeUserPath(null), "");
 });
 
 test("sources: una base de conocimiento no puede vivir en la carpeta de salidas ni dentro de un repositorio", async () => {
-  const parent = await mkdtemp(path.join(os.tmpdir(), "doriath-kb-guard-"));
+  const parent = await mkdtemp(path.join(os.tmpdir(), "kdd-kb-guard-"));
   const outputs = path.join(parent, "outputs");
   await updateConfig({ paths: { outputs } });
   await assert.rejects(createSource({ name: "Choca con salidas", parentDir: outputs }), /carpeta de salidas/);
 
-  const projectsRoot = await mkdtemp(path.join(os.tmpdir(), "doriath-repos-"));
+  const projectsRoot = await mkdtemp(path.join(os.tmpdir(), "kdd-repos-"));
   const otherKb = await createSource({ name: "Base con repos", parentDir: projectsRoot });
   const repoDir = path.join(projectsRoot, "mi-repo");
   await mkdir(repoDir, { recursive: true });
   await registerRepositories(otherKb.path, [{ path: repoDir, name: "mi-repo" }]);
   await assert.rejects(addExistingSource(repoDir), /repositorio/);
   await assert.rejects(createSource({ name: "Dentro del repo", parentDir: repoDir }), /repositorio/);
+});
+
+test("paths: los datos de la versión Doriath se adoptan sin perder nada", async () => {
+  // La migración se resuelve al importar el módulo, así que se comprueba en un proceso aparte
+  // con un HOME de mentira. Es el código que puede dejar sin datos a quien actualiza.
+  const home = await mkdtemp(path.join(tmpdir(), "kdd-migracion-"));
+  await mkdir(path.join(home, ".doriath", "chats"), { recursive: true });
+  await mkdir(path.join(home, "Doriath", "knowledge-bases", "base-de-siempre"), { recursive: true });
+  await writeFile(path.join(home, ".doriath", "sources.json"), '{"marca":"original"}');
+
+  const leer = `import { paths, defaultKnowledgeBasesRoot } from "${pathToFileURL(path.join(process.cwd(), "src/paths.mjs")).href}";
+    console.log(JSON.stringify({ dataRoot: paths.dataRoot, kbs: defaultKnowledgeBasesRoot }));`;
+  const salida = spawnSync(process.execPath, ["--input-type=module", "-e", leer], {
+    encoding: "utf8", env: { ...process.env, HOME: home, USERPROFILE: home, KDD_HOME: "" },
+  });
+  const rutas = JSON.parse(salida.stdout.trim());
+
+  assert.equal(rutas.dataRoot, path.join(home, ".kdd"), "los datos pasan a la carpeta nueva");
+  assert.equal(await readFile(path.join(home, ".kdd", "sources.json"), "utf8"), '{"marca":"original"}',
+    "el registro de bases sobrevive a la migración");
+  assert.ok(existsSync(path.join(home, "KDD", "knowledge-bases", "base-de-siempre")),
+    "las bases de conocimiento sobreviven a la migración");
+  assert.ok(!existsSync(path.join(home, ".doriath")), "no queda una copia huérfana");
+
+  // Si ya existe la carpeta nueva, la vieja no se toca: mandan los datos nuevos.
+  const mixto = await mkdtemp(path.join(tmpdir(), "kdd-mixto-"));
+  await mkdir(path.join(mixto, ".doriath"), { recursive: true });
+  await mkdir(path.join(mixto, ".kdd"), { recursive: true });
+  await writeFile(path.join(mixto, ".doriath", "sources.json"), "viejo");
+  await writeFile(path.join(mixto, ".kdd", "sources.json"), "nuevo");
+  spawnSync(process.execPath, ["--input-type=module", "-e", leer], {
+    encoding: "utf8", env: { ...process.env, HOME: mixto, USERPROFILE: mixto, KDD_HOME: "" },
+  });
+  assert.equal(await readFile(path.join(mixto, ".kdd", "sources.json"), "utf8"), "nuevo");
+  assert.equal(await readFile(path.join(mixto, ".doriath", "sources.json"), "utf8"), "viejo");
 });

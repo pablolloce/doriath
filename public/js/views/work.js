@@ -27,11 +27,11 @@ export async function renderWork({ container, params, state }) {
     return {};
   }
   const layers = state.layers || [];
-  let tab = params[0] || localStorage.getItem("doriath.workTab") || "initiatives";
+  let tab = params[0] || localStorage.getItem("kdd.workTab") || "initiatives";
   const tabsNode = h("div", { class: "tabs" });
   const body = h("div");
   container.append(
-    h("div", { class: "card card--electric" }, h("p", { class: "ante-title", text: `Knowledge-Driven Development · ${source.sourceId}` }), h("h1", { text: source.name }), h("p", { class: "small", style: { marginTop: "8px", opacity: 0.85 }, text: "Cuenta qué necesitas cambiar, en tus palabras. Doriath consulta lo que ya sabe, mira tus repositorios y propone las features con sus historias de usuario. Después trabaja cada historia sobre tu código y te enseña los cambios para que los revises antes de guardarlos." })),
+    h("div", { class: "card card--electric" }, h("p", { class: "ante-title", text: `Knowledge-Driven Development · ${source.sourceId}` }), h("h1", { text: source.name }), h("p", { class: "small", style: { marginTop: "8px", opacity: 0.85 }, text: "Cuenta qué necesitas cambiar, en tus palabras. KDD Studio consulta lo que ya sabe, mira tus repositorios y propone las features con sus historias de usuario. Después trabaja cada historia sobre tu código y te enseña los cambios para que los revises antes de guardarlos." })),
     tabsNode,
     body,
   );
@@ -42,7 +42,7 @@ export async function renderWork({ container, params, state }) {
   }
   async function selectTab(id, extra) {
     tab = id;
-    localStorage.setItem("doriath.workTab", id);
+    localStorage.setItem("kdd.workTab", id);
     renderTabs();
     cleanup?.();
     cleanup = null;
@@ -105,7 +105,7 @@ export async function renderWork({ container, params, state }) {
     }
     node.append(h("div", { class: "bento bento--main-aside" },
       h("div", { class: "card" }, h("div", { class: "card__header" }, h("div", {}, h("p", { class: "ante-title", text: "Repositorios registrados" }), h("h2", { text: "Clones locales" })), h("button", { class: "btn btn--outline btn--sm", text: "Actualizar", onclick: refreshRegistered })), registeredNode),
-      h("div", { class: "card card--serene" }, h("p", { class: "ante-title", text: "Detectar repositorios" }), h("h3", { text: "Selecciona carpetas" }), h("p", { class: "small", style: { margin: "8px 0 12px" }, text: "Elige la carpeta raíz donde tienes clonados los repositorios (o cada repositorio). Doriath busca las carpetas .git y trabaja directamente sobre ellas." }),
+      h("div", { class: "card card--serene" }, h("p", { class: "ante-title", text: "Detectar repositorios" }), h("h3", { text: "Selecciona carpetas" }), h("p", { class: "small", style: { margin: "8px 0 12px" }, text: "Elige la carpeta raíz donde tienes clonados los repositorios (o cada repositorio). KDD Studio busca las carpetas .git y trabaja directamente sobre ellas." }),
         h("div", { class: "card__actions" }, h("button", { class: "btn", text: "Elegir carpeta", onclick: async () => { const folder = await pickFolder({ title: "Carpeta con repositorios" }); if (folder && !folders.includes(folder)) { folders.push(folder); renderFolders(); } } }), h("button", { class: "btn btn--outline", text: "Escribir ruta", onclick: async () => { const value = await promptDialog("Ruta de la carpeta", { label: "Ruta" }); if (value && !folders.includes(value)) { folders.push(value); renderFolders(); } } })),
         h("div", { style: { margin: "12px 0" } }, foldersNode),
         h("button", { class: "btn btn--lime", text: "Buscar repositorios", onclick: scan }),
@@ -122,7 +122,7 @@ export async function renderWork({ container, params, state }) {
     let view = null;
     node.append(h("div", { class: "bento", style: { gridTemplateColumns: "280px minmax(0, 1fr) 380px", alignItems: "start" } },
       h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } },
-        h("div", { class: "card card--serene" }, h("p", { class: "ante-title", text: "Paso 1" }), h("h3", { text: "Describe el cambio" }), h("p", { class: "small", style: { margin: "8px 0 12px" }, text: "Explícalo como se lo contarías a un compañero. Doriath te pregunta lo que le falte, busca en el conocimiento, detecta los repositorios y propone las features con sus historias de usuario." }), h("button", { class: "btn", text: "Nueva iniciativa", onclick: () => startChat() })),
+        h("div", { class: "card card--serene" }, h("p", { class: "ante-title", text: "Paso 1" }), h("h3", { text: "Describe el cambio" }), h("p", { class: "small", style: { margin: "8px 0 12px" }, text: "Explícalo como se lo contarías a un compañero. KDD Studio te pregunta lo que le falte, busca en el conocimiento, detecta los repositorios y propone las features con sus historias de usuario." }), h("button", { class: "btn", text: "Nueva iniciativa", onclick: () => startChat() })),
         h("div", { class: "card" }, h("p", { class: "ante-title", text: "Iniciativas en curso" }), listNode)),
       chatHost,
       h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } }, h("div", { class: "card" }, h("div", { class: "card__header" }, h("p", { class: "ante-title", text: "Repositorios de la iniciativa" }), h("button", { class: "btn btn--ghost btn--xs", text: "Gestionar", onclick: () => selectTab("repositories") })), reposNode), packageHost)));
@@ -203,7 +203,7 @@ export async function renderWork({ container, params, state }) {
       const branch = h("input", { class: "input", value: "", placeholder: "Se generará a partir de la iniciativa" });
       document.querySelector(".modal").append(
         modalHeader(spec.title, close, isAdmin() ? `Preparar ejecución · ${spec.id}` : "Preparar ejecución"),
-        h("p", { class: "muted small", text: "Elige en qué repositorio se trabaja cada historia de usuario. Doriath abre una rama para la iniciativa; al terminar cada historia te enseña los cambios para que los revises antes de confirmarlos." }),
+        h("p", { class: "muted small", text: "Elige en qué repositorio se trabaja cada historia de usuario. KDD Studio abre una rama para la iniciativa; al terminar cada historia te enseña los cambios para que los revises antes de confirmarlos." }),
         h("div", { class: "field" }, h("label", { text: "Rama de trabajo (opcional)" }), branch),
         h("table", { class: "table table--compact" }, h("thead", {}, h("tr", {}, h("th", {}), h("th", { text: "Historia de usuario" }), h("th", { text: "Tipo" }), h("th", { text: "Repositorio" }))), h("tbody", {}, tasks.map((task) => {
           const select = h("select", { class: "select" }, h("option", { value: "", text: "— sin repositorio —" }), repos.map((repo) => h("option", { value: repo.id, text: repo.name, selected: task.repositoryHint && repo.name.toLowerCase() === task.repositoryHint.toLowerCase() })));
@@ -278,7 +278,7 @@ export async function renderWork({ container, params, state }) {
           taskCard.append(h("div", { class: "log", dataset: { log: task.id } }, (task.log || []).slice(-40).map((entry) => h("div", { class: "log__line" }, h("span", { class: "log__time", text: new Date(entry.at).toLocaleTimeString("es-ES") }), entry.message))), h("pre", { class: "code small", dataset: { stream: task.id }, style: { marginTop: "8px", maxHeight: "200px", whiteSpace: "pre-wrap" } }));
         } else if (task.status === "review" || task.status === "no-changes" || task.status === "failed" || task.status === "committed" || task.status === "cancelled") {
           if (task.error) taskCard.append(h("div", { class: "callout callout--error small", text: task.error }));
-          if (task.summary) taskCard.append(h("details", { open: task.status === "review" }, h("summary", { class: "small muted", text: "Qué ha hecho Doriath" }), md(task.summary)));
+          if (task.summary) taskCard.append(h("details", { open: task.status === "review" }, h("summary", { class: "small muted", text: "Qué ha hecho KDD Studio" }), md(task.summary)));
           if (task.commit) taskCard.append(h("div", { class: "callout callout--ok small", text: `Commit ${task.commit.sha}: ${task.commit.message}` }));
           if (task.status === "review") {
             const message = h("input", { class: "input", value: `feat(${task.id}): ${task.title}` });

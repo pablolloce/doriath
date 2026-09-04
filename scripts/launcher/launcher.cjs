@@ -1,11 +1,11 @@
 "use strict";
 /**
- * Doriath.exe — launcher (Node SEA). Vive en la raíz de la instalación:
+ * KDD-Studio.exe — launcher (Node SEA). Vive en la raíz de la instalación:
  *
  *   <raiz>/
- *   ├── Doriath.exe          este launcher
- *   ├── doriath-root.json    marcador de instalación
- *   ├── app/                 código de Doriath + node_modules
+ *   ├── KDD-Studio.exe          este launcher
+ *   ├── kdd-root.json    marcador de instalación
+ *   ├── app/                 código de KDD Studio + node_modules
  *   ├── runtime/node/        Node.js portable (node.exe)
  *   ├── runtime/gh, git/     GitHub CLI y MinGit portables (si no estaban en el equipo)
  *   ├── data/ outputs/ knowledge-bases/
@@ -17,7 +17,7 @@
  *
  * Diagnóstico: todo lo que se imprime en la consola (incluida la salida del servidor) se copia en
  * data/logs/launcher.log, y ante cualquier fallo la ventana se queda abierta ("Pulsa una tecla")
- * como hace Wait-ForExit en FENIX. `--no-pause` (o DORIATH_NO_PAUSE=1) desactiva la espera.
+ * como hace Wait-ForExit en FENIX. `--no-pause` (o KDD_NO_PAUSE=1) desactiva la espera.
  */
 const fs = require("node:fs");
 const path = require("node:path");
@@ -29,8 +29,8 @@ const tools = require("./tools.json");
 
 const isWindows = process.platform === "win32";
 const argv = process.argv.slice(1);
-const noPause = argv.includes("--no-pause") || process.env.DORIATH_NO_PAUSE === "1";
-const root = process.env.DORIATH_ROOT ? path.resolve(process.env.DORIATH_ROOT) : fs.existsSync(path.join(path.dirname(process.execPath), "doriath-root.json")) ? path.dirname(process.execPath) : path.resolve(__dirname, "..", "..", "dist", "Doriath");
+const noPause = argv.includes("--no-pause") || process.env.KDD_NO_PAUSE === "1";
+const root = process.env.KDD_ROOT ? path.resolve(process.env.KDD_ROOT) : fs.existsSync(path.join(path.dirname(process.execPath), "kdd-root.json")) ? path.dirname(process.execPath) : path.resolve(__dirname, "..", "..", "dist", "KDD Studio");
 const appDir = path.join(root, "app");
 const runtimeDir = path.join(root, "runtime");
 const dataDir = path.join(root, "data");
@@ -55,7 +55,7 @@ function logToFile(text) {
 }
 
 function log(message, { stderr = false } = {}) {
-  const line = `[Doriath] ${message}\n`;
+  const line = `[KDD Studio] ${message}\n`;
   (stderr ? process.stderr : process.stdout).write(line);
   logToFile(line);
 }
@@ -63,7 +63,7 @@ function log(message, { stderr = false } = {}) {
 /** Mantiene la ventana abierta hasta que el usuario pulse una tecla (solo si hay consola interactiva). */
 function waitForKey(message = "Pulsa una tecla para cerrar esta ventana.") {
   if (noPause || !process.stdin.isTTY) return;
-  process.stdout.write(`\n[Doriath] ${message}\n`);
+  process.stdout.write(`\n[KDD Studio] ${message}\n`);
   try {
     if (isWindows) spawnSync("cmd.exe", ["/c", "pause"], { stdio: "inherit" });
     else spawnSync("sh", ["-c", "read -r _"], { stdio: "inherit" });
@@ -109,7 +109,7 @@ function readConfig() {
 }
 
 function applyProxy(env, config) {
-  const proxy = String(config?.network?.proxyUrl || process.env.DORIATH_PROXY || "").trim();
+  const proxy = String(config?.network?.proxyUrl || process.env.KDD_PROXY || "").trim();
   if (!proxy) return env;
   for (const key of ["HTTPS_PROXY", "HTTP_PROXY", "https_proxy", "http_proxy"]) env[key] = proxy;
   env.NO_PROXY = String(config?.network?.noProxy || "127.0.0.1,localhost");
@@ -154,7 +154,7 @@ async function ensurePortableTool(name) {
   log(`Descargando ${name} ${spec.version} (portable)…`);
   const zipPath = path.join(runtimeDir, `${name}.zip`);
   fs.mkdirSync(runtimeDir, { recursive: true });
-  await download(spec.url, zipPath, { onProgress: (received, total) => { if (total) process.stdout.write(`\r[Doriath] ${name}: ${Math.round((received / total) * 100)}%   `); } });
+  await download(spec.url, zipPath, { onProgress: (received, total) => { if (total) process.stdout.write(`\r[KDD Studio] ${name}: ${Math.round((received / total) * 100)}%   `); } });
   process.stdout.write("\n");
   fs.mkdirSync(dir, { recursive: true });
   extractZip(fs.readFileSync(zipPath), dir, { stripPrefix: spec.stripPrefix });
@@ -296,7 +296,7 @@ function startServer(node, env, port) {
     if (code === 0) {
       // El servidor salió sin llegar al health: normalmente porque ya había una instancia en marcha y
       // solo ha abierto una pestaña (main.mjs, reused).
-      log(`El servidor ha terminado antes de responder. Si Doriath ya estaba abierto, se ha abierto una pestaña nueva; si no ves nada, entra en http://127.0.0.1:${port}/ o revisa ${logFile}.`);
+      log(`El servidor ha terminado antes de responder. Si KDD Studio ya estaba abierto, se ha abierto una pestaña nueva; si no ves nada, entra en http://127.0.0.1:${port}/ o revisa ${logFile}.`);
       waitForKey();
       process.exit(0);
     }
@@ -313,7 +313,7 @@ async function main() {
     throw new Error(`No se encuentra la aplicación en ${appDir}. Vuelve a ejecutar el instalador.`);
   }
   const config = readConfig();
-  const env = applyProxy({ ...process.env, DORIATH_LAUNCHER_PID: String(process.pid) }, config);
+  const env = applyProxy({ ...process.env, KDD_LAUNCHER_PID: String(process.pid) }, config);
   const extraPath = [];
   for (const tool of ["gh", "git"]) {
     try {
@@ -329,7 +329,7 @@ async function main() {
   log(`Node: ${node}`);
   repairDependencies(node, env);
   ensureGitHubSession(env, config?.github?.host || "bbva.ghe.com");
-  const port = Number(process.env.DORIATH_PORT || config?.server?.port || 4410);
+  const port = Number(process.env.KDD_PORT || config?.server?.port || 4410);
   log("Arrancando el servidor local…");
   startServer(node, env, port);
   process.on("SIGINT", () => {
@@ -339,7 +339,7 @@ async function main() {
   const healthy = await waitForHealth(port);
   if (healthy) {
     serverReady = true;
-    log(`Doriath disponible en http://127.0.0.1:${port}/ (esta ventana muestra los registros; ciérrala para detenerlo).`);
+    log(`KDD-Studio disponible en http://127.0.0.1:${port}/ (esta ventana muestra los registros; ciérrala para detenerlo).`);
   } else if (serverChild && serverChild.exitCode === null) {
     log("El servidor tarda más de lo esperado; revisa los mensajes anteriores.");
   }

@@ -6,7 +6,7 @@ import { getConfig } from "../config.mjs";
 import { readJson, writeJson, ensureDir, safeFileName, slugify } from "../util/fs.mjs";
 import { eventBus } from "../util/events.mjs";
 import { log } from "../util/log.mjs";
-import { sessionPool, defineDoriathTool } from "../ai/copilot.mjs";
+import { sessionPool, defineKddTool } from "../ai/copilot.mjs";
 import { loadSpecDrivenPrompt, loadPrompt, loadVerticalTaxonomy, renderTemplate } from "../ai/prompts.mjs";
 import { createKddTools, describeTools } from "../ai/tools.mjs";
 import { getSource, listSources, touchSource } from "../knowledge/sources.mjs";
@@ -152,13 +152,13 @@ async function createOutputTools(chat) {
     eventBus.publish(`chat:${chat.id}`, "file", file);
     return `Fichero generado: ${file.name} (${file.size} bytes). Ruta: ${file.path}. Enlace de descarga: ${file.url}`;
   };
-  tools.push(await defineDoriathTool("write_output_file", {
+  tools.push(await defineKddTool("write_output_file", {
     description: "Escribe un fichero de texto en la carpeta de salidas de la conversación (Markdown, código, JSON, CSV, YAML, SQL, HTML, TXT...). Úsalo para cualquier entregable textual o de código. Devuelve la ruta y el enlace de descarga.",
     parameters: { type: "object", properties: { name: { type: "string", description: "Nombre con extensión, p. ej. informe.md o consulta.sql" }, content: { type: "string" } }, required: ["name", "content"] },
     handler: async ({ name, content }) => publishFile(await writeOutput(chat, name, String(content))),
   }));
-  tools.push(await defineDoriathTool("generate_docx", {
-    description: "Genera un documento Word (.docx) con la identidad BBVA (tipografías Source Serif 4 y Lato, Electric Blue, logos BBVA y NFQ). Pasa el contenido estructurado; el diseño lo aplica Doriath.",
+  tools.push(await defineKddTool("generate_docx", {
+    description: "Genera un documento Word (.docx) con la identidad BBVA (tipografías Source Serif 4 y Lato, Electric Blue, logos BBVA y NFQ). Pasa el contenido estructurado; el diseño lo aplica KDD Studio.",
     parameters: {
       type: "object",
       properties: {
@@ -173,7 +173,7 @@ async function createOutputTools(chat) {
     },
     handler: async ({ name, ...model }) => publishFile(await writeOutput(chat, name.endsWith(".docx") ? name : `${name}.docx`, await buildDocx(model))),
   }));
-  tools.push(await defineDoriathTool("generate_xlsx", {
+  tools.push(await defineKddTool("generate_xlsx", {
     description: "Genera un libro Excel (.xlsx) con una o varias hojas (cabeceras + filas). Útil para tablas, matrices de pruebas (C204), inventarios.",
     parameters: {
       type: "object",
@@ -186,7 +186,7 @@ async function createOutputTools(chat) {
     },
     handler: async ({ name, ...model }) => publishFile(await writeOutput(chat, name.endsWith(".xlsx") ? name : `${name}.xlsx`, buildXlsx(model))),
   }));
-  tools.push(await defineDoriathTool("generate_pptx", {
+  tools.push(await defineKddTool("generate_pptx", {
     description: "Genera una presentación PowerPoint (.pptx) con la identidad BBVA × NFQ (16:9, combos Sand/Serene/Electric/Midnight, logos, tipografías). Tipos de diapositiva: cover, section, content, bullets, cards, table, quote, closing.",
     parameters: {
       type: "object",
@@ -201,7 +201,7 @@ async function createOutputTools(chat) {
     },
     handler: async ({ name, ...model }) => publishFile(await writeOutput(chat, name.endsWith(".pptx") ? name : `${name}.pptx`, await buildPptx(model))),
   }));
-  tools.push(await defineDoriathTool("generate_html_document", {
+  tools.push(await defineKddTool("generate_html_document", {
     description: "Genera un documento HTML autocontenido con la identidad BBVA a partir de Markdown (para informes navegables o para imprimir a PDF desde el navegador).",
     parameters: { type: "object", properties: { name: { type: "string" }, title: { type: "string" }, subtitle: { type: "string" }, markdown: { type: "string" } }, required: ["name", "title", "markdown"] },
     handler: async ({ name, ...model }) => publishFile(await writeOutput(chat, name.endsWith(".html") ? name : `${name}.html`, await buildHtmlDocument(model))),
@@ -213,7 +213,7 @@ async function createOutputTools(chat) {
 
 async function assistantSystemPrompt(chat, contexts, tools) {
   const catalog = contexts.map((context) => `## ${context.source.name} (${context.source.sourceId})\n${context.source.description ? `${context.source.description}\n` : ""}${specsCatalogText(context.store.all(), { withSummary: true, max: 150 })}`).join("\n\n");
-  return `Eres el **BBVA CIB Assistant** de Doriath, un asistente de NFQ para los equipos de Corporate & Investment Banking de BBVA. Respondes en español, con tono sobrio y editorial (frases declarativas, datos concretos, sin exclamaciones ni emojis).
+  return `Eres el **BBVA CIB Assistant** de KDD Studio, un asistente de NFQ para los equipos de Corporate & Investment Banking de BBVA. Respondes en español, con tono sobrio y editorial (frases declarativas, datos concretos, sin exclamaciones ni emojis).
 
 ## Fuente de verdad
 Tu contexto son las bases de conocimiento KDD disponibles (specs de arquitectura, dominio, producto, funcionalidad, documentación, gobernanza y trabajo). No recuerdas su contenido: lo CONSULTAS con las herramientas antes de afirmar nada. Cita los identificadores de las specs en las que te apoyas (por ejemplo DOM-RISK-S001-002). Si el conocimiento no está en las bases, dilo explícitamente y distingue lo que es conocimiento de la caja de lo que es conocimiento general.
@@ -238,14 +238,14 @@ async function workSystemPrompt(chat, contexts, repos, tools) {
   const template = await loadSpecDrivenPrompt("create-work-chat");
   const decisions = await context.store.readDecisionHistory();
   const taskKinds = [
-    "- `implementation`: la tarea consiste en modificar código en uno o varios repositorios (Doriath la ejecuta con el agente Copilot sobre los repos seleccionados).",
+    "- `implementation`: la tarea consiste en modificar código en uno o varios repositorios (KDD Studio la ejecuta con el agente Copilot sobre los repos seleccionados).",
     "- `document`: la tarea produce un documento (Markdown/Word) a partir del contexto.",
     "- `test-cases`: la tarea produce un documento de casos de prueba (C204 en Excel).",
-    "- `manual`: la tarea la realiza una persona fuera de Doriath (despliegue, aprobación, reunión).",
+    "- `manual`: la tarea la realiza una persona fuera de KDD Studio (despliegue, aprobación, reunión).",
   ].join("\n");
   const repoBlock = repos.length
     ? repos.map((repo) => `- **${repo.name}** — ruta ${repo.path} · rama ${repo.branch || "?"} · ${repo.stacks?.map((stack) => stack.label).join(", ") || "stack no detectado"}${repo.remote ? ` · remoto ${repo.remote}` : ""}${repo.summary ? `\n  ${repo.summary}` : ""}`).join("\n")
-    : "(todavía no hay repositorios seleccionados; pide al usuario que seleccione las carpetas de los repositorios afectados desde Doriath)";
+    : "(todavía no hay repositorios seleccionados; pide al usuario que seleccione las carpetas de los repositorios afectados desde KDD Studio)";
   const tuned = renderTemplate(template, {
     SOURCE_UUAAS: context.source.sourceId,
     SPECS_INVENTORY: specsInventoryText(context.store.all()),
@@ -256,18 +256,18 @@ async function workSystemPrompt(chat, contexts, repos, tools) {
   });
   return `${tuned}
 
-## Repositorios (Doriath)
+## Repositorios (KDD Studio)
 
-Doriath ejecutará las tareas de tipo \`implementation\` directamente sobre repositorios Git locales que el usuario selecciona. Repositorios ya seleccionados para esta caja:
+KDD Studio ejecutará las tareas de tipo \`implementation\` directamente sobre repositorios Git locales que el usuario selecciona. Repositorios ya seleccionados para esta caja:
 
 ${repoBlock}
 
-Reglas adicionales de Doriath:
+Reglas adicionales de KDD Studio:
 - **Vocabulario con la persona**: quien usa este módulo no sabe qué es una spec y no tiene por qué saberlo. En tu prosa NO digas «spec», «WRK-SPEC», «WRK-PLAN», «WRK-TASK», «paquete», «capa» ni «frontmatter». Di **iniciativa** (lo que se quiere conseguir), **feature** (cada bloque de trabajo) e **historia de usuario** (cada pieza concreta). Los identificadores solo aparecen dentro de los bloques que emites, nunca en la conversación. Los términos de Git (rama, commit, pull request) sí se usan con normalidad.
 - Source ID de la caja activa: **${context.source.sourceId}**. Usa siempre ese código en los identificadores.
 - En cuanto tengas claro qué repositorios toca la iniciativa, emite en una línea propia el marcador \`#REPOSITORIES: <nombre1>, <nombre2>\` con los nombres exactos de la lista anterior (o \`#REPOSITORIES: ninguno\` si no toca código). Si la iniciativa necesita un repositorio que no está en la lista, dilo con claridad y pide al usuario que lo seleccione (ruta local) antes de la fase de plan.
 - Antes de planificar, inspecciona los repositorios con \`repo_tree\`, \`grep_repo\` y \`read_repo_file\` para que el plan cite módulos y ficheros reales.
-- En cada WRK-TASK de tipo \`implementation\`, incluye en \`## Implementation Notes\` el repositorio (nombre exacto) y los ficheros o módulos a tocar. Doriath lee ese nombre para saber sobre qué repositorio ejecutar la tarea.
+- En cada WRK-TASK de tipo \`implementation\`, incluye en \`## Implementation Notes\` el repositorio (nombre exacto) y los ficheros o módulos a tocar. KDD Studio lee ese nombre para saber sobre qué repositorio ejecutar la tarea.
 - Idioma: español.`;
 }
 
@@ -282,7 +282,7 @@ async function knowledgeSystemPrompt(chat, contexts, tools) {
     VERTICAL_TAXONOMY: await loadVerticalTaxonomy("cib-taxonomy"),
     TOOLS_SECTION: `## Herramientas disponibles\n\n${describeTools(tools)}`,
   });
-  return `${tuned}\n\n## Doriath\n\n- Source ID de la caja activa: **${context.source.sourceId}** (emite \`#CREATION_SOURCE_ID: ${context.source.sourceId}\`).\n- Idioma: español.`;
+  return `${tuned}\n\n## KDD Studio\n\n- Source ID de la caja activa: **${context.source.sourceId}** (emite \`#CREATION_SOURCE_ID: ${context.source.sourceId}\`).\n- Idioma: español.`;
 }
 
 async function resolutionSystemPrompt(chat, contexts, tools) {
@@ -469,7 +469,7 @@ export async function confirmPackage(chatId, { force = false } = {}) {
   if (!pkg) throw Object.assign(new Error("La conversación no tiene un paquete pendiente."), { status: 404 });
   const contexts = await loadContexts(chat);
   const context = contexts[0];
-  const results = await persistPackage(pkg, { store: context.store, sourceCode: context.source.sourceId, generatedBy: `doriath-${chat.kind}-chat`, force });
+  const results = await persistPackage(pkg, { store: context.store, sourceCode: context.source.sourceId, generatedBy: `kdd-${chat.kind}-chat`, force });
   chat.state.persisted = [...(chat.state.persisted || []), { packageId: pkg.id, at: new Date().toISOString(), results }];
   chat.state.package = null;
   await saveChat(chat);

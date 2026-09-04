@@ -18,7 +18,7 @@ import { listRegisteredRepositories, ensureBranch, workingTreeStatus, diffWorkin
 /**
  * Ejecución de iniciativas Work sobre repositorios locales (fase Implement de KDD):
  *   1. el usuario elige la WRK-SPEC, las tareas y el repositorio de cada tarea;
- *   2. Doriath crea (o reutiliza) una rama por iniciativa en cada repositorio;
+ *   2. KDD Studio crea (o reutiliza) una rama por iniciativa en cada repositorio;
  *   3. cada tarea se implementa con una sesión Copilot con herramientas de edición acotadas al repo,
  *      con el conocimiento activado inyectado como contexto (bundle de activación);
  *   4. el usuario revisa el diff y confirma el commit; push y pull request son opcionales.
@@ -118,7 +118,7 @@ export async function createRun({ sourceId, workSpecId, taskIds, assignments = [
     sourceCode: source.sourceId,
     workSpecId: workSpec.id,
     title: workSpec.title,
-    branch: branch || `${config.work.branchPrefix || "feature/doriath"}/${slugBranch(`${workSpec.id}-${workSpec.title}`, 48)}`,
+    branch: branch || `${config.work.branchPrefix || "feature/kdd"}/${slugBranch(`${workSpec.id}-${workSpec.title}`, 48)}`,
     model: model || "",
     status: "ready",
     createdAt: new Date().toISOString(),
@@ -169,7 +169,7 @@ function buildTaskPrompt({ workSpec, plan, task, siblings, bundle, repo, previou
   const acceptance = findSection(task.body, "Acceptance Criteria")?.content || "";
   return `# Tarea a implementar: ${task.id} — ${task.title}
 
-Trabajas dentro del repositorio **${repo.name}** (ruta ${repo.path}, rama ${repo.branch}). Implementa la tarea editando los ficheros necesarios con tus herramientas. No te limites a describir la solución: aplica los cambios. No ejecutes comandos que modifiquen el sistema fuera del repositorio ni hagas commits (Doriath los hace tras la revisión del usuario).
+Trabajas dentro del repositorio **${repo.name}** (ruta ${repo.path}, rama ${repo.branch}). Implementa la tarea editando los ficheros necesarios con tus herramientas. No te limites a describir la solución: aplica los cambios. No ejecutes comandos que modifiquen el sistema fuera del repositorio ni hagas commits (KDD Studio los hace tras la revisión del usuario).
 
 ## Iniciativa (WRK-SPEC ${workSpec.id} — ${workSpec.title})
 
@@ -363,7 +363,7 @@ export async function openPullRequest(runId, { repositoryId, title, body, base }
   const config = getConfig();
   const committed = run.tasks.filter((task) => task.repositoryId === repositoryId && task.commit);
   const prTitle = title || `${run.workSpecId}: ${run.title}`;
-  const prBody = body || `Iniciativa KDD ${run.workSpecId} — ${run.title}\n\nTareas incluidas:\n${committed.map((task) => `- ${task.id}: ${task.title} (${task.commit.sha})`).join("\n")}\n\nGenerado con Doriath.`;
+  const prBody = body || `Iniciativa KDD ${run.workSpecId} — ${run.title}\n\nTareas incluidas:\n${committed.map((task) => `- ${task.id}: ${task.title} (${task.commit.sha})`).join("\n")}\n\nGenerado con KDD Studio.`;
   const result = await createPullRequest(repo.path, { title: prTitle, body: prBody, base, host: config.github.host });
   run.pullRequests = [...(run.pullRequests || []), { repositoryId, url: result.url, at: new Date().toISOString() }];
   pushLog(run, null, `Pull request creada en ${repo.name}: ${result.url}`);

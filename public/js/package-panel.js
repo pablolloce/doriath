@@ -16,7 +16,7 @@ export function renderPackagePanel({ chatId, pkg, onChanged, layers = [], plain 
   const heading = plain ? "Propuesta" : "Paquete propuesto";
   const showId = !plain || isAdmin();
   if (!pkg) {
-    root.append(h("p", { class: "ante-title", text: heading }), h("div", { class: "empty", text: plain ? "Cuando Doriath proponga las features y sus historias de usuario aparecerán aquí para que las revises y las guardes." : "Cuando el asistente proponga specs aparecerán aquí para revisarlas y confirmarlas." }));
+    root.append(h("p", { class: "ante-title", text: heading }), h("div", { class: "empty", text: plain ? "Cuando KDD Studio proponga las features y sus historias de usuario aparecerán aquí para que las revises y las guardes." : "Cuando el asistente proponga specs aparecerán aquí para revisarlas y confirmarlas." }));
     return root;
   }
   const labelFor = (layer) => layers.find((item) => item.id === layer)?.label || layer;
@@ -69,7 +69,7 @@ export function renderPackagePanel({ chatId, pkg, onChanged, layers = [], plain 
   const renderStatus = () => {
     clear(status);
     if (pkg.warnings?.length) status.append(h("div", { class: "callout callout--warn small", html: pkg.warnings.map((warning) => `• ${warning}`).join("<br>") }));
-    if (pkg.blocking) status.append(h("div", { class: "callout callout--error small", text: plain ? "Hay puntos que hay que resolver antes de guardar. Pídeselo a Doriath (\"corrige la propuesta\") o edítalos aquí." : "Hay specs con incidencias bloqueantes. Pide al asistente que las corrija (\"corrige el paquete\") o edítalas aquí antes de confirmar." }));
+    if (pkg.blocking) status.append(h("div", { class: "callout callout--error small", text: plain ? "Hay puntos que hay que resolver antes de guardar. Pídeselo a KDD Studio (\"corrige la propuesta\") o edítalos aquí." : "Hay specs con incidencias bloqueantes. Pide al asistente que las corrija (\"corrige el paquete\") o edítalas aquí antes de confirmar." }));
   };
   root.append(
     h("div", { class: "card__header" }, h("div", {}, h("p", { class: "ante-title", text: heading }), h("h3", { text: pkg.summary })), showId ? h("span", { class: "chip chip--outline", text: pkg.id }) : null),

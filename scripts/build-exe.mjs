@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * Genera los ejecutables con Node SEA (single executable application):
- *   dist/Doriath/Doriath.exe     launcher (arranca el servidor y abre Chrome)
- *   dist/Doriath-Setup.exe       instalador con el payload (dist/Doriath) embebido
+ *   dist/KDD-Studio/KDD-Studio.exe     launcher (arranca el servidor y abre Chrome)
+ *   dist/KDD-Studio-Setup.exe       instalador con el payload (dist/KDD-Studio) embebido
  *
  * Requiere haber ejecutado build-dist. El node.exe base se toma del Node portable descargado
  * (runtime/node/node.exe) para que el launcher y el runtime compartan versión. Con --platform linux
@@ -19,8 +19,8 @@ import { ensureFreeSpace } from "./build-dist.mjs";
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const pkgVersion = JSON.parse(await readFile(path.join(root, "package.json"), "utf8")).version;
-const dist = process.env.DORIATH_DIST ? path.resolve(process.env.DORIATH_DIST) : path.join(root, "dist");
-const target = path.join(dist, "Doriath");
+const dist = process.env.KDD_DIST ? path.resolve(process.env.KDD_DIST) : path.join(root, "dist");
+const target = path.join(dist, "KDD Studio");
 const build = path.join(dist, "build");
 const args = process.argv.slice(2);
 const flag = (name) => { const index = args.indexOf(name); return index >= 0 ? args[index + 1] : undefined; };
@@ -132,7 +132,7 @@ function requireResedit() {
 }
 
 async function brandExecutable(target, name) {
-  const icon = path.join(root, "public", "brand", "doriath.ico");
+  const icon = path.join(root, "public", "brand", "kdd.ico");
   if (!existsSync(icon)) throw new Error(`Falta ${path.relative(root, icon)}: el ejecutable se quedaría con el icono de Node.`);
   try {
     const ResEdit = requireResedit();
@@ -147,8 +147,8 @@ async function brandExecutable(target, name) {
     version.setFileVersion(major, minor, patch, 0, 1033);
     version.setProductVersion(major, minor, patch, 0, 1033);
     version.setStringValues({ lang: 1033, codepage: 1200 }, {
-      ProductName: "Doriath",
-      FileDescription: name === "setup" ? "Instalador de Doriath" : "Doriath — BBVA CIB Knowledge-Driven Development",
+      ProductName: "KDD Studio",
+      FileDescription: name === "setup" ? "Instalador de KDD Studio" : "KDD Studio — BBVA CIB Knowledge-Driven Development",
       CompanyName: "BBVA CIB · NFQ",
       LegalCopyright: "BBVA CIB",
       OriginalFilename: path.basename(target),
@@ -165,7 +165,7 @@ async function brandExecutable(target, name) {
 /**
  * Relee el icono de los ejecutables ya terminados. Si el build dice que están y Windows sigue
  * enseñando el de Node, el problema es la caché de iconos del Explorador o se está mirando otra copia
- * (la instalada en %LOCALAPPDATA%\Doriath no cambia hasta volver a pasar el instalador).
+ * (la instalada en %LOCALAPPDATA%\KDD Studio no cambia hasta volver a pasar el instalador).
  */
 /**
  * Comprueba que el icono llegó al ejecutable y, sobre todo, que los tamaños pequeños van en
@@ -179,7 +179,7 @@ async function verifyIcons(files) {
     const resource = ResEdit.NtExecutableResource.from(ResEdit.NtExecutable.from(await readFile(file), { ignoreCert: true }));
     const groups = ResEdit.Resource.IconGroupEntry.fromEntries(resource.entries);
     const group = groups[0];
-    if (!group || group.icons.length < 2) throw new Error(`${path.basename(file)} no lleva el icono de Doriath.`);
+    if (!group || group.icons.length < 2) throw new Error(`${path.basename(file)} no lleva el icono de KDD Studio.`);
     const bitmaps = new Map(resource.entries.filter((entry) => entry.type === 3).map((entry) => [entry.id, entry.bin]));
     for (const icon of group.icons) {
       const bin = bitmaps.get(icon.iconID);
@@ -188,7 +188,7 @@ async function verifyIcons(files) {
       const isPng = head[0] === 0x89 && head.toString("latin1", 1, 4) === "PNG";
       const width = icon.width || 256;
       if (isPng && width < 256) {
-        throw new Error(`${path.basename(file)}: el icono de ${width}px va en PNG y Windows no lo sabe leer; regenera public/brand/doriath.ico con "npm run icon".`);
+        throw new Error(`${path.basename(file)}: el icono de ${width}px va en PNG y Windows no lo sabe leer; regenera public/brand/kdd.ico con "npm run icon".`);
       }
     }
     const sizes = group.icons.map((icon) => icon.width || 256).join("/");
@@ -197,7 +197,7 @@ async function verifyIcons(files) {
 }
 
 /** Pega el payload detrás del ejecutable con un pie que dice dónde empieza (ver setup.cjs). */
-const PAYLOAD_MAGIC = "DORIATH-PAYLOAD1";
+const PAYLOAD_MAGIC = "KDD-PAYLOAD1";
 async function appendPayload(target, payload) {
   const base = await stat(target);
   const data = await readFile(payload);
@@ -217,25 +217,25 @@ async function main() {
   if (!args.includes("--allow-low-space")) await ensureFreeSpace(dist, 1.5 * 1024 ** 3, "build:exe");
   await rm(build, { recursive: true, force: true });
   // 1. Launcher dentro del payload.
-  await makeSea({ name: "launcher", entry: path.join(root, "scripts", "launcher", "launcher.cjs"), output: path.join(target, `Doriath${exe}`) });
-  // 2. Payload comprimido (todo dist/Doriath, con el launcher ya dentro).
+  await makeSea({ name: "launcher", entry: path.join(root, "scripts", "launcher", "launcher.cjs"), output: path.join(target, `KDD-Studio${exe}`) });
+  // 2. Payload comprimido (todo dist/KDD-Studio, con el launcher ya dentro).
   const payload = path.join(dist, "payload.zip");
   log("Comprimiendo el payload…");
   const size = await zipDirectory(target, payload, { exclude: ["data", "outputs", "knowledge-bases"] });
   log(`payload.zip: ${(size / (1024 * 1024)).toFixed(0)} MB.`);
   // 3. Instalador: el ejecutable primero y el payload pegado detrás. Incrustarlo como recurso SEA
   //    reventaba postject a partir de unos cientos de megas, y el payload ronda el medio giga.
-  const setup = path.join(dist, `Doriath-Setup${exe}`);
+  const setup = path.join(dist, `KDD-Studio-Setup${exe}`);
   await makeSea({ name: "setup", entry: path.join(root, "scripts", "launcher", "setup.cjs"), output: setup });
   await appendPayload(setup, payload);
   // Los intermedios (payload.zip y los blobs SEA) duplican cientos de MB; se retiran salvo que se pidan.
-  if (platform === "win32") await verifyIcons([path.join(target, `Doriath${exe}`), setup]);
+  if (platform === "win32") await verifyIcons([path.join(target, `KDD-Studio${exe}`), setup]);
   if (!args.includes("--keep-artifacts")) {
     await rm(payload, { force: true });
     await rm(build, { recursive: true, force: true });
     log("Intermedios retirados (payload.zip y blobs SEA); usa --keep-artifacts para conservarlos.");
   }
-  log(`Listo: ${path.join(dist, `Doriath-Setup${exe}`)} y ${path.join(target, `Doriath${exe}`)}.`);
+  log(`Listo: ${path.join(dist, `KDD-Studio-Setup${exe}`)} y ${path.join(target, `KDD-Studio${exe}`)}.`);
 }
 
 main().catch((error) => {

@@ -69,7 +69,7 @@ export async function buildDocx(model) {
 
   const logoWidth = 110;
   const document = new Document({
-    creator: model.author || "NFQ · Doriath",
+    creator: model.author || "NFQ · KDD Studio",
     title: plainText(model.title || "Documento"),
     styles: { default: { document: { run: { font: FONT_BODY, size: 22, color: COLORS.midnight } } } },
     sections: [{

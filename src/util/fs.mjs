@@ -41,12 +41,12 @@ export async function writeText(file, text) {
 /**
  * Limpia una ruta escrita o pegada a mano. "Copiar como ruta de acceso" de Windows la envuelve en
  * comillas, y esas comillas acababan formando parte del nombre de la carpeta: la ruta existía y
- * Doriath decía que no. También se quitan espacios, el prefijo file:// y las barras sobrantes.
+ * KDD Studio decía que no. También se quitan espacios, el prefijo file:// y las barras sobrantes.
  */
 export function normalizeUserPath(value) {
   let text = String(value ?? "").trim();
   if (!text) return "";
-  // file:///C:/Doriath -> C:/Doriath, pero file:///home/ana -> /home/ana (la barra inicial es la raíz).
+  // file:///C:/KDD Studio -> C:/KDD Studio, pero file:///home/ana -> /home/ana (la barra inicial es la raíz).
   text = text.replace(/^file:\/\//i, "").replace(/^\/([A-Za-z]:)/, "$1");
   if ((text.startsWith('"') && text.endsWith('"')) || (text.startsWith("'") && text.endsWith("'"))) {
     text = text.slice(1, -1).trim();
@@ -59,7 +59,7 @@ export function normalizeUserPath(value) {
 
 /**
  * true si `child` es la misma carpeta que `parent` o está dentro de ella. Comparación insensible a
- * mayúsculas (como el sistema de ficheros de Windows, la plataforma de destino de Doriath).
+ * mayúsculas (como el sistema de ficheros de Windows, la plataforma de destino de KDD Studio).
  */
 export function isPathWithin(child, parent) {
   const a = path.resolve(String(child || "")).toLowerCase();
