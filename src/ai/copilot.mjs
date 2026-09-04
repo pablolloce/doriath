@@ -205,22 +205,10 @@ export function pickModel(catalog, requested) {
 
 /* ---------- Herramientas propias ---------- */
 
-export async function defineKddTool(name, { description, parameters, handler }) {
-  const { defineTool } = await loadSdk();
-  return defineTool(name, {
-    description,
-    parameters: parameters || { type: "object", properties: {} },
-    handler: async (args, invocation) => {
-      try {
-        const result = await handler(args || {}, invocation);
-        if (typeof result === "string") return result;
-        return JSON.stringify(result ?? null, null, 2);
-      } catch (error) {
-        return `ERROR: ${error.message}`;
-      }
-    },
-  });
-}
+// El descriptor vive en `tool-kit.mjs` y es el mismo para los dos proveedores. El SDK de Copilot
+// acepta el objeto plano tal cual (su `defineTool` no hace más que copiar el nombre dentro), así que
+// aquí solo se reexporta para no romper los imports antiguos.
+export { defineKddTool } from "./tool-kit.mjs";
 
 /* ---------- Normalización de eventos para la UI ---------- */
 

@@ -1,6 +1,6 @@
 import path from "node:path";
 import { readFile, readdir, stat } from "node:fs/promises";
-import { defineKddTool } from "./copilot.mjs";
+import { defineKddTool } from "./tool-kit.mjs";
 import { buildSpecIndex, snippetFor } from "../kdd/search.mjs";
 import { buildGraph, impact as graphImpact } from "../kdd/graph.mjs";
 import { validateSpecStructure, findSection } from "../kdd/sections.mjs";

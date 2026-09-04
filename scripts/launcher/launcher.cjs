@@ -27,10 +27,16 @@ const { download } = require("./download.cjs");
 const { extractZip } = require("./zip.cjs");
 const tools = require("./tools.json");
 
+
+/* Inyectadas por esbuild al construir cada edición; los valores de aquí solo aplican
+   si el fichero se ejecuta suelto durante el desarrollo. */
+const EDITION_NAME = typeof __EDITION_NAME__ === "string" ? __EDITION_NAME__ : "KDD Studio";
+const EDITION_EXE = typeof __EDITION_EXE__ === "string" ? __EDITION_EXE__ : "KDD-Studio";
+
 const isWindows = process.platform === "win32";
 const argv = process.argv.slice(1);
 const noPause = argv.includes("--no-pause") || process.env.KDD_NO_PAUSE === "1";
-const root = process.env.KDD_ROOT ? path.resolve(process.env.KDD_ROOT) : fs.existsSync(path.join(path.dirname(process.execPath), "kdd-root.json")) ? path.dirname(process.execPath) : path.resolve(__dirname, "..", "..", "dist", "KDD Studio");
+const root = process.env.KDD_ROOT ? path.resolve(process.env.KDD_ROOT) : fs.existsSync(path.join(path.dirname(process.execPath), "kdd-root.json")) ? path.dirname(process.execPath) : path.resolve(__dirname, "..", "..", "dist", EDITION_EXE);
 const appDir = path.join(root, "app");
 const runtimeDir = path.join(root, "runtime");
 const dataDir = path.join(root, "data");
@@ -55,7 +61,7 @@ function logToFile(text) {
 }
 
 function log(message, { stderr = false } = {}) {
-  const line = `[KDD Studio] ${message}\n`;
+  const line = `[${EDITION_NAME}] ${message}\n`;
   (stderr ? process.stderr : process.stdout).write(line);
   logToFile(line);
 }
@@ -63,7 +69,7 @@ function log(message, { stderr = false } = {}) {
 /** Mantiene la ventana abierta hasta que el usuario pulse una tecla (solo si hay consola interactiva). */
 function waitForKey(message = "Pulsa una tecla para cerrar esta ventana.") {
   if (noPause || !process.stdin.isTTY) return;
-  process.stdout.write(`\n[KDD Studio] ${message}\n`);
+  process.stdout.write(`\n[${EDITION_NAME}] ${message}\n`);
   try {
     if (isWindows) spawnSync("cmd.exe", ["/c", "pause"], { stdio: "inherit" });
     else spawnSync("sh", ["-c", "read -r _"], { stdio: "inherit" });
@@ -154,7 +160,7 @@ async function ensurePortableTool(name) {
   log(`Descargando ${name} ${spec.version} (portable)…`);
   const zipPath = path.join(runtimeDir, `${name}.zip`);
   fs.mkdirSync(runtimeDir, { recursive: true });
-  await download(spec.url, zipPath, { onProgress: (received, total) => { if (total) process.stdout.write(`\r[KDD Studio] ${name}: ${Math.round((received / total) * 100)}%   `); } });
+  await download(spec.url, zipPath, { onProgress: (received, total) => { if (total) process.stdout.write(`\r[${EDITION_NAME}] ${name}: ${Math.round((received / total) * 100)}%   `); } });
   process.stdout.write("\n");
   fs.mkdirSync(dir, { recursive: true });
   extractZip(fs.readFileSync(zipPath), dir, { stripPrefix: spec.stripPrefix });

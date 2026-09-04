@@ -3,6 +3,8 @@ import { getConfig, updateConfig, publicConfig } from "../config.mjs";
 import { paths } from "../paths.mjs";
 import { getAuthStatus, startGitHubLogin, logoutGitHub, getAuthenticatedUser, invalidateAuthCache } from "../auth/gh.mjs";
 import { copilotStatus, getModelCatalog, invalidateModelCatalog } from "../ai/copilot.mjs";
+import { edition } from "../edition.mjs";
+import { getCodexStatus, invalidateCodexCache, startCodexLogin, logoutCodex } from "../auth/codex.mjs";
 import { pickFolder, listDirectory } from "../util/dialog.mjs";
 import { listSources } from "../knowledge/sources.mjs";
 import { listRegisteredRepositories } from "../work/repos.mjs";
@@ -57,10 +59,25 @@ async function assertOutputPathsSeparate(patchPaths) {
 }
 
 export function registerSystemRoutes(router) {
-  router.get("/api/health", async () => ({ ok: true, product: "KDD Studio", version: getConfig().product.version, pid: process.pid }));
+  router.get("/api/health", async () => ({ ok: true, product: edition.name, version: getConfig().product.version, pid: process.pid }));
 
   router.get("/api/status", async ({ query }) => {
     const config = getConfig();
+    const meta = { id: edition.id, name: edition.name, tagline: edition.tagline, provider: edition.provider, modules: edition.modules, canManageKnowledge: edition.canManageKnowledge };
+    // KDD Assistant se autentica con la cuenta de ChatGPT, no con GitHub: no tiene sentido
+    // pedirle una sesión de Copilot ni enseñarle un diagnóstico de `gh`.
+    if (edition.provider === "codex") {
+      const codex = await getCodexStatus({ refresh: query.refresh === "1" });
+      const sourcesCodex = await listSources();
+      return {
+        product: config.product,
+        edition: meta,
+        paths: { dataRoot: paths.dataRoot, outputs: config.paths.outputs, knowledgeBases: config.paths.knowledgeBases, installRoot: paths.installRoot },
+        build: await buildInfo(),
+        codex,
+        sources: sourcesCodex.length,
+      };
+    }
     const auth = await getAuthStatus(config.github.host, { refresh: query.refresh === "1" });
     const git = await runCommand("git", ["--version"], { timeoutMs: 10000 });
     const user = auth.authenticated ? await getAuthenticatedUser(config.github.host).catch(() => null) : null;
@@ -68,6 +85,7 @@ export function registerSystemRoutes(router) {
     const sources = await listSources();
     return {
       product: config.product,
+      edition: meta,
       paths: { dataRoot: paths.dataRoot, outputs: config.paths.outputs, knowledgeBases: config.paths.knowledgeBases, installRoot: paths.installRoot },
       build: await buildInfo(),
       github: { host: config.github.host, ...auth, user },
@@ -75,6 +93,18 @@ export function registerSystemRoutes(router) {
       copilot,
       sources: sources.length,
     };
+  });
+
+  router.post("/api/codex/login", async () => {
+    const result = await startCodexLogin();
+    return { ...result, hint: "Se ha abierto una consola: inicia sesión con tu cuenta de ChatGPT y vuelve aquí." };
+  });
+
+  router.post("/api/codex/logout", async () => logoutCodex());
+
+  router.get("/api/codex/status", async ({ query }) => {
+    if (query.refresh === "1") invalidateCodexCache();
+    return getCodexStatus({ refresh: query.refresh === "1" });
   });
 
   router.get("/api/auth/status", async ({ query }) => {

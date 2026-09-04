@@ -14,6 +14,12 @@ const readline = require("node:readline");
 const { spawn, spawnSync } = require("node:child_process");
 const { extractZip } = require("./zip.cjs");
 
+
+/* Inyectadas por esbuild al construir cada edición; los valores de aquí solo aplican
+   si el fichero se ejecuta suelto durante el desarrollo. */
+const EDITION_NAME = typeof __EDITION_NAME__ === "string" ? __EDITION_NAME__ : "KDD Studio";
+const EDITION_EXE = typeof __EDITION_EXE__ === "string" ? __EDITION_EXE__ : "KDD-Studio";
+
 const isWindows = process.platform === "win32";
 const args = process.argv.slice(2);
 const flag = (name) => { const index = args.indexOf(name); return index >= 0 ? args[index + 1] : undefined; };
@@ -90,12 +96,12 @@ function createIcon(root) {
 
 function createShortcuts(root) {
   if (!isWindows) return;
-  const target = path.join(root, "KDD-Studio.exe");
+  const target = path.join(root, `${EDITION_EXE}.exe`);
   const icon = createIcon(root) || target;
   const script = [
     "$shell = New-Object -ComObject WScript.Shell",
-    `$desktop = Join-Path ([Environment]::GetFolderPath('Desktop')) 'KDD Studio.lnk'`,
-    `$menu = Join-Path ([Environment]::GetFolderPath('Programs')) 'KDD Studio.lnk'`,
+    `$desktop = Join-Path ([Environment]::GetFolderPath('Desktop')) '${EDITION_NAME}.lnk'`,
+    `$menu = Join-Path ([Environment]::GetFolderPath('Programs')) '${EDITION_NAME}.lnk'`,
     "foreach ($file in @($desktop, $menu)) {",
     "  $s = $shell.CreateShortcut($file)",
     `  $s.TargetPath = '${target.replace(/'/g, "''")}'`,
@@ -112,7 +118,7 @@ function createShortcuts(root) {
 
 async function main() {
   process.stdout.write("\nKDD Studio — instalador\n====================\n\n");
-  const defaultDir = flag("--dir") || (isWindows ? path.join(process.env.LOCALAPPDATA || os.homedir(), "KDD Studio") : path.join(os.homedir(), "KDD Studio"));
+  const defaultDir = flag("--dir") || (isWindows ? path.join(process.env.LOCALAPPDATA || os.homedir(), EDITION_EXE) : path.join(os.homedir(), EDITION_EXE));
   const root = path.resolve(await ask("Carpeta de instalación", defaultDir));
   const payload = readPayload();
   fs.mkdirSync(root, { recursive: true });
@@ -128,10 +134,10 @@ async function main() {
   for (const folder of ["data", "outputs", "knowledge-bases"]) fs.mkdirSync(path.join(root, folder), { recursive: true });
   fs.writeFileSync(path.join(root, "kdd-root.json"), JSON.stringify({ product: "KDD Studio", installedAt: new Date().toISOString(), root }, null, 2));
   createShortcuts(root);
-  process.stdout.write(`\n[Setup] Instalación completada.\n  Ejecutable:            ${path.join(root, "KDD-Studio.exe")}\n  Bases de conocimiento: ${path.join(root, "knowledge-bases")}\n  Salidas:               ${path.join(root, "outputs")}\n  Datos:                 ${path.join(root, "data")}\n\n`);
+  process.stdout.write(`\n[Setup] Instalación completada.\n  Ejecutable:            ${path.join(root, `${EDITION_EXE}.exe`)}\n  Bases de conocimiento: ${path.join(root, "knowledge-bases")}\n  Salidas:               ${path.join(root, "outputs")}\n  Datos:                 ${path.join(root, "data")}\n\n`);
   const launch = has("--no-launch") ? "n" : await ask("¿Abrir KDD Studio ahora? (s/n)", "s");
   if (/^s/i.test(launch)) {
-    const executable = path.join(root, isWindows ? "KDD-Studio.exe" : "KDD Studio");
+    const executable = path.join(root, isWindows ? `${EDITION_EXE}.exe` : EDITION_EXE);
     if (fs.existsSync(executable)) {
       const child = spawn(executable, [], { cwd: root, detached: true, stdio: "ignore" });
       child.unref();

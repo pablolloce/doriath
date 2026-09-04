@@ -23,7 +23,16 @@ const tools = require("./launcher/tools.json");
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 // KDD_DIST permite construir en otra unidad con más espacio (p. ej. KDD_DIST=D:\\kdd-dist).
 const dist = process.env.KDD_DIST ? path.resolve(process.env.KDD_DIST) : path.join(root, "dist");
-const target = path.join(dist, "KDD Studio");
+// La edición decide el nombre, el proveedor de modelo y qué runtime viaja dentro.
+const EDITIONS = {
+  studio: { name: "KDD Studio", executable: "KDD-Studio", runtime: "copilot" },
+  assistant: { name: "KDD Assistant", executable: "KDD-Assistant", runtime: "codex" },
+};
+const editionFlag = (() => { const a = process.argv.slice(2); const i = a.indexOf("--edition"); return i >= 0 ? String(a[i + 1] || "").toLowerCase() : ""; })();
+const requested = editionFlag || String(process.env.KDD_EDITION || "").toLowerCase();
+const editionId = EDITIONS[requested] ? requested : "studio";
+const edition = EDITIONS[editionId];
+const target = path.join(dist, edition.executable);
 const cache = path.join(root, ".cache");
 const args = process.argv.slice(2);
 const flag = (name) => { const index = args.indexOf(name); return index >= 0 ? args[index + 1] : undefined; };
@@ -42,12 +51,52 @@ async function stageApp() {
   }
   await mkdir(path.join(app, "docs"), { recursive: true });
   await cp(path.join(root, "docs", "identidad-bbva"), path.join(app, "docs", "identidad-bbva"), { recursive: true });
-  log("Código de la aplicación copiado.");
+  await writeFile(path.join(app, "edition.json"), JSON.stringify({ edition: editionId, name: edition.name, builtAt: new Date().toISOString() }, null, 2));
+  log(`Código de la aplicación copiado (edición ${editionId}).`);
   return app;
 }
 
 function copilotPlatformPackage() {
   return `@github/copilot-${platform}-x64`;
+}
+
+/**
+ * Codex viaja dentro del instalador de KDD Assistant. El paquete `@openai/codex` es un lanzador de
+ * 13 KB con dependencias opcionales por plataforma —la misma forma que `@github/copilot`—, así que
+ * se instala el envoltorio y el binario de la plataforma destino a propósito, sin depender de que
+ * npm acierte con la selección.
+ */
+async function installCodexRuntime(app, platformEnv) {
+  const wrapper = "@openai/codex";
+  const sdk = "@openai/codex-sdk";
+  const binary = `@openai/codex-${platform}-x64`;
+  const installed = path.join(app, "node_modules", "@openai", `codex-${platform}-x64`);
+  const sdkInstalled = path.join(app, "node_modules", "@openai", "codex-sdk");
+  if (existsSync(installed) && existsSync(sdkInstalled)) {
+    log(`Runtime de Codex ya presente (${platform}-x64).`);
+    return;
+  }
+  log(`Instalando el runtime de Codex para ${platform}-x64…`);
+  const result = spawnSync(process.execPath, [path.join(root, "scripts", "install-deps.mjs"), "--production", "--cwd", app, "--packages", `${wrapper},${sdk},${binary}`], { stdio: "inherit", env: platformEnv });
+  if (result.status !== 0 || !existsSync(installed)) {
+    throw new Error(`No se pudo instalar ${binary}. KDD Assistant no puede iniciar sesión con ChatGPT sin el binario de Codex dentro del instalador.`);
+  }
+  if (!existsSync(sdkInstalled)) throw new Error(`No se pudo instalar ${sdk}. Sin él KDD Assistant no puede hablar con el modelo.`);
+  log("Runtime y SDK de Codex incluidos en el payload.");
+}
+
+/**
+ * El runtime de Copilot ocupa unos 300 MB y KDD Assistant no lo usa: su motor es Codex. Se retira
+ * del payload junto al SDK, que sin runtime no sirve para nada.
+ */
+async function pruneCopilotRuntime(app) {
+  for (const name of [`@github/copilot-${platform}-x64`, "@github/copilot", "@github/copilot-sdk"]) {
+    const dir = path.join(app, "node_modules", ...name.split("/"));
+    if (!existsSync(dir)) continue;
+    await rm(dir, { recursive: true, force: true });
+    log(`Retirado ${name}: KDD Assistant no habla con Copilot.`);
+  }
+  await rm(path.join(app, "node_modules", ".bin", "copilot"), { force: true });
 }
 
 async function readInstalledVersion(dir, name) {
@@ -88,6 +137,14 @@ async function installModules(app) {
     if (result.status !== 0) throw new Error("npm install falló en el payload.");
   }
 
+  if (edition.runtime === "codex") {
+    await installCodexRuntime(app, platformEnv);
+    await pruneCopilotRuntime(app);
+    await rm(path.join(app, "package-lock.json"), { force: true });
+    await rm(path.join(app, ".npmrc"), { force: true });
+    return;
+  }
+
   const packageName = copilotPlatformPackage();
   if (!existsSync(path.join(app, "node_modules", "@github", `copilot-${platform}-x64`))) {
     const version = await readInstalledVersion(app, "@github/copilot");
@@ -101,8 +158,21 @@ async function installModules(app) {
   }
   log(`Paquete Copilot de plataforma: ${packageName} ${await readInstalledVersion(app, packageName)}.`);
   await pruneForeignCopilotRuntimes(app);
+  await pruneCodexRuntime(app);
   await rm(path.join(app, "package-lock.json"), { force: true });
   await rm(path.join(app, ".npmrc"), { force: true });
+}
+
+/**
+ * Codex es una dependencia opcional del repositorio, así que el árbol copiado lo trae aunque se esté
+ * construyendo KDD Studio, que habla con Copilot. Son otros 300 MB que nadie va a abrir.
+ */
+async function pruneCodexRuntime(app) {
+  const dir = path.join(app, "node_modules", "@openai");
+  if (!existsSync(dir)) return;
+  await rm(dir, { recursive: true, force: true });
+  await rm(path.join(app, "node_modules", ".bin", "codex"), { force: true });
+  log("Retirado @openai/codex: KDD Studio habla con Copilot.");
 }
 
 /**
@@ -204,8 +274,11 @@ export async function ensureFreeSpace(directory, requiredBytes, label) {
 
 async function main() {
   if (!args.includes("--allow-low-space")) await ensureFreeSpace(dist, 2.5 * 1024 ** 3, "build:dist");
-  log(`Limpiando ${dist}…`);
-  await rm(dist, { recursive: true, force: true });
+  // Solo se limpia la carpeta de esta edición: `build:all` construye las dos seguidas y borrar
+  // dist entero se llevaría por delante la que ya estaba hecha.
+  log(`Limpiando ${target}…`);
+  await rm(target, { recursive: true, force: true });
+  await mkdir(dist, { recursive: true });
   await mkdir(target, { recursive: true });
   const app = await stageApp();
   await installModules(app);
