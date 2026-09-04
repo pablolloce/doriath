@@ -366,16 +366,22 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
       <g class="node dimmable s-kdd" data-key="studio">
         <rect class="box" x="340" y="106" width="260" height="60" rx="6"/>
         <text class="lbl" x="470" y="132" text-anchor="middle">KB STUDIO</text>
-        <text class="note" x="470" y="152" text-anchor="middle">construye y mantiene la base</text>
+        <text class="note" x="470" y="152" text-anchor="middle">administras la base de conocimiento</text>
         <rect class="chipbg" x="546" y="112" width="46" height="15" rx="7.5"/>
         <text class="chiptx" x="569" y="123" text-anchor="middle">ADMIN</text>
         <rect class="hitbox" x="336" y="102" width="268" height="68"/>
       </g>
 
+      <g class="node dimmable s-kdd s-duda" data-key="sabe-kb">
+        <rect x="368" y="174" width="204" height="20" rx="10" fill="rgba(0,19,145,.07)"/>
+        <text class="chiptx" x="470" y="188" text-anchor="middle" fill="#001391">HAY QUE CONOCER LA KB</text>
+        <rect class="hitbox" x="364" y="170" width="212" height="28"/>
+      </g>
+
       <g class="node dimmable s-kdd" data-key="asistente">
         <rect class="box" x="340" y="210" width="260" height="60" rx="6"/>
         <text class="lbl" x="470" y="236" text-anchor="middle">ASISTENTE</text>
-        <text class="note" x="470" y="256" text-anchor="middle">pregunta y genera entregables</text>
+        <text class="note" x="470" y="256" text-anchor="middle">chat especialista · funcional o técnico</text>
         <rect class="hitbox" x="336" y="206" width="268" height="68"/>
       </g>
 
@@ -403,7 +409,7 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
       <g class="node dimmable s-kdd" data-key="kdd">
         <rect class="box" x="340" y="418" width="260" height="60" rx="6"/>
         <text class="lbl" x="470" y="444" text-anchor="middle">KDD</text>
-        <text class="note" x="470" y="464" text-anchor="middle">iniciativa · features · historias</text>
+        <text class="note" x="470" y="464" text-anchor="middle">el día a día del proyecto</text>
         <rect class="hitbox" x="336" y="414" width="268" height="68"/>
       </g>
 
@@ -414,8 +420,18 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
         <line class="pmark" x1="352" y1="508" x2="352" y2="532"/>
         <rect class="hitbox" x="336" y="492" width="268" height="56"/>
       </g>
-      <text class="note-b dimmable s-kdd" x="470" y="566" text-anchor="middle">Los tres leen la misma base.</text>
-      <text class="note dimmable s-kdd" x="470" y="582" text-anchor="middle">Solo el KB Studio escribe en ella.</text>
+      <text class="note-b dimmable s-kdd" x="470" y="562" text-anchor="middle">Los tres leen la misma base.</text>
+      <text class="note dimmable s-kdd" x="470" y="576" text-anchor="middle">Solo el KB Studio escribe en ella,</text>
+      <text class="note dimmable s-kdd" x="470" y="590" text-anchor="middle">y solo él pide saber cómo funciona.</text>
+
+      <g class="node dimmable s-kdd" data-key="no-sabe-kb">
+        <rect x="524" y="216" width="68" height="15" rx="7.5" fill="rgba(136,231,131,.34)"/>
+        <text class="chiptx" x="558" y="227" text-anchor="middle" fill="#1F6B33">SIN JERGA</text>
+        <rect x="524" y="424" width="68" height="15" rx="7.5" fill="rgba(136,231,131,.34)"/>
+        <text class="chiptx" x="558" y="435" text-anchor="middle" fill="#1F6B33">SIN JERGA</text>
+        <rect class="hitbox" x="520" y="212" width="76" height="23"/>
+        <rect class="hitbox" x="520" y="420" width="76" height="23"/>
+      </g>
 
       <!-- manifiestos → agentes -->
       <path class="wire dimmable s-kdd" d="M600,136 H636" marker-end="url(#arw)"/>
@@ -746,26 +762,28 @@ escribe:{k:"Escritura en la base",h:"Quién escribe en la base",role:"La única 
 /* ══════ 2 · MANIFEST ══════ */
 manifest:{k:"Capa 2 · Orquestación",h:"Los tres módulos",role:"Las opciones de KDD Studio",
   tags:[["kdd","Lo fija KDD Studio"],["humano","Tú eres quien entra"]],
-  d:"Los manifiestos son <b>las opciones que te ofrece KDD Studio</b>: los tres sitios por donde entra una persona. Declaran qué agentes existen detrás, con qué conocimiento se les alimenta y qué tienen que devolver. Es <em>la capa que no se toca</em>.",
-  L:[["Los tres",["<b>KB Studio</b> — construye y mantiene la base. El único que escribe en ella","<b>Asistente</b> — pregunta al conocimiento y produce entregables","<b>KDD</b> — convierte una necesidad en iniciativa y la ejecuta sobre el código"]],
+  d:"Los manifiestos son <b>las opciones que te ofrece KDD Studio</b>: los tres sitios por donde entra una persona. Son tres usos distintos, y solo uno de ellos pide saber cómo funciona la base por dentro.",
+  L:[["Los tres usos",["<b>KB Studio</b> — entras como administrador de la base: la construyes y la mantienes","<b>Asistente</b> — entras a preguntarle a un especialista, en clave funcional o técnica","<b>KDD</b> — entras en el día a día del proyecto y del desarrollo"]],
+    ["La diferencia que importa",["Solo el <b>KB Studio</b> exige conocer la KB: capas, specs, grafo, gobernanza","El <b>Asistente</b> y <b>KDD</b> la usan por debajo, pero no la enseñan","Quien los abre no tiene por qué saber qué es una spec, ni verá una en pantalla"]],
     ["Lo que comparten",["La misma base de conocimiento","El mismo catálogo de herramientas","Los mismos límites y las mismas reglas de verificación"]]],
-  call:["","Por qué no se llaman entre ellos","Porque no hace falta. Si los tres leen la misma base, la coherencia sale sola; una integración entre módulos solo añadiría una fuente de desincronización."]},
+  call:["ok","Por qué esto no es un detalle","Es lo que decide cuánta gente puede usarlo. Si para preguntarle algo al Asistente hubiera que entender el formato KDD, el eje se quedaría en las tres personas del banco que lo entienden."]},
 
-studio:{k:"Manifiesto · KB Studio",h:"Knowledge Bases Studio",role:"Construye y mantiene la base",
+studio:{k:"Manifiesto · KB Studio",h:"Knowledge Bases Studio",role:"Entras como administrador de la base",
   tags:[["kdd","Lo fija KDD Studio"],["humano","Tú confirmas"]],
   d:"El único módulo que <b>escribe en la base</b>. Le das documentos, sus agentes los analizan y te proponen qué conocimiento han encontrado; tú lo revisas y confirmas. Después es también donde se mantiene: catálogo, grafo, impacto, gobernanza y actividad.",
   L:[["Sus pestañas",["<b>Panel</b> — specs totales, reparto por capa, salud e incidencias","<b>Documentos</b> — qué se importó, quién y cuándo","<b>Análisis</b> — los preview pendientes de confirmar","<b>Specs</b> — catálogo, edición y estados","<b>Grafo</b> — qué activa qué, y qué está roto","<b>Gobernanza</b> — ADR, RFC y reglas","<b>Actividad</b> — el registro completo de cambios"]],
     ["Qué agentes orquesta",["Agente analizador","Agente de conocimiento","Agente de resolución"]]],
   call:["ok","La pieza sin la que no hay eje","El Asistente y KDD <em>consumen</em> la base. El KB Studio es el que la <b>construye</b>: sin él los otros dos no tienen de qué hablar."]},
 
-asistente:{k:"Manifiesto · Asistente",h:"BBVA CIB Assistant",role:"Preguntar y producir entregables",
+asistente:{k:"Manifiesto · Asistente",h:"BBVA CIB Assistant",role:"Un especialista al que preguntar",
   tags:[["kdd","Lo fija KDD Studio"],["humano","Corriges lo que no encaje"]],
-  d:"Conversación con el conocimiento de las bases que elijas. La propiedad que lo define: <b>no recuerda nada</b>. Consulta la base con sus herramientas antes de afirmar, cita los identificadores en los que se apoya, y si algo no está, lo dice en vez de rellenarlo.",
-  L:[["Qué agente orquesta",["Agente asistente — uno solo, con el catálogo de consulta, documentos y generación"]],
+  d:"Un <b>especialista al que preguntas en clave funcional o técnica</b>, según lo que necesites: qué hace el sistema y por qué, o cómo está construido. La propiedad que lo define: <b>no recuerda nada</b>. Consulta la base con sus herramientas antes de afirmar, cita los identificadores en los que se apoya, y si algo no está, lo dice en vez de rellenarlo.",
+  L:[["De dónde sale cada vista",["<b>PROD</b> y <b>FEAT</b> responden en clave de negocio: qué ofrece y qué hace","<b>ARCH</b> responde en clave técnica: cómo está construido","<b>DOM</b> sirve a las dos, porque las reglas del dominio son a la vez negocio y modelo"]],
+    ["Qué agente orquesta",["Agente asistente — uno solo, que cubre las dos vistas","El eje original contemplaba separarlo en un agente técnico y otro funcional; hoy es uno"]],
     ["Qué genera",["Word, Excel, PowerPoint, HTML","Markdown, código, SQL, JSON o CSV","Con la identidad BBVA × NFQ ya puesta"]]],
   call:["ok","Qué gana la base cuando preguntas","Si una respuesta no te encaja y pulsas «No es así, corregir», tu corrección se anota como evidencia sobre la spec afectada y le sube la versión. Preguntar <b>mejora</b> la base."]},
 
-kdd:{k:"Manifiesto · KDD",h:"Knowledge-Driven Development",role:"Del cambio que necesitas al commit",
+kdd:{k:"Manifiesto · KDD",h:"Knowledge-Driven Development",role:"El día a día del proyecto",
   tags:[["kdd","Lo fija KDD Studio"],["humano","Decides tres veces"]],
   d:"Le cuentas qué necesitas cambiar, en lenguaje de negocio. Te entrevista, consulta el conocimiento, mira tus repositorios y propone la <b>iniciativa</b> con sus <b>features</b> e <b>historias de usuario</b>. Después trabaja cada historia sobre tu código real.",
   L:[["Qué agentes orquesta",["Agente de iniciativa — la entrevista en cuatro fases","Agente de ejecución — el que escribe código en el repositorio"]],
@@ -777,6 +795,20 @@ usuario:{k:"El centro del eje",h:"Tú",role:"Quien decide en cada tramo",
   d:"El eje <b>no funciona solo</b>, y es a propósito. Los agentes proponen; escribir en la base, guardar una propuesta o tocar el código son decisiones de una persona. La marca naranja del diagrama señala cada uno de esos puntos.",
   L:[["Los cinco puntos donde decides",["<b>Confirmar el preview</b> — nada entra en la base antes","<b>Corregir una respuesta</b> — cuando algo no encaja, se corrige la base","<b>Guardar la propuesta</b> — la iniciativa y sus historias","<b>Revisar el diff</b> — antes de cada commit, sin excepción","<b>Aceptar o rechazar</b> — en gobernanza"]]],
   call:["stop","La diferencia con «dale a generar»","Un agente que escribe sin que nadie mire produce trabajo que hay que revisar entero después. Aquí la revisión está <em>dentro</em> del flujo, en el punto donde todavía es barata."]},
+
+"sabe-kb":{k:"Manifiesto · La frontera",h:"Quién tiene que conocer la KB",role:"Solo uno de los tres",
+  tags:[["kdd","Decisión de producto"]],
+  d:"Los tres módulos usan la base, pero <b>solo el KB Studio la enseña</b>. Es la frontera entre quien mantiene el conocimiento y quien lo aprovecha, y está puesta a propósito.",
+  L:[["KB Studio — sí hay que conocerla",["Capas, specs, identificadores y grafo a la vista","Confirmar un preview exige entender qué se va a escribir","Gobernanza: aceptar o rechazar una decisión"]],
+    ["Asistente y KDD — no hace falta",["Preguntas en tu idioma y respondes a lo que te propone","Ni una spec, ni una capa, ni un identificador en pantalla","Por debajo se consulta la misma base, con las mismas herramientas"]]],
+  call:["ok","La prueba de que funciona","En KDD, una iniciativa se guarda como WRK-SPEC con sus WRK-PLAN y WRK-TASK. En pantalla se llaman iniciativa, feature e historia de usuario. Nadie que la use tiene que enterarse de lo primero."]},
+
+"no-sabe-kb":{k:"Manifiesto · La frontera",h:"Aquí no hace falta saber de KDD",role:"Asistente y KDD",
+  tags:[["tuyo","Para cualquiera del equipo"],["kdd","Decisión de producto"]],
+  d:"Los dos módulos del día a día están construidos para que <b>quien los abre no tenga que aprender el formato</b>. Usan la base entera —el grafo, la evidencia, las decisiones— y no enseñan nada de eso.",
+  L:[["Qué se traduce",["Iniciativa, feature e historia de usuario, en vez de WRK-SPEC, WRK-PLAN y WRK-TASK","Los estados en castellano: borrador, en marcha, para revisar","Los identificadores solo aparecen en el rol Admin"]],
+    ["Qué no se pierde por el camino",["Las respuestas siguen citando en qué se apoyan","Las correcciones siguen entrando en la base como evidencia","La trazabilidad al código sigue en el mensaje de commit"]]],
+  call:["","El coste de no hacerlo","Un módulo que exige aprender su formato solo lo usa quien ya lo conocía. Y el conocimiento que hace falta capturar casi nunca está en esa persona."]},
 
 "duda-agents":{k:"Duda pendiente · 1",h:"¿Agentes globales o por departamento?",role:"Quién define el roster",
   tags:[["duda","Sin decidir"],["kdd","Decisión de gobierno"]],
