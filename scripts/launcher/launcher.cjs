@@ -1,11 +1,11 @@
 "use strict";
 /**
- * KDD-Studio.exe — launcher (Node SEA). Vive en la raíz de la instalación:
+ * <Edición>.exe — launcher (Node SEA). Vive en la raíz de la instalación:
  *
  *   <raiz>/
- *   ├── KDD-Studio.exe          este launcher
+ *   ├── <Edición>.exe        este launcher
  *   ├── kdd-root.json    marcador de instalación
- *   ├── app/                 código de KDD Studio + node_modules
+ *   ├── app/                 código de la aplicación + node_modules
  *   ├── runtime/node/        Node.js portable (node.exe)
  *   ├── runtime/gh, git/     GitHub CLI y MinGit portables (si no estaban en el equipo)
  *   ├── data/ outputs/ knowledge-bases/
@@ -30,6 +30,7 @@ const tools = require("./tools.json");
 
 /* Inyectadas por esbuild al construir cada edición; los valores de aquí solo aplican
    si el fichero se ejecuta suelto durante el desarrollo. */
+const EDITION_ID = typeof __EDITION_ID__ === "string" ? __EDITION_ID__ : "studio";
 const EDITION_NAME = typeof __EDITION_NAME__ === "string" ? __EDITION_NAME__ : "KDD Studio";
 const EDITION_EXE = typeof __EDITION_EXE__ === "string" ? __EDITION_EXE__ : "KDD-Studio";
 
@@ -177,6 +178,12 @@ async function ensurePortableTool(name) {
 // ---------------------------------------------------------------------------------------------
 
 const COPILOT_PLATFORM_PACKAGE = `@github/copilot-${process.platform}-${process.arch}`;
+const CODEX_PLATFORM_PACKAGE = `@openai/codex-${process.platform}-${process.arch}`;
+// KDD Assistant habla con ChatGPT a través de Codex; KDD Studio, con Copilot. Cada edición repara
+// el suyo y no sabe nada del otro, que ni siquiera viaja en su instalador.
+const RUNTIME = EDITION_ID === "assistant"
+  ? { package: CODEX_PLATFORM_PACKAGE, wrapper: "@openai/codex", label: "runtime Codex", motor: "Codex" }
+  : { package: COPILOT_PLATFORM_PACKAGE, wrapper: "@github/copilot", label: "runtime Copilot", motor: "Copilot" };
 
 function installed(name) {
   return fs.existsSync(path.join(appDir, "node_modules", ...name.split("/"), "package.json"));
@@ -216,20 +223,20 @@ function npmInstallWithFallback(node, env, extraArgs, label) {
   if (!second.ok) throw new Error(`${label}: npm install falló también contra registry.npmjs.org.`);
 }
 
-/** Repara node_modules: dependencias declaradas y runtime Copilot de esta plataforma. */
+/** Repara node_modules: dependencias declaradas y el runtime de esta edición y esta plataforma. */
 function repairDependencies(node, env) {
   if (!dependenciesReady()) {
     log("Faltan dependencias en app/node_modules; instalando (npm install)…");
     npmInstallWithFallback(node, env, [], "dependencias");
   }
-  if (!installed(COPILOT_PLATFORM_PACKAGE)) {
+  if (!installed(RUNTIME.package)) {
     let version = "";
     try {
-      version = JSON.parse(fs.readFileSync(path.join(appDir, "node_modules", "@github", "copilot", "package.json"), "utf8")).version;
+      version = JSON.parse(fs.readFileSync(path.join(appDir, "node_modules", ...RUNTIME.wrapper.split("/"), "package.json"), "utf8")).version;
     } catch { /* sin versión */ }
-    log(`Falta ${COPILOT_PLATFORM_PACKAGE} (runtime de Copilot); instalándolo explícitamente…`);
-    npmInstallWithFallback(node, env, ["--no-save", "--force", `${COPILOT_PLATFORM_PACKAGE}${version ? `@${version}` : ""}`], "runtime Copilot");
-    if (!installed(COPILOT_PLATFORM_PACKAGE)) throw new Error(`No se pudo instalar ${COPILOT_PLATFORM_PACKAGE}. Copilot no funcionará hasta resolverlo.`);
+    log(`Falta ${RUNTIME.package} (${RUNTIME.label}); instalándolo explícitamente…`);
+    npmInstallWithFallback(node, env, ["--no-save", "--force", `${RUNTIME.package}${version ? `@${version}` : ""}`], RUNTIME.label);
+    if (!installed(RUNTIME.package)) throw new Error(`No se pudo instalar ${RUNTIME.package}. ${RUNTIME.motor} no funcionará hasta resolverlo.`);
   }
 }
 
@@ -302,7 +309,7 @@ function startServer(node, env, port) {
     if (code === 0) {
       // El servidor salió sin llegar al health: normalmente porque ya había una instancia en marcha y
       // solo ha abierto una pestaña (main.mjs, reused).
-      log(`El servidor ha terminado antes de responder. Si KDD Studio ya estaba abierto, se ha abierto una pestaña nueva; si no ves nada, entra en http://127.0.0.1:${port}/ o revisa ${logFile}.`);
+      log(`El servidor ha terminado antes de responder. Si ${EDITION_NAME} ya estaba abierto, se ha abierto una pestaña nueva; si no ves nada, entra en http://127.0.0.1:${port}/ o revisa ${logFile}.`);
       waitForKey();
       process.exit(0);
     }
@@ -321,7 +328,9 @@ async function main() {
   const config = readConfig();
   const env = applyProxy({ ...process.env, KDD_LAUNCHER_PID: String(process.pid) }, config);
   const extraPath = [];
-  for (const tool of ["gh", "git"]) {
+  // KDD Assistant no abre repositorios ni habla con GitHub: no necesita gh ni git, y bajarlos sería
+  // hacer esperar a alguien por dos herramientas que no va a usar.
+  for (const tool of EDITION_ID === "assistant" ? [] : ["gh", "git"]) {
     try {
       const binDir = await ensurePortableTool(tool);
       if (binDir) extraPath.push(binDir);
@@ -334,7 +343,8 @@ async function main() {
   if (!node) throw new Error("No se encuentra Node.js (runtime/node). Vuelve a ejecutar el instalador.");
   log(`Node: ${node}`);
   repairDependencies(node, env);
-  ensureGitHubSession(env, config?.github?.host || "bbva.ghe.com");
+  // La sesión de ChatGPT la abre la propia aplicación con `codex login`, no la consola de arranque.
+  if (EDITION_ID !== "assistant") ensureGitHubSession(env, config?.github?.host || "bbva.ghe.com");
   const port = Number(process.env.KDD_PORT || config?.server?.port || 4410);
   log("Arrancando el servidor local…");
   startServer(node, env, port);
@@ -345,7 +355,7 @@ async function main() {
   const healthy = await waitForHealth(port);
   if (healthy) {
     serverReady = true;
-    log(`KDD-Studio disponible en http://127.0.0.1:${port}/ (esta ventana muestra los registros; ciérrala para detenerlo).`);
+    log(`${EDITION_NAME} disponible en http://127.0.0.1:${port}/ (esta ventana muestra los registros; ciérrala para detenerlo).`);
   } else if (serverChild && serverChild.exitCode === null) {
     log("El servidor tarda más de lo esperado; revisa los mensajes anteriores.");
   }

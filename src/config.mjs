@@ -1,8 +1,11 @@
 import { readJson, writeJson } from "./util/fs.mjs";
 import { paths, defaultOutputsRoot, defaultKnowledgeBasesRoot } from "./paths.mjs";
+import { edition } from "./edition.mjs";
 
 export const DEFAULT_CONFIG = Object.freeze({
-  product: { name: "KDD Studio", version: "0.1.0" },
+  // El nombre lo pone la edición: el mismo código se llama KDD Studio o KDD Assistant según cuál
+  // se haya construido. La versión es común.
+  product: { name: edition.name, version: "0.1.0" },
   server: { host: "127.0.0.1", port: 4410 },
   github: { host: "bbva.ghe.com", type: "ghec" },
   copilot: {

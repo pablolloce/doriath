@@ -4,6 +4,30 @@ Workbench local para BBVA CIB que une la operativa de **FENIX** (sesión corpora
 
 Se ejecuta en el equipo del usuario: un servidor Node en `127.0.0.1` y una pestaña en Chrome. No hay backend remoto ni base de datos: el estado vive en ficheros.
 
+## Dos ediciones
+
+El mismo código produce dos aplicaciones. No es un modo que se conmuta: son dos instaladores, y cada uno lleva dentro solo lo suyo.
+
+| | **KDD Studio** | **KDD Assistant** |
+|---|---|---|
+| Instalador | `KDD-Studio-Setup.exe` (~390 MB) | `KDD-Assistant-Setup.exe` (~310 MB) |
+| Sesión | GitHub Copilot, con la cuenta corporativa (`gh`) | ChatGPT, con la cuenta de la persona (`codex`) |
+| Módulos | Conocimiento, asistente y desarrollo | Solo el asistente |
+| Bases de conocimiento | Se administran: importar, analizar, editar specs, grafo, gobernanza | Se importan y se consultan; el mantenimiento vive en el Studio |
+| Requiere | `gh`, `git`, licencia de Copilot | Nada más: Codex viaja dentro del instalador |
+
+**Para quién es cada una.** KDD Studio es la herramienta de quien construye y mantiene el conocimiento, y de quien desarrolla con él. KDD Assistant es para quien solo necesita preguntar: se instala, se inicia sesión con la cuenta de ChatGPT que ya se tiene, se apuntan las bases de conocimiento que interesen y se pregunta. No hay que instalar `gh`, ni tener licencia de Copilot, ni saber qué es una spec.
+
+**El cupo de ChatGPT es compartido.** Las respuestas de KDD Assistant gastan el cupo del plan de ChatGPT de la persona, en una ventana móvil de 5 horas que comparte con su propio ChatGPT y con la extensión de su IDE. No es un contador aparte: agotarlo aquí deja a la persona sin ChatGPT el resto de la ventana. La aplicación lo dice en la pantalla de inicio de sesión.
+
+En desarrollo se prueban las dos sin reinstalar nada: `KDD_EDITION=assistant npm start`. Instalada, la edición viaja en `app/edition.json` y se decide al construir.
+
+### Cómo hablan con el modelo
+
+Copilot acepta herramientas dentro del propio proceso. Codex no: las suyas llegan por **MCP**, y un servidor MCP es un proceso aparte. Así que KDD Assistant publica el juego de herramientas de cada conversación en su propio servidor local (`src/ai/mcp-bridge.mjs`) bajo un secreto de un solo uso, y `src/mcp/kdd-mcp-server.mjs` es el proceso que Codex lanza y que no hace más que reenviar. El secreto importa: el servidor escucha en `127.0.0.1`, pero cualquier programa del equipo puede llamar a un puerto local y estas herramientas leen ficheros.
+
+Las herramientas se escriben una sola vez (`src/ai/tool-kit.mjs`: nombre, descripción, esquema y función) y cada motor las traduce a lo suyo. `src/ai/provider.mjs` elige el pool según la edición, con importación diferida, porque el instalador de cada edición solo trae su SDK.
+
 ## Módulos
 
 | Módulo | Qué hace |
@@ -133,17 +157,26 @@ En desarrollo los datos van a `~/.kdd`; instalado, a `<raíz>/data`. La configur
 ## Build del instalador
 
 ```bash
-npm run build:dist   # dist/KDD-Studio: app + node_modules (paquete Copilot win32-x64) + Node portable
-npm run build:exe    # dist/KDD-Studio/KDD-Studio.exe y dist/KDD-Studio-Setup.exe (Node SEA + postject)
-npm run build        # ambos
-npm run icon         # regenera public/brand/kdd.ico desde public/brand/kdd-icon.png
+npm run build          # KDD Studio: dist/KDD-Studio-Setup.exe
+npm run build:studio   # lo mismo, nombrando la edición
+npm run build:assistant # KDD Assistant: dist/KDD-Assistant-Setup.exe
+npm run build:all      # las dos, una detrás de otra
+npm run build:dist     # solo el payload (app + node_modules + Node portable)
+npm run build:exe      # solo los ejecutables (Node SEA + postject)
+npm run icon           # regenera public/brand/kdd.ico desde public/brand/kdd-icon.png
 ```
+
+`build:dist` y `build:exe` aceptan `--edition studio|assistant` (o `KDD_EDITION`); sin él construyen el Studio. Cada edición va a su propia carpeta de `dist/`, así que `build:all` no pisa la primera con la segunda.
+
+**Cada payload retira el runtime de la otra edición**: KDD Assistant no lleva `@github/copilot*` y KDD Studio no lleva `@openai/codex*`. Son unos 300 MB por lado que nadie iba a abrir. El `package.json` del payload se reescribe con las dependencias de su edición, porque el launcher comprueba en cada arranque que estén todas: si el manifiesto pidiera el SDK de Copilot en KDD Assistant, lo reinstalaría cada vez.
+
+Codex es una **dependencia opcional** del repositorio (`@openai/codex` + `@openai/codex-sdk`): `npm run setup` lo instala para que `build:assistant` funcione desde el checkout, y `npm install --omit=optional` lo evita si solo se va a construir el Studio.
 
 - `build:dist` copia por defecto el `node_modules` ya probado del checkout (como FENIX) y retira las dependencias de desarrollo con `npm prune --omit=dev`; con `--fresh`, o al construir desde otra plataforma, reinstala desde el registro con el mismo reintento que `npm run setup`. En ambos casos comprueba que el runtime nativo de Copilot (`@github/copilot-win32-x64`) está en el payload y, si npm no lo seleccionó, lo instala explícitamente. También descarga el Node portable indicado en `scripts/launcher/tools.json`.
 - `build:exe` empaqueta `scripts/launcher/launcher.cjs` y `setup.cjs` con esbuild, genera los blobs SEA e inyecta cada uno con `postject` en una copia de `node.exe`. Al construir en Windows el blob se genera con el propio `node.exe` portable (misma versión que ejecutará el launcher); desde otra plataforma se usa el Node del sistema.
 - Después, `resedit` (JavaScript puro, sin binarios que descargar) pone en los dos ejecutables el icono `public/brand/kdd.ico` —siete resoluciones, de 16 a 256 px, las seis pequeñas en DIB y la de 256 en PNG— y los datos de versión, y de paso descarta la firma que `node.exe` traía y que `postject` deja inservible. Al terminar el build relee los dos ejecutables y comprueba que el icono está y que ningún tamaño pequeño va en PNG (ver *Si el ejecutable sigue con el icono de Node*).
 - El payload va **pegado detrás** del instalador con un pie de 32 bytes que dice dónde empieza, como un autoextraíble clásico: incrustarlo como recurso SEA reventaba `postject` a partir de unos cientos de megas.
-- `build:dist` retira del payload los runtimes de Copilot de otras plataformas (cada uno ocupa unos 300 MB), que aparecen al construir el paquete de Windows desde otro sistema.
+- `build:dist` retira del payload los runtimes de Copilot de otras plataformas (cada uno ocupa unos 300 MB), que aparecen al construir el paquete de Windows desde otro sistema, y barre los enlaces de `node_modules/.bin` que quedan colgando al retirar un paquete (un enlace roto revienta cualquier recorrido posterior del árbol).
 - Los ejecutables no van firmados; firma Authenticode aparte si la política lo exige. Con `--platform linux` se generan binarios Linux para validar la mecánica.
 - **Espacio en disco**: el build necesita unos 3 GB libres (payload ~600 MB, instalador ~750 MB entre zip y exe, más la caché de npm con el runtime de Copilot, ~300 MB). Los scripts lo comprueban antes de empezar y retiran los intermedios al terminar. Si la unidad del repositorio va justa, construye en otra con `KDD_DIST=D:\kdd-dist npm run build`. Con el disco lleno, npm descarta en silencio el runtime de Copilot por ser una dependencia opcional.
 
@@ -153,8 +186,11 @@ npm run icon         # regenera public/brand/kdd.ico desde public/brand/kdd-icon
 src/
 ├── cli.mjs, main.mjs, server.mjs      arranque, servidor HTTP (node:http), SSE
 ├── config.mjs, paths.mjs              configuración y rutas (dev vs instalado)
+├── edition.mjs                        qué edición es esta: nombre, proveedor de modelo y módulos
 ├── auth/gh.mjs                        sesión GitHub vía gh (token efímero, login en consola)
-├── ai/                                Copilot SDK (cliente, sesiones, herramientas, permisos), prompts, YAML del modelo
+├── auth/codex.mjs                     sesión ChatGPT vía codex (mismo contrato que gh)
+├── ai/                                los dos motores tras una misma fachada (provider.mjs), herramientas, prompts
+├── mcp/kdd-mcp-server.mjs             servidor MCP en stdio: por aquí entra Codex a las herramientas
 ├── kdd/                               núcleo KDD: layout, frontmatter, ids, secciones, store, grafo, BM25
 ├── knowledge/                         bases de conocimiento, documentos, extractores, analizador en dos fases
 ├── assistant/                         chats (assistant/work/knowledge/resolution), generadores docx/xlsx/pptx/html, salidas

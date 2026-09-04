@@ -4,7 +4,7 @@
  *   app/          código + node_modules de producción (paquete Copilot de Windows x64)
  *   runtime/node/ Node.js portable para Windows
  *   data/ outputs/ knowledge-bases/  carpetas vacías (las crea también el instalador)
- *   kdd-root.json, KDD Studio.cmd, KDD Studio-Diagnostico.cmd, BUILD.json
+ *   kdd-root.json, <Edición>.cmd, <Edición>-Diagnostico.cmd, BUILD.json
  *
  * Opciones: --fresh (reinstala node_modules desde el registro en vez de copiar el árbol probado),
  *           --skip-node (no descarga Node), --platform linux (payload Linux para pruebas)
@@ -52,8 +52,29 @@ async function stageApp() {
   await mkdir(path.join(app, "docs"), { recursive: true });
   await cp(path.join(root, "docs", "identidad-bbva"), path.join(app, "docs", "identidad-bbva"), { recursive: true });
   await writeFile(path.join(app, "edition.json"), JSON.stringify({ edition: editionId, name: edition.name, builtAt: new Date().toISOString() }, null, 2));
+  await writeEditionManifest(app);
   log(`Código de la aplicación copiado (edición ${editionId}).`);
   return app;
+}
+
+/**
+ * El `package.json` del payload declara las dependencias de esta edición, no las del repositorio.
+ * Importa porque el launcher comprueba en cada arranque que estén todas: si el manifiesto pidiera el
+ * SDK de Copilot en KDD Assistant —donde se retira a propósito— reinstalaría 300 MB cada vez.
+ */
+async function writeEditionManifest(app) {
+  const manifest = JSON.parse(await readFile(path.join(app, "package.json"), "utf8"));
+  const dependencies = { ...manifest.dependencies };
+  delete manifest.optionalDependencies;
+  if (edition.runtime === "codex") {
+    delete dependencies["@github/copilot-sdk"];
+    const optional = JSON.parse(await readFile(path.join(root, "package.json"), "utf8")).optionalDependencies || {};
+    dependencies["@openai/codex"] = optional["@openai/codex"];
+    dependencies["@openai/codex-sdk"] = optional["@openai/codex-sdk"];
+  }
+  manifest.name = edition.executable.toLowerCase();
+  manifest.dependencies = dependencies;
+  await writeFile(path.join(app, "package.json"), `${JSON.stringify(manifest, null, 2)}\n`);
 }
 
 function copilotPlatformPackage() {
@@ -96,7 +117,7 @@ async function pruneCopilotRuntime(app) {
     await rm(dir, { recursive: true, force: true });
     log(`Retirado ${name}: KDD Assistant no habla con Copilot.`);
   }
-  await rm(path.join(app, "node_modules", ".bin", "copilot"), { force: true });
+  await pruneDanglingBinaries(app);
 }
 
 async function readInstalledVersion(dir, name) {
@@ -171,8 +192,27 @@ async function pruneCodexRuntime(app) {
   const dir = path.join(app, "node_modules", "@openai");
   if (!existsSync(dir)) return;
   await rm(dir, { recursive: true, force: true });
-  await rm(path.join(app, "node_modules", ".bin", "codex"), { force: true });
+  await pruneDanglingBinaries(app);
   log("Retirado @openai/codex: KDD Studio habla con Copilot.");
+}
+
+/**
+ * Retirar un paquete deja su enlace en `node_modules/.bin` apuntando a la nada, y un enlace colgando
+ * revienta cualquier recorrido posterior del árbol (medir el tamaño, comprimir el payload). Se
+ * barren todos de una vez en lugar de acordarse del nombre de cada uno.
+ */
+async function pruneDanglingBinaries(app) {
+  const dir = path.join(app, "node_modules", ".bin");
+  if (!existsSync(dir)) return;
+  for (const entry of await readdir(dir)) {
+    const file = path.join(dir, entry);
+    try {
+      await stat(file);
+    } catch {
+      await rm(file, { force: true });
+      log(`Retirado el enlace colgante .bin/${entry}.`);
+    }
+  }
 }
 
 /**
@@ -187,10 +227,9 @@ async function pruneForeignCopilotRuntimes(app) {
   for (const entry of await readdir(dir)) {
     if (!/^copilot-(win32|linux|linuxmusl|darwin)-/.test(entry) || entry === keep) continue;
     await rm(path.join(dir, entry), { recursive: true, force: true });
-    // El enlace de node_modules/.bin quedaría colgando y rompe el empaquetado.
-    await rm(path.join(app, "node_modules", ".bin", entry.replace(/^copilot-/, "copilot-")), { force: true });
     log(`Retirado ${entry}: no es de la plataforma de destino.`);
   }
+  await pruneDanglingBinaries(app);
 }
 
 async function stageNode() {
@@ -212,7 +251,7 @@ async function stageNode() {
 
 async function stageScaffold() {
   for (const folder of ["data", "outputs", "knowledge-bases", "runtime"]) await mkdir(path.join(target, folder), { recursive: true });
-  await writeFile(path.join(target, "kdd-root.json"), JSON.stringify({ product: "KDD Studio", version: pkg.version, builtAt: new Date().toISOString() }, null, 2));
+  await writeFile(path.join(target, "kdd-root.json"), JSON.stringify({ product: edition.name, edition: editionId, version: pkg.version, builtAt: new Date().toISOString() }, null, 2));
   await writeFile(path.join(target, "knowledge-bases", "LEEME.txt"), "Carpeta sugerida para tus bases de conocimiento KDD. Puedes usar cualquier otra desde KDD Studio > Gestionar.\n");
   await writeFile(path.join(target, "outputs", "LEEME.txt"), "Aquí deja el BBVA CIB Assistant los ficheros que genera.\n");
   const cmd = [
@@ -226,7 +265,7 @@ async function stageScaffold() {
     "if errorlevel 1 pause",
     "endlocal",
   ].join("\r\n");
-  await writeFile(path.join(target, "KDD Studio.cmd"), `${cmd}\r\n`);
+  await writeFile(path.join(target, `${edition.name}.cmd`), `${cmd}\r\n`);
   // Ejecuta el launcher con la ventana fija: si KDD-Studio.exe no llega ni a arrancar (por ejemplo, si el
   // equipo bloquea el binario), el mensaje queda a la vista en vez de cerrarse la consola.
   const diagnostic = [
@@ -241,12 +280,12 @@ async function stageScaffold() {
     "pause",
     "endlocal",
   ].join("\r\n");
-  await writeFile(path.join(target, "KDD Studio-Diagnostico.cmd"), `${diagnostic}\r\n`);
+  await writeFile(path.join(target, `${edition.name}-Diagnostico.cmd`), `${diagnostic}\r\n`);
   let commit = "";
   try {
     commit = spawnSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).stdout.trim();
   } catch { /* sin git */ }
-  await writeFile(path.join(target, "BUILD.json"), JSON.stringify({ product: "KDD Studio", version: pkg.version, platform, commit, builtAt: new Date().toISOString(), node: tools.node.version }, null, 2));
+  await writeFile(path.join(target, "BUILD.json"), JSON.stringify({ product: edition.name, edition: editionId, version: pkg.version, platform, commit, builtAt: new Date().toISOString(), node: tools.node.version }, null, 2));
 }
 
 /**

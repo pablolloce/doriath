@@ -1,11 +1,11 @@
 "use strict";
 /**
- * KDD-Studio-Setup.exe — instalador (Node SEA con el payload comprimido como asset).
+ * <Edición>-Setup.exe — instalador (Node SEA con el payload comprimido como asset).
  *
  * Crea la estructura de carpetas de la instalación, extrae la aplicación con su Node portable, deja
  * intactos los datos existentes (data/, outputs/, knowledge-bases/) y crea accesos directos. Uso:
- *   KDD-Studio-Setup.exe                 asistente en consola (carpeta por defecto %LOCALAPPDATA%\KDD Studio)
- *   KDD-Studio-Setup.exe --dir C:\KDD Studio --silent [--no-launch]
+ *   <Edición>-Setup.exe                  asistente en consola (por defecto %LOCALAPPDATA%\<Edición>)
+ *   <Edición>-Setup.exe --dir C:\KDD --silent [--no-launch]
  */
 const fs = require("node:fs");
 const path = require("node:path");
@@ -17,6 +17,7 @@ const { extractZip } = require("./zip.cjs");
 
 /* Inyectadas por esbuild al construir cada edición; los valores de aquí solo aplican
    si el fichero se ejecuta suelto durante el desarrollo. */
+const EDITION_ID = typeof __EDITION_ID__ === "string" ? __EDITION_ID__ : "studio";
 const EDITION_NAME = typeof __EDITION_NAME__ === "string" ? __EDITION_NAME__ : "KDD Studio";
 const EDITION_EXE = typeof __EDITION_EXE__ === "string" ? __EDITION_EXE__ : "KDD-Studio";
 
@@ -106,7 +107,7 @@ function createShortcuts(root) {
     "  $s = $shell.CreateShortcut($file)",
     `  $s.TargetPath = '${target.replace(/'/g, "''")}'`,
     `  $s.WorkingDirectory = '${root.replace(/'/g, "''")}'`,
-    "  $s.Description = 'KDD Studio - BBVA CIB Knowledge-Driven Development'",
+    `  $s.Description = '${EDITION_NAME} - BBVA CIB'`,
     `  $s.IconLocation = '${icon.replace(/'/g, "''")},0'`,
     "  $s.Save()",
     "}",
@@ -117,7 +118,7 @@ function createShortcuts(root) {
 }
 
 async function main() {
-  process.stdout.write("\nKDD Studio — instalador\n====================\n\n");
+  process.stdout.write(`\n${EDITION_NAME} — instalador\n${"=".repeat(EDITION_NAME.length + 13)}\n\n`);
   const defaultDir = flag("--dir") || (isWindows ? path.join(process.env.LOCALAPPDATA || os.homedir(), EDITION_EXE) : path.join(os.homedir(), EDITION_EXE));
   const root = path.resolve(await ask("Carpeta de instalación", defaultDir));
   const payload = readPayload();
@@ -132,10 +133,10 @@ async function main() {
   });
   process.stdout.write(`\r[Setup] ${count} ficheros extraídos.        \n`);
   for (const folder of ["data", "outputs", "knowledge-bases"]) fs.mkdirSync(path.join(root, folder), { recursive: true });
-  fs.writeFileSync(path.join(root, "kdd-root.json"), JSON.stringify({ product: "KDD Studio", installedAt: new Date().toISOString(), root }, null, 2));
+  fs.writeFileSync(path.join(root, "kdd-root.json"), JSON.stringify({ product: EDITION_NAME, edition: EDITION_ID, installedAt: new Date().toISOString(), root }, null, 2));
   createShortcuts(root);
   process.stdout.write(`\n[Setup] Instalación completada.\n  Ejecutable:            ${path.join(root, `${EDITION_EXE}.exe`)}\n  Bases de conocimiento: ${path.join(root, "knowledge-bases")}\n  Salidas:               ${path.join(root, "outputs")}\n  Datos:                 ${path.join(root, "data")}\n\n`);
-  const launch = has("--no-launch") ? "n" : await ask("¿Abrir KDD Studio ahora? (s/n)", "s");
+  const launch = has("--no-launch") ? "n" : await ask(`¿Abrir ${EDITION_NAME} ahora? (s/n)`, "s");
   if (/^s/i.test(launch)) {
     const executable = path.join(root, isWindows ? `${EDITION_EXE}.exe` : EDITION_EXE);
     if (fs.existsSync(executable)) {

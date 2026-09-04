@@ -92,6 +92,15 @@ function renderNav() {
   });
 }
 
+/** El nombre de la barra lateral y el del título salen de la edición, no del HTML. */
+function renderEditionName() {
+  const name = state.status?.edition?.name;
+  if (!name) return;
+  const node = document.querySelector(".sidebar__name");
+  if (node) node.textContent = name;
+  document.title = name;
+}
+
 /** ¿Esta edición mantiene la base, o solo la consulta? Decide el menú de rol y la jerga de specs. */
 export function canManageKnowledge() {
   return state.status?.edition?.canManageKnowledge !== false;
@@ -238,6 +247,11 @@ export async function openSourcesManager() {
 /* ---------- Sesión y estado ---------- */
 export async function refreshStatus({ copilot = true, refresh = false } = {}) {
   state.status = await get(`/api/status?copilot=${copilot ? "1" : "0"}${refresh ? "&refresh=1" : ""}`);
+  // La edición llega con el estado, y de ella dependen el menú de rol y el de módulos: hasta este
+  // momento la interfaz se ha pintado a ciegas, suponiendo la edición completa.
+  renderRolePicker();
+  renderNav();
+  renderEditionName();
   renderSession();
   renderGate();
   return state.status;
