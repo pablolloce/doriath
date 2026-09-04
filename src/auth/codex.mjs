@@ -2,7 +2,8 @@ import process from "node:process";
 import path from "node:path";
 import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
-import { runCommand, spawnDetached } from "../util/process.mjs";
+import { runCommand } from "../util/process.mjs";
+import { openLoginConsole, quoteArgument } from "../util/console.mjs";
 import { paths } from "../paths.mjs";
 import { log } from "../util/log.mjs";
 
@@ -119,20 +120,26 @@ export function invalidateCodexCache() {
 }
 
 /**
- * Arranca el login. `codex login` abre el navegador contra ChatGPT y espera; se lanza en una consola
- * aparte para no bloquear el servidor, igual que se hace con `gh auth login`.
+ * Arranca el login. `codex login` abre el navegador contra ChatGPT y espera, así que se lanza en una
+ * consola aparte para no bloquear el servidor, igual que se hace con `gh auth login`.
+ *
+ * La orden se escribe en un fichero y se abre el fichero (ver `openLoginConsole`): el Codex que viaja
+ * en el instalador es un .js que hay que ejecutar con Node, de modo que la línea lleva dos rutas
+ * entrecomilladas dentro y pasársela a cmd.exe como argumento la rompía siempre.
  */
 export async function startCodexLogin() {
   const command = await codexCommand();
-  const quoted = command.includes(" ") ? `"${command}"` : command;
-  const line = command.endsWith(".js") ? `"${process.execPath}" ${quoted} login` : `${quoted} login`;
-  if (process.platform === "win32") {
-    await spawnDetached("cmd.exe", ["/c", "start", "", "cmd.exe", "/k", line]);
-  } else {
-    await spawnDetached("/bin/sh", ["-c", line]);
-  }
+  const line = command.endsWith(".js")
+    ? `${quoteArgument(process.execPath)} ${quoteArgument(command)} login`
+    : `${quoteArgument(command)} login`;
+  const result = openLoginConsole({
+    id: "codex-login",
+    title: "KDD Assistant - Inicio de sesion con ChatGPT",
+    lines: [line],
+    note: "Sesion iniciada. Puedes cerrar esta ventana y volver a KDD Assistant.",
+  });
   invalidateCodexCache();
-  return { started: true, command: line };
+  return { ...result, command: line };
 }
 
 /** Cierra la sesión de ChatGPT. Lo hace la propia CLI: aquí solo se invoca y se olvida la caché. */

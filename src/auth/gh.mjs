@@ -1,7 +1,8 @@
 import process from "node:process";
 import path from "node:path";
 import { existsSync } from "node:fs";
-import { runCommand, spawnDetached } from "../util/process.mjs";
+import { runCommand } from "../util/process.mjs";
+import { openLoginConsole, quoteArgument } from "../util/console.mjs";
 import { paths } from "../paths.mjs";
 import { log } from "../util/log.mjs";
 
@@ -198,39 +199,22 @@ export async function startGitHubLogin(host) {
   // Se resuelve gh antes de vaciar la caché: la consola que se abre debe usar el mismo ejecutable
   // que encontró KDD Studio, no confiar en que esté en el PATH de esa consola.
   const executable = await ghCommand();
-  const quoted = /\s/.test(executable) ? `"${executable}"` : executable;
+  const quoted = quoteArgument(executable);
   invalidateAuthCache();
 
-  if (process.platform === "win32") {
-    const script = `${quoted} ${loginArgs.join(" ")} && ${quoted} ${setupArgs.join(" ")} && echo. && echo Sesion iniciada. Puedes cerrar esta ventana y volver a KDD Studio. && timeout /t 8`;
-    spawnDetached("cmd.exe", ["/c", "start", "KDD Studio - Inicio de sesion en GitHub", "cmd.exe", "/c", script]);
-    return { started: true, mode: "console", message: "Se ha abierto una consola con el inicio de sesión de GitHub. Completa el flujo en el navegador con tu correo de BBVA." };
-  }
-
+  // La orden va en un fichero, no como argumento de cmd.exe: con gh instalado en la ruta por defecto
+  // (`C:\Program Files\GitHub CLI`) la línea lleva comillas dentro, y pasarla suelta la rompía.
   const command = `${quoted} ${loginArgs.join(" ")} && ${quoted} ${setupArgs.join(" ")}`;
-  if (process.platform === "darwin") {
-    spawnDetached("osascript", ["-e", `tell application "Terminal" to do script "${command.replace(/"/g, '\\"')}"`]);
-    return { started: true, mode: "terminal", message: "Se ha abierto Terminal con el inicio de sesión de GitHub." };
-  }
-  const terminals = [
-    ["x-terminal-emulator", ["-e"]],
-    ["gnome-terminal", ["--"]],
-    ["konsole", ["-e"]],
-    ["xterm", ["-e"]],
-  ];
-  for (const [terminal, prefix] of terminals) {
-    const probe = await runCommand("which", [terminal], { timeoutMs: 5000 });
-    if (probe.ok) {
-      spawnDetached(terminal, [...prefix, "bash", "-lc", command]);
-      return { started: true, mode: "terminal", message: `Se ha abierto ${terminal} con el inicio de sesión de GitHub.` };
-    }
-  }
-  log.warn("auth", "No hay terminal disponible para lanzar gh auth login.");
-  return {
-    started: false,
-    mode: "manual",
-    message: `Ejecuta en una terminal: ${command}`,
-  };
+  const result = openLoginConsole({
+    id: "github-login",
+    title: "KDD Studio - Inicio de sesion en GitHub",
+    lines: [command],
+    note: "Sesion iniciada. Puedes cerrar esta ventana y volver a KDD Studio.",
+  });
+  const message = result.mode === "background"
+    ? `No hay ninguna terminal disponible. Ejecuta a mano: ${command}`
+    : "Se ha abierto una consola con el inicio de sesión de GitHub. Completa el flujo en el navegador con tu correo de BBVA.";
+  return { ...result, message };
 }
 
 export async function logoutGitHub(host) {
