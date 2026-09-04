@@ -67,6 +67,7 @@ body{
 .fbtn[data-f="kdd"] .sw{background:var(--electric)}
 .fbtn[data-f="humano"] .sw{background:var(--mandarin)}
 .fbtn[data-f="perfil"] .sw{background:var(--purple)}
+.fbtn[data-f="duda"] .sw{background:var(--canary);border:1px solid #7A5B00}
 .fbtn[data-f="abierto"] .sw{border:1.6px dashed var(--mute2);background:transparent;border-radius:2px}
 
 /* ── cuerpo ── */
@@ -96,6 +97,8 @@ svg.dg{width:100%;height:100%;display:block;font-family:var(--body)}
 .dg .wire-d{stroke:var(--mute2);stroke-width:1.7;fill:none;stroke-dasharray:8 7;stroke-linecap:round}
 .dg .hmark{stroke:var(--mandarin);stroke-width:4.4;stroke-linecap:round}
 .dg .pmark{stroke:var(--purple);stroke-width:4.4;stroke-linecap:round}
+.dg .qbg{fill:var(--canary);stroke:#7A5B00;stroke-width:1.3}
+.dg .qmark{font-size:15px;font-weight:700;fill:#7A5B00;font-family:var(--display)}
 .dg .pill-p{fill:var(--white);stroke:var(--purple);stroke-width:2.2}
 .dg .pnum{font-size:9.5px;font-weight:700;fill:var(--purple-ink);font-family:var(--mono)}
 .dg .note-p{font-size:10px;fill:var(--purple-ink);font-weight:700}
@@ -123,6 +126,7 @@ svg.dg[data-filter="tuyo"]    .dimmable:not(.s-tuyo){opacity:.08}
 svg.dg[data-filter="kdd"] .dimmable:not(.s-kdd){opacity:.08}
 svg.dg[data-filter="humano"]  .dimmable:not(.s-humano){opacity:.08}
 svg.dg[data-filter="perfil"]  .dimmable:not(.s-perfil){opacity:.08}
+svg.dg[data-filter="duda"]    .dimmable:not(.s-duda){opacity:.08}
 svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
 
 /* ── panel ── */
@@ -141,6 +145,7 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
 .tag.kdd{background:rgba(0,19,145,.09);color:var(--electric)}
 .tag.humano{background:rgba(255,181,107,.36);color:var(--mandarin-ink)}
 .tag.perfil{background:rgba(150,148,255,.28);color:var(--purple-ink)}
+.tag.duda{background:rgba(255,231,97,.42);color:var(--canary-ink)}
 .tag.abierto{background:rgba(0,19,145,.06);color:var(--ink2)}
 .dp-d{font-size:14px;color:var(--ink2);margin-top:14px;line-height:1.65;max-width:62ch}
 .dp-d b{color:var(--ink);font-weight:700}
@@ -160,6 +165,7 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
 .dp-block.humano li::before{background:var(--mandarin)}
 .dp-block.perfil li::before{background:var(--purple)}
 .dp-block.stop li::before{background:var(--canary)}
+.dp-block.duda li::before{background:var(--canary)}
 
 .dp-call{margin-top:16px;padding:13px 15px;border-radius:12px;font-size:13px;line-height:1.6;
   color:var(--ink2);background:rgba(133,200,255,.20);
@@ -186,6 +192,7 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
 .lg .i-lime{width:22px;height:3.4px;border-radius:2px;background:var(--lime)}
 .lg .i-mand{width:4px;height:15px;border-radius:2px;background:var(--mandarin)}
 .lg .i-dash{width:22px;height:0;border-top:2px dashed var(--mute2)}
+.lg .i-q{font-family:var(--display);font-weight:700;color:#7A5B00;font-size:15px;line-height:1}
 .lg .i-can{width:13px;height:13px;border-radius:4px;background:rgba(255,231,97,.55);border:1.5px solid var(--canary)}
 .lg .i-aqua{width:13px;height:13px;border-radius:4px;background:rgba(139,225,233,.5);border:1.5px solid var(--aqua)}
 .lg .i-purple{width:4px;height:15px;border-radius:2px;background:var(--purple)}
@@ -211,6 +218,7 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
   <button class="fbtn" data-f="kdd"><span class="sw"></span>Lo que fija KDD Studio</button>
   <button class="fbtn" data-f="humano"><span class="sw"></span>Donde decides tú</button>
   <button class="fbtn" data-f="perfil"><span class="sw"></span>Quién puede qué</button>
+  <button class="fbtn" data-f="duda"><span class="sw"></span>Dudas pendientes</button>
   <button class="fbtn" data-f="abierto"><span class="sw"></span>Lo que crece</button>
 </div>
 <div class="main">
@@ -256,19 +264,19 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
         <text class="colsub" x="470" y="59" text-anchor="middle">LAS OPCIONES DE KDD STUDIO</text>
         <text class="colrole" x="470" y="80" text-anchor="middle">Por dónde entras</text>
       </g>
-      <g class="colgroup dimmable s-kdd" data-key="agents">
+      <g class="colgroup dimmable s-kdd s-duda" data-key="agents">
         <rect class="hitbox" x="648" y="14" width="344" height="82"/>
         <text class="colhead" x="820" y="42" text-anchor="middle">AGENTS</text>
         <text class="colsub" x="820" y="59" text-anchor="middle">LAS PERSONALIDADES DE LA IA</text>
         <text class="colrole" x="820" y="80" text-anchor="middle">Con quién hablas</text>
       </g>
-      <g class="colgroup dimmable s-kdd" data-key="skills">
+      <g class="colgroup dimmable s-kdd s-duda" data-key="skills">
         <rect class="hitbox" x="1008" y="14" width="274" height="82"/>
         <text class="colhead" x="1145" y="42" text-anchor="middle">SKILLS</text>
         <text class="colsub" x="1145" y="59" text-anchor="middle">QUÉ ES CAPAZ DE HACER LA IA</text>
         <text class="colrole" x="1145" y="80" text-anchor="middle">22 herramientas · 4 tipos</text>
       </g>
-      <g class="colgroup dimmable s-kdd" data-key="harness">
+      <g class="colgroup dimmable s-kdd s-duda" data-key="harness">
         <rect class="hitbox" x="1298" y="14" width="194" height="82"/>
         <text class="colhead" x="1395" y="42" text-anchor="middle">HARNESS</text>
         <text class="colsub" x="1395" y="59" text-anchor="middle">LAS LIMITACIONES DE LA IA</text>
@@ -281,6 +289,22 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
         <text class="colrole" x="1602" y="80" text-anchor="middle">Comprueba después</text>
       </g>
 
+
+      <g class="node dimmable s-duda" data-key="duda-agents">
+        <circle class="qbg" cx="878" cy="36" r="11"/>
+        <text class="qmark" x="878" y="42" text-anchor="middle">?</text>
+        <rect class="hitbox" x="864" y="22" width="28" height="28"/>
+      </g>
+      <g class="node dimmable s-duda" data-key="duda-skills">
+        <circle class="qbg" cx="1202" cy="36" r="11"/>
+        <text class="qmark" x="1202" y="42" text-anchor="middle">?</text>
+        <rect class="hitbox" x="1188" y="22" width="28" height="28"/>
+      </g>
+      <g class="node dimmable s-duda" data-key="duda-harness">
+        <circle class="qbg" cx="1458" cy="36" r="11"/>
+        <text class="qmark" x="1458" y="42" text-anchor="middle">?</text>
+        <rect class="hitbox" x="1444" y="22" width="28" height="28"/>
+      </g>
       <!-- ══════════ 1 · KB ══════════ -->
       <g class="node dimmable s-tuyo s-abierto" data-key="documentos">
         <rect class="pill" x="36" y="100" width="252" height="46" rx="10"/>
@@ -522,7 +546,7 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
         <rect x="1306" y="104" width="178" height="418" rx="16" fill="url(#ghar)" stroke="#FFB56B" stroke-width="1.8"/>
         <rect class="hitbox" x="1302" y="100" width="186" height="30"/>
       </g>
-      <g class="node dimmable s-kdd" data-key="h-global">
+      <g class="node dimmable s-kdd s-duda" data-key="h-global">
         <text class="barlbl" x="1395" y="126" text-anchor="middle" fill="#8A4B0B">GLOBAL BBVA</text>
         <rect class="hitbox" x="1310" y="112" width="170" height="22"/>
       </g>
@@ -552,7 +576,7 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
       </g>
 
       <line x1="1320" y1="378" x2="1470" y2="378" stroke="#FFB56B" stroke-width="1" stroke-dasharray="4 4" class="dimmable s-kdd"/>
-      <g class="node dimmable s-tuyo" data-key="h-area">
+      <g class="node dimmable s-tuyo s-duda" data-key="h-area">
         <text class="barlbl" x="1395" y="400" text-anchor="middle" fill="#1F6B33">POR ÁREA</text>
         <rect class="hitbox" x="1310" y="386" width="170" height="22"/>
       </g>
@@ -659,6 +683,7 @@ svg.dg[data-filter="abierto"] .dimmable:not(.s-abierto){opacity:.08}
   <span class="lg"><i class="i-lime"></i>Verde = lo aporta tu equipo</span>
   <span class="lg"><i class="i-purple"></i>Morado = perfilado: quién puede qué</span>
   <span class="lg"><i class="i-mand"></i>Naranja = decide una persona</span>
+  <span class="lg"><i class="i-q">?</i>Decisión pendiente</span>
   <span class="lg"><i class="i-dash"></i>Discontinua = crece sin límite</span>
   <span class="lg"><i class="i-can"></i>HARNESS = lo que <b>NO</b> se permite</span>
   <span class="lg"><i class="i-aqua"></i>EVALUATION = lo que <b>SÍ</b> debe cumplirse</span>
@@ -752,6 +777,29 @@ usuario:{k:"El centro del eje",h:"Tú",role:"Quien decide en cada tramo",
   d:"El eje <b>no funciona solo</b>, y es a propósito. Los agentes proponen; escribir en la base, guardar una propuesta o tocar el código son decisiones de una persona. La marca naranja del diagrama señala cada uno de esos puntos.",
   L:[["Los cinco puntos donde decides",["<b>Confirmar el preview</b> — nada entra en la base antes","<b>Corregir una respuesta</b> — cuando algo no encaja, se corrige la base","<b>Guardar la propuesta</b> — la iniciativa y sus historias","<b>Revisar el diff</b> — antes de cada commit, sin excepción","<b>Aceptar o rechazar</b> — en gobernanza"]]],
   call:["stop","La diferencia con «dale a generar»","Un agente que escribe sin que nadie mire produce trabajo que hay que revisar entero después. Aquí la revisión está <em>dentro</em> del flujo, en el punto donde todavía es barata."]},
+
+"duda-agents":{k:"Duda pendiente · 1",h:"¿Agentes globales o por departamento?",role:"Quién define el roster",
+  tags:[["duda","Sin decidir"],["kdd","Decisión de gobierno"]],
+  d:"Hoy los <b>seis agentes los fija el producto</b> y son iguales para todos. La pregunta es si un departamento debería poder añadir los suyos: un agente de datos, de migración, de regulación.",
+  L:[["Si nacen globales",["Un solo contrato que mantener, y comparable entre áreas","Lo que un agente sabe ya viene de la KB, que <em>sí</em> es del área","Riesgo: un área con una necesidad real se queda sin cubrir"]],
+    ["Si nacen en el área",["Cada departamento modela su realidad","Riesgo: seis contratos se convierten en sesenta, y ninguno se audita igual"]],
+    ["Una observación que quizá deshace la duda",["El prompt de cada agente se alimenta de la KB del área","Así que un «agente de área» puede que no sea más que un agente global mirando otra KB","Antes de abrir el roster conviene comprobar si el caso real no se resuelve ya así"]]],
+  call:["warn","Criterio propuesto","<b>Contrato global, prompt y roster del área</b>. Es decir: una mezcla. El área añade agentes, pero todos cumplen el mismo contrato de entrada, salida y evidencia."]},
+
+"duda-skills":{k:"Duda pendiente · 2",h:"¿Skills globales o por departamento?",role:"Quién define el catálogo",
+  tags:[["duda","Sin decidir"],["kdd","Decisión de gobierno"]],
+  d:"Las 22 herramientas de hoy también las fija el producto. Pero una skill tiene <b>dos mitades</b> —qué hace y cómo lo hace— y no está claro que las dos deban vivir en el mismo sitio.",
+  L:[["Si el catálogo es global",["Se invoca igual desde cualquier área y se audita igual","Riesgo: no hay una sola forma de lanzar pruebas que valga para Maven, Gradle y Poetry"]],
+    ["Si el catálogo es de área",["Cada stack resuelve lo suyo como le toca","Riesgo: cuatro áreas con el mismo stack escriben cuatro veces la misma skill"]]],
+  call:["warn","Criterio propuesto","<b>Interfaz global, implementación por stack</b> — otra mezcla. Cómo se invoca una skill y qué devuelve es global; cómo se ejecuta lo pone el stack, y se publica para que otra área con el mismo stack la reutilice en vez de reescribirla."]},
+
+"duda-harness":{k:"Duda pendiente · 3",h:"¿Límites globales o por departamento?",role:"Quién decide que un límite es de todos",
+  tags:[["duda","Sin decidir"],["kdd","Decisión de gobierno"]],
+  d:"El diagrama ya propone un reparto —cuatro globales y dos de área— pero eso es lo que <b>hoy hace el producto</b>, no una política acordada. La duda de verdad no es dónde cae cada límite: es <em>quién decide</em> dónde cae.",
+  L:[["Si todo se eleva a BBVA",["Coherencia total y auditoría comparable entre áreas","Riesgo: rigidez, y casos legítimos bloqueados esperando una excepción"]],
+    ["Si cada aplicación decide",["Rápido de definir y ajustado al riesgo real de esa aplicación","Riesgo: cada aplicación acaba con su propio criterio, y ninguno se puede comparar"]],
+    ["Qué hace hoy el producto",["Fija en código: la nube, el commit sin revisar, tocar tu sistema y mezclar carpetas","Deja configurable: el prefijo de rama, y qué repositorios y entornos registra el equipo"]]],
+  call:["warn","Criterio propuesto","Todo lo que sea <b>seguridad o dato</b> se eleva a BBVA por defecto. Todo lo que sea <b>stack o convención</b> se queda en la aplicación, salvo que se demuestre lo contrario. Y cada límite nuevo declara su ámbito al nacer."]},
 
 "p-modulos":{k:"Perfilado · Nivel 1",h:"Qué módulos abres",role:"El primer corte",
   tags:[["perfil","Perfilado"],["humano","Tú eliges"]],
@@ -898,7 +946,7 @@ harness:{k:"Capa 5 · Harness",h:"Las limitaciones de la IA",role:"Impide antes 
 
 "h-global":{k:"Harness · Global",h:"Los límites de BBVA",role:"Iguales para todas las áreas",
   tags:[["kdd","Global"]],
-  d:"Cuatro límites que <b>no admiten excepción por área</b>. Son el suelo mínimo: seguridad, dato y control de lo que cambia fuera de KDD Studio. Un área no puede relajarlos ni negociarlos.",
+  d:"Los cuatro que <b>el producto fija en código</b> hoy: seguridad, dato y control de lo que cambia fuera de KDD Studio. Que esta sea la lista correcta, y quién puede tocarla, es una de las tres dudas abiertas del eje.",
   L:[["Los cuatro",["<b>La nube</b> — nada sale de tu equipo","<b>Commit</b> — nunca sin que revises el diff","<b>Tu sistema</b> — el agente solo toca el repositorio asignado","<b>Sin mezclar</b> — las salidas nunca dentro de un repo ni de una base"]]],
   call:["stop","Por qué estos son globales","Porque el daño que evitan no depende del área. Una fuga de conocimiento o un commit que nadie miró son igual de graves en Pagos que en Riesgos."]},
 
@@ -1009,6 +1057,7 @@ var DEF = {k:"Eje KDD Studio",h:"Seis capas, dos naturalezas",role:"Recorre el d
   tags:[["tuyo","Lo tuyo"],["kdd","Lo fijo"],["humano","Tú decides"],["perfil","Perfilado"],["abierto","Abierto"]],
   d:"Seis capas encadenadas: <b>qué sabe</b> la IA, <b>por dónde entras</b>, <b>con qué personalidad hablas</b>, <b>qué es capaz de hacer</b>, <b>qué no puede hacer</b> y <b>cómo se comprueba que todo sale bajo el estándar BBVA</b>.",
   L:[["Las dos capas de control",["<b>HARNESS</b> — limitaciones: «no se permite X». Aplican a una o varias skills. Actúan <em>antes</em>.","<b>EVALUATION</b> — reglas de verificación: aseguran que todo lo que se escribe cumple. Actúan <em>después</em>."]],
+    ["Las tres dudas pendientes",["<b>Agentes</b> — ¿el roster es global o lo amplía cada departamento?","<b>Skills</b> — ¿catálogo común o propio de cada área?","<b>Harness</b> — ¿quién decide que un límite es de todo BBVA?","La <b>evaluación</b> no tiene duda: nace global"]],
     ["El perfilado va por niveles",["<b>Qué módulos abres</b> — hoy, dos roles: Usuario y Admin","<b>Con qué agentes hablas</b> — el corte entre consultar y construir","<b>Qué puedes ejecutar</b> — por perfil, repositorio y entorno"]],
     ["Dos correcciones frente al eje genérico",["Los <b>manifiestos</b> son los tres módulos reales: KB Studio, Asistente y KDD — y solo el KB Studio escribe en la base","Lo <b>abierto</b> no son los agentes ni las skills, que KDD Studio fija: es tu contenido — bases, documentos y repositorios"]],
     ["Cómo leer los colores",["<b>Verde</b> — lo aporta tu equipo","<b>Azul claro</b> — lectura de la base","<b>Naranja</b> — donde decide una persona","<b>Morado</b> — no sale de tu equipo","<b>Discontinuo</b> — crece sin límite"]]],
@@ -1027,6 +1076,7 @@ function render(o){
     if(/decides|puedes hacer|Punto/i.test(t)) c=' humano';
     if(/perfil|Hoy|modelo permite|identidad|ajusta un área/i.test(t)) c=' perfil';
     if(/Prohib|prohíbe|evita|garantiza|implica|severidad|nunca|no puede|no ocurre|no crece|no tiene/i.test(t)) c=' stop';
+    if(/^Si |dudas|hace hoy|deshace/i.test(t)) c=' duda';
     h+='<div class="dp-block'+c+'"><div class="bt">'+t+'</div><ul>';
     b[1].forEach(function(li){h+='<li>'+li+'</li>';});
     h+='</ul></div>';
